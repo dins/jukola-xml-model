@@ -1,11 +1,14 @@
 import csv
 import datetime
-import time
-import sys
 import logging
+import sys
+import time
 import xml.etree.ElementTree as ET
 
-#
+# time pipenv run python result_xml_to_csv.py 2017
+
+# time for year in $(seq 2011 2017); do echo "YEAR $year"; time wget -P data http://results.jukola.com/tulokset/results_j${year}_ju.xml; done
+# time for year in $(seq 2012 2017); do echo "YEAR $year"; time pipenv run python result_xml_to_csv.py $year && head data/csv-results_j${year}_ju.tsv; done
 
 year = sys.argv[1]
 tree = ET.parse('data/results_j%s_ju.xml' % year)
@@ -19,8 +22,8 @@ csv_file = open(out_file_name, 'w')
 # create the csv writer object
 
 csvwriter = csv.writer(csv_file, delimiter="\t", quoting=csv.QUOTE_ALL)
-header = ["team-id", "placement", "team-time", "team-nro", "team-name", "leg-nro", "emit", "leg-time", "competitor-name",
-          "control-times"]
+header = ["team-id", "placement", "team-time", "team-name", "team-nro", "leg-nro", "emit", "leg-time",
+          "competitor-name", "control-times"]
 
 csvwriter.writerow(header)
 
@@ -42,8 +45,8 @@ for team in root.iter('team'):
         row.append(team.find("teamid").text)
         row.append(team.findtext("placement", "NA"))
         row.append(team.findtext("tsecs", "NA"))
-        row.append(team.find("teamnro").text)
         row.append(team.find("teamname").text)
+        row.append(team.find("teamnro").text)
 
         row.append(leg.find("legnro").text)
         row.append(leg.findtext("emit", "NA"))
