@@ -1,20 +1,20 @@
 import csv
+import logging
 
 import numpy as np
-import logging
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
 
 years = ["2017", "2016", "2015", "2014", "2013", "2012"]
 
 # time for year in $(seq 2011 2017); do echo "$year: [$(curl http://results.jukola.com/tulokset/fi/j${year}_ju/ | grep "<td><a href='/tulokset/fi/" | grep -E "Vaihto |Maali "| cut -d " " -f 3| tr ',' '.' | tr '\n' ',')]," >> years.txt; done
-distances = {2011: [11.5,11.4,13.6,8.3,8.5,10.5,15.6],
-             2012: [12.7,12.7,14.1,7.7,8.1,10.2,15.1],
-             2013: [12.2,13.0,14.4,7.8,7.7,11.7,15.1],
-             2014: [10.1,11.5,10.2,7.6,7.7,10.7,14.0],
-             2015: [13.8,12.3,15.8,8.1,8.6,12.6,14.6],
-             2016: [10.7,12.8,14.1,8.6,8.7,12.4,16.5],
-             2017: [12.8,14.3,12.3,7.7,7.8,11.1,13.8]}
+distances = {2011: [11.5, 11.4, 13.6, 8.3, 8.5, 10.5, 15.6],
+             2012: [12.7, 12.7, 14.1, 7.7, 8.1, 10.2, 15.1],
+             2013: [12.2, 13.0, 14.4, 7.8, 7.7, 11.7, 15.1],
+             2014: [10.1, 11.5, 10.2, 7.6, 7.7, 10.7, 14.0],
+             2015: [13.8, 12.3, 15.8, 8.1, 8.6, 12.6, 14.6],
+             2016: [10.7, 12.8, 14.1, 8.6, 8.7, 12.4, 16.5],
+             2017: [12.8, 14.3, 12.3, 7.7, 7.8, 11.1, 13.8]}
 
 by_name = {}
 
@@ -48,6 +48,8 @@ for year in years:
 
 
                 duplicates = list(filter(is_duplicate_name, by_name[name]))
+
+
                 def has_team(runner):
                     return team_base_name in runner["teams"]
 
@@ -73,7 +75,7 @@ for year in years:
 out_file_name = 'data/grouped_paces_ju.tsv'
 out_file = open(out_file_name, 'w')
 csvwriter = csv.writer(out_file, delimiter="\t", quoting=csv.QUOTE_ALL)
-header = ["teams", "name",  "kaimat", "mean_pace", "stdev", "pace_1", "pace_2", "pace_3", "pace_4", "pace_5", "pace_6"]
+header = ["teams", "name", "kaimat", "mean_pace", "stdev", "pace_1", "pace_2", "pace_3", "pace_4", "pace_5", "pace_6"]
 csvwriter.writerow(header)
 
 for name, runners in by_name.items():
