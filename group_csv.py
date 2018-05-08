@@ -1,5 +1,6 @@
 import csv
 
+import numpy as np
 import logging
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
@@ -39,7 +40,7 @@ for year in years:
                 by_name[name] = []
                 runner["teams"] = []
                 runner["years"] = []
-                runner["means"] = []
+                runner["paces"] = []
                 by_name[name].append(runner)
             else:
                 def is_duplicate_name(runner):
@@ -59,12 +60,12 @@ for year in years:
                 else:
                     runner["teams"] = []
                     runner["years"] = []
-                    runner["means"] = []
+                    runner["paces"] = []
                     by_name[name].append(runner)
 
             runner["teams"].append(team_base_name)
             runner["years"].append(year)
-            runner["means"].append(leg_pace)
+            runner["paces"].append(leg_pace)
             if name == "petri hirvonen":
                 logging.info(by_name[name])
         csvfile.close()
@@ -72,17 +73,27 @@ for year in years:
 out_file_name = 'data/grouped_paces_ju.tsv'
 out_file = open(out_file_name, 'w')
 csvwriter = csv.writer(out_file, delimiter="\t", quoting=csv.QUOTE_ALL)
-header = ["teams", "name",  "kaimat", "pace_mean_1", "pace_mean_2", "pace_mean_3", "pace_mean_4", "pace_mean_5", "pace_mean_6"]
+header = ["teams", "name",  "kaimat", "mean_pace", "stdev", "pace_1", "pace_2", "pace_3", "pace_4", "pace_5", "pace_6"]
 csvwriter.writerow(header)
 
 for name, runners in by_name.items():
     for runner in runners:
         teams = set(runner["teams"])
         joined_teams = ";".join(teams)
-        means = runner["means"]
-        six_means = means[:6] + ["NA" for x in range(6 - len(means))]
+        paces = runner["paces"]
 
-        row = [joined_teams, name, len(runners)] + six_means
+        valid_paces = [pace for pace in paces if pace != "NA"]
+        six_paces = valid_paces[:6] + ["NA" for x in range(6 - len(valid_paces))]
+
+        if len(valid_paces) > 0:
+            float_paces = np.array(valid_paces).astype(np.float)
+            mean_pace = round(np.average(float_paces), 3)
+            stdev = round(np.std(float_paces), 3)
+        else:
+            mean_pace = "NA"
+            stdev = "NA"
+
+        row = [joined_teams, name, len(runners), mean_pace, stdev] + six_paces
         csvwriter.writerow(row)
 
 out_file.close()
