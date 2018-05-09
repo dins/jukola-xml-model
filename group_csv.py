@@ -75,7 +75,7 @@ for year in years:
 out_file_name = 'data/grouped_paces_ju.tsv'
 out_file = open(out_file_name, 'w')
 csvwriter = csv.writer(out_file, delimiter="\t", quoting=csv.QUOTE_ALL)
-header = ["teams", "name", "kaimat", "mean_pace", "stdev", "pace_1", "pace_2", "pace_3", "pace_4", "pace_5", "pace_6"]
+header = ["teams", "name", "kaimat", "num_years", "mean_pace", "stdev", "pace_1", "pace_2", "pace_3", "pace_4", "pace_5", "pace_6"]
 csvwriter.writerow(header)
 
 for name, runners in by_name.items():
@@ -95,7 +95,7 @@ for name, runners in by_name.items():
             mean_pace = "NA"
             stdev = "NA"
 
-        row = [joined_teams, name, len(runners), mean_pace, stdev] + six_paces
+        row = [joined_teams, name, len(runners), len(valid_paces), mean_pace, stdev] + six_paces
         csvwriter.writerow(row)
 
 out_file.close()
