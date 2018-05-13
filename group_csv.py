@@ -4,6 +4,8 @@ import logging
 import numpy as np
 from collections import defaultdict
 
+# time pipenv run python group_csv.py && head data/grouped_paces_ju.tsv
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
 
 years = ["2017", "2016", "2015", "2014", "2013", "2012"]
