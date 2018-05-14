@@ -27,6 +27,7 @@ for year in years:
         csvreader = csv.reader(csvfile, delimiter="\t")
         next(csvreader, None)  # skip the headers
         for row in csvreader:
+            team_id = int(row[0])
             team_base_name = row[3].upper()
             name = row[8].lower()
             leg_nro = int(row[5])
@@ -43,19 +44,23 @@ for year in years:
 
             run = {}
             run["name"] = name
+            run["team_id"] = team_id
             run["team"] = team_base_name
             run["year"] = year
             run["pace"] = leg_pace
+            run["leg_nro"] = leg_nro
             by_name[name].append(run)
             if name == "jussi kallioniemi":
                 logging.info(by_name[name])
         csvfile.close()
 
-out_file_name = 'data/grouped_paces_ju.tsv'
-out_file = open(out_file_name, 'w')
-csvwriter = csv.writer(out_file, delimiter="\t", quoting=csv.QUOTE_ALL)
-header = ["teams", "name", "num_runs", "num_valid_times", "mean_pace", "stdev", "pace_1", "pace_2", "pace_3", "pace_4", "pace_5", "pace_6"]
-csvwriter.writerow(header)
+
+def open_output_file(out_file_name, column_names):
+    out_file = open(out_file_name, 'w')
+    csvwriter = csv.writer(out_file, delimiter="\t", quoting=csv.QUOTE_ALL)
+    csvwriter.writerow(column_names)
+    return (out_file, csvwriter)
+
 
 by_unique_name = {}
 for name, runs in by_name.items():
@@ -73,13 +78,20 @@ for name, runs in by_name.items():
             unique_name = name + ":" + team_name
             by_unique_name[unique_name] = runs_in_team
 
+column_names = ["mean_team_id", "teams", "name", "num_runs", "num_valid_times", "mean_pace", "stdev", "pace_1", "pace_2",
+                "pace_3", "pace_4", "pace_5", "pace_6"]
+(out_file, csvwriter) = open_output_file('data/grouped_paces_ju.tsv', column_names)
+
 for unique_name, runs in by_unique_name.items():
+    team_ids = map(lambda run: run["team_id"], runs)
     teams = map(lambda run: run["team"], runs)
     joined_teams = ";".join(set(teams))
     paces = map(lambda run: run["pace"], runs)
 
     valid_paces = [pace for pace in paces if pace != "NA"]
     six_paces = valid_paces[:6] + ["NA" for x in range(6 - len(valid_paces))]
+
+    mean_team_id = round(np.average(list(team_ids)), 1)
 
     if len(valid_paces) > 6:
         print(unique_name)
@@ -95,7 +107,19 @@ for unique_name, runs in by_unique_name.items():
         mean_pace = "NA"
         stdev = "NA"
 
-    row = [joined_teams, unique_name, len(runs), len(valid_paces), mean_pace, stdev] + six_paces
+    row = [mean_team_id, joined_teams, unique_name, len(runs), len(valid_paces), mean_pace, stdev] + six_paces
     csvwriter.writerow(row)
 
 out_file.close()
+
+runs_file_cols = ["name", "team_id", "pace", "leg_nro", "num_runs"]
+(runs_out_file, runs_csvwriter) = open_output_file('data/runs_ju.tsv', runs_file_cols)
+
+for unique_name, runs in by_unique_name.items():
+    for run in runs:
+        pace = run["pace"]
+        if pace != "NA":
+            row = [unique_name, run["team_id"], pace, run["leg_nro"], len(runs)]
+            runs_csvwriter.writerow(row)
+
+runs_out_file.close()
