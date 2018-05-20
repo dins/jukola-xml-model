@@ -9,8 +9,6 @@ pandas = "*"
 jupyter = "*"
 scipy = "*"
 scikit-learn = "*"
-lxml = "*"
-requests = "*"
 
 [dev-packages]
 
