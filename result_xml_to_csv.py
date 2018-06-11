@@ -50,7 +50,19 @@ for team in root.iter('team'):
 
         row.append(leg.find("legnro").text)
         row.append(leg.findtext("emit", "NA"))
-        row.append(leg.findtext("tsecs", "NA"))
+
+        control_times = []
+        for control_time in leg.iter('ct'):
+            struct_time = parse_time(control_time.text)
+            ct_secs = datetime.timedelta(hours=struct_time.tm_hour, minutes=struct_time.tm_min,
+                                         seconds=struct_time.tm_sec).total_seconds()
+            control_times.append(str(int(ct_secs)))
+
+        default_leg_time = "NA"
+        if len(control_times) > 0:
+            default_leg_time = control_times[-1] # Use last control as default if no tsecs (=disqualified?)
+        row.append(leg.findtext("tsecs", default_leg_time))
+
         row.append(leg.find("nm").text)
 
         control_times = []
