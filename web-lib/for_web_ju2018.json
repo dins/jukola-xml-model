@@ -1,0 +1,352 @@
+[
+  {
+    "team_id": 429,
+    "leg": 1,
+    "team": "Reaktor Innovations 1",
+    "name": "Mikko Peltonen",
+    "fin_sum_log_mean": 4.5831279175,
+    "fin_sum_log_std": 0.0808753361,
+    "fin_median": 97.8463787699,
+    "fint_median": 1529195870782
+  },
+  {
+    "team_id": 429,
+    "leg": 2,
+    "team": "Reaktor Innovations 1",
+    "name": "Pasi Huhtiniemi",
+    "fin_sum_log_mean": 5.3376851645,
+    "fin_sum_log_std": 0.0543778067,
+    "fin_median": 207.9176873916,
+    "fint_median": 1529202475061
+  },
+  {
+    "team_id": 429,
+    "leg": 3,
+    "team": "Reaktor Innovations 1",
+    "name": "Joni Freeman",
+    "fin_sum_log_mean": 5.7566725803,
+    "fin_sum_log_std": 0.0532980899,
+    "fin_median": 316.0989815802,
+    "fint_median": 1529208965938
+  },
+  {
+    "team_id": 429,
+    "leg": 4,
+    "team": "Reaktor Innovations 1",
+    "name": "Tuomas Kareinen",
+    "fin_sum_log_mean": 6.0003254555,
+    "fin_sum_log_std": 0.0545273083,
+    "fin_median": 403.4951925548,
+    "fint_median": 1529214209711
+  },
+  {
+    "team_id": 429,
+    "leg": 5,
+    "team": "Reaktor Innovations 1",
+    "name": "Janne Vaittinen",
+    "fin_sum_log_mean": 6.1997390825,
+    "fin_sum_log_std": 0.0452927371,
+    "fin_median": 492.4872425785,
+    "fint_median": 1529219549234
+  },
+  {
+    "team_id": 429,
+    "leg": 6,
+    "team": "Reaktor Innovations 1",
+    "name": "Olavi Kanerva",
+    "fin_sum_log_mean": 6.3695451652,
+    "fin_sum_log_std": 0.0407139265,
+    "fin_median": 583.5739076741,
+    "fint_median": 1529225014434
+  },
+  {
+    "team_id": 429,
+    "leg": 7,
+    "team": "Reaktor Innovations 1",
+    "name": "Jyri Kyt\u00f6m\u00e4ki",
+    "fin_sum_log_mean": 6.6137884289,
+    "fin_sum_log_std": 0.0334452623,
+    "fin_median": 745.1871331843,
+    "fint_median": 1529234711227
+  },
+  {
+    "team_id": 568,
+    "leg": 1,
+    "team": "Rastihaukat 1",
+    "name": "Harri Kauppinen",
+    "fin_sum_log_mean": 4.5873347828,
+    "fin_sum_log_std": 0.131457793,
+    "fin_median": 98.1918835017,
+    "fint_median": 1529195891513
+  },
+  {
+    "team_id": 568,
+    "leg": 2,
+    "team": "Rastihaukat 1",
+    "name": "Tuomas Helin",
+    "fin_sum_log_mean": 5.3118393915,
+    "fin_sum_log_std": 0.0792181651,
+    "fin_median": 202.5646340083,
+    "fint_median": 1529202153878
+  },
+  {
+    "team_id": 568,
+    "leg": 3,
+    "team": "Rastihaukat 1",
+    "name": "Teemu Siniranta",
+    "fin_sum_log_mean": 5.8266800033,
+    "fin_sum_log_std": 0.0541679107,
+    "fin_median": 338.9942603087,
+    "fint_median": 1529210339655
+  },
+  {
+    "team_id": 568,
+    "leg": 4,
+    "team": "Rastihaukat 1",
+    "name": "Pertti Sorri",
+    "fin_sum_log_mean": 6.051609041,
+    "fin_sum_log_std": 0.0492790981,
+    "fin_median": 424.5193740911,
+    "fint_median": 1529215471162
+  },
+  {
+    "team_id": 568,
+    "leg": 5,
+    "team": "Rastihaukat 1",
+    "name": "Stephan Witick",
+    "fin_sum_log_mean": 6.2462658547,
+    "fin_sum_log_std": 0.0458129889,
+    "fin_median": 516.0802445463,
+    "fint_median": 1529220964814
+  },
+  {
+    "team_id": 568,
+    "leg": 6,
+    "team": "Rastihaukat 1",
+    "name": "Esko Sorri",
+    "fin_sum_log_mean": 6.4210039046,
+    "fin_sum_log_std": 0.0408406728,
+    "fin_median": 614.6894259694,
+    "fint_median": 1529226881365
+  },
+  {
+    "team_id": 568,
+    "leg": 7,
+    "team": "Rastihaukat 1",
+    "name": "Timo Mouhu",
+    "fin_sum_log_mean": 6.6223261399,
+    "fin_sum_log_std": 0.0372270167,
+    "fin_median": 751.4379711628,
+    "fint_median": 1529235086278
+  },
+  {
+    "team_id": 1131,
+    "leg": 1,
+    "team": "Puskasilim\u00e4t OK 1",
+    "name": "Tuomas Ketonen",
+    "fin_sum_log_mean": 4.8229634321,
+    "fin_sum_log_std": 0.104494946,
+    "fin_median": 124.3791492585,
+    "fint_median": 1529197462748
+  },
+  {
+    "team_id": 1131,
+    "leg": 2,
+    "team": "Puskasilim\u00e4t OK 1",
+    "name": "Petri Miettinen",
+    "fin_sum_log_mean": 5.5442625401,
+    "fin_sum_log_std": 0.054053141,
+    "fin_median": 255.5857079419,
+    "fint_median": 1529205335142
+  },
+  {
+    "team_id": 1131,
+    "leg": 3,
+    "team": "Puskasilim\u00e4t OK 1",
+    "name": "Jaakko Havola",
+    "fin_sum_log_mean": 5.9983714174,
+    "fin_sum_log_std": 0.0372153239,
+    "fin_median": 402.6668423723,
+    "fint_median": 1529214160010
+  },
+  {
+    "team_id": 1131,
+    "leg": 4,
+    "team": "Puskasilim\u00e4t OK 1",
+    "name": "Joonas Kek\u00e4le",
+    "fin_sum_log_mean": 6.2418416553,
+    "fin_sum_log_std": 0.0367517487,
+    "fin_median": 513.7943704061,
+    "fint_median": 1529220827662
+  },
+  {
+    "team_id": 1131,
+    "leg": 5,
+    "team": "Puskasilim\u00e4t OK 1",
+    "name": "Joonas Mikkonen",
+    "fin_sum_log_mean": 6.4189539254,
+    "fin_sum_log_std": 0.0350667997,
+    "fin_median": 613.1879294376,
+    "fint_median": 1529226791275
+  },
+  {
+    "team_id": 1131,
+    "leg": 6,
+    "team": "Puskasilim\u00e4t OK 1",
+    "name": "Esko Harjama",
+    "fin_sum_log_mean": 6.6027831586,
+    "fin_sum_log_std": 0.0337837305,
+    "fin_median": 737.2565316714,
+    "fint_median": 1529234235391
+  },
+  {
+    "team_id": 1131,
+    "leg": 7,
+    "team": "Puskasilim\u00e4t OK 1",
+    "name": "Anssi Pesonen",
+    "fin_sum_log_mean": 6.8174256848,
+    "fin_sum_log_std": 0.0336346468,
+    "fin_median": 913.7495811481,
+    "fint_median": 1529244824974
+  },
+  {
+    "team_id": 1246,
+    "leg": 1,
+    "team": "Rastihaukat 2",
+    "name": "Antero Aunesluoma",
+    "fin_sum_log_mean": 4.7776912072,
+    "fin_sum_log_std": 0.1059453363,
+    "fin_median": 118.9251556721,
+    "fint_median": 1529197135509
+  },
+  {
+    "team_id": 1246,
+    "leg": 2,
+    "team": "Rastihaukat 2",
+    "name": "Janne Takala",
+    "fin_sum_log_mean": 5.4520372981,
+    "fin_sum_log_std": 0.0933158133,
+    "fin_median": 233.0271861467,
+    "fint_median": 1529203981631
+  },
+  {
+    "team_id": 1246,
+    "leg": 3,
+    "team": "Rastihaukat 2",
+    "name": "Kimmo Tikka",
+    "fin_sum_log_mean": 5.9696205526,
+    "fin_sum_log_std": 0.0728100082,
+    "fin_median": 391.4266771645,
+    "fint_median": 1529213485600
+  },
+  {
+    "team_id": 1246,
+    "leg": 4,
+    "team": "Rastihaukat 2",
+    "name": "Jari Siniranta",
+    "fin_sum_log_mean": 6.2442771813,
+    "fin_sum_log_std": 0.0644243372,
+    "fin_median": 515.1865075413,
+    "fint_median": 1529220911190
+  },
+  {
+    "team_id": 1246,
+    "leg": 5,
+    "team": "Rastihaukat 2",
+    "name": "Ove Nilsson",
+    "fin_sum_log_mean": 6.4358641304,
+    "fin_sum_log_std": 0.0548431771,
+    "fin_median": 623.9391625583,
+    "fint_median": 1529227436349
+  },
+  {
+    "team_id": 1246,
+    "leg": 6,
+    "team": "Rastihaukat 2",
+    "name": "Mika Tapanainen",
+    "fin_sum_log_mean": 6.6254268308,
+    "fin_sum_log_std": 0.0487191873,
+    "fin_median": 753.9897987022,
+    "fint_median": 1529235239387
+  },
+  {
+    "team_id": 1246,
+    "leg": 7,
+    "team": "Rastihaukat 2",
+    "name": "Teemu Matilainen",
+    "fin_sum_log_mean": 6.8131584191,
+    "fin_sum_log_std": 0.0445728507,
+    "fin_median": 909.8959312472,
+    "fint_median": 1529244593755
+  },
+  {
+    "team_id": 1270,
+    "leg": 1,
+    "team": "Reaktor Innovations 2",
+    "name": "Antti-Ville Jokela",
+    "fin_sum_log_mean": 4.7599762785,
+    "fin_sum_log_std": 0.1057741754,
+    "fin_median": 116.6616096649,
+    "fint_median": 1529196999696
+  },
+  {
+    "team_id": 1270,
+    "leg": 2,
+    "team": "Reaktor Innovations 2",
+    "name": "Karri-Pekka Laakso",
+    "fin_sum_log_mean": 5.5230524324,
+    "fin_sum_log_std": 0.0665340332,
+    "fin_median": 250.3755581307,
+    "fint_median": 1529205022533
+  },
+  {
+    "team_id": 1270,
+    "leg": 3,
+    "team": "Reaktor Innovations 2",
+    "name": "Oskari Pirttikoski",
+    "fin_sum_log_mean": 6.0678068739,
+    "fin_sum_log_std": 0.0893582674,
+    "fin_median": 431.277510429,
+    "fint_median": 1529215876650
+  },
+  {
+    "team_id": 1270,
+    "leg": 4,
+    "team": "Reaktor Innovations 2",
+    "name": "Jeppe Koivula",
+    "fin_sum_log_mean": 6.2132689507,
+    "fin_sum_log_std": 0.0779830076,
+    "fin_median": 498.4425793931,
+    "fint_median": 1529219906554
+  },
+  {
+    "team_id": 1270,
+    "leg": 5,
+    "team": "Reaktor Innovations 2",
+    "name": "Tommi Simell",
+    "fin_sum_log_mean": 6.4059131244,
+    "fin_sum_log_std": 0.0671001575,
+    "fin_median": 604.7552547849,
+    "fint_median": 1529226285315
+  },
+  {
+    "team_id": 1270,
+    "leg": 6,
+    "team": "Reaktor Innovations 2",
+    "name": "Mikko Apo",
+    "fin_sum_log_mean": 6.5896029211,
+    "fin_sum_log_std": 0.0643319284,
+    "fin_median": 726.8104517929,
+    "fint_median": 1529233608627
+  },
+  {
+    "team_id": 1270,
+    "leg": 7,
+    "team": "Reaktor Innovations 2",
+    "name": "Aki Kaivola",
+    "fin_sum_log_mean": 6.7856715565,
+    "fin_sum_log_std": 0.0561400831,
+    "fin_median": 885.3458728581,
+    "fint_median": 1529243120752
+  }
+]

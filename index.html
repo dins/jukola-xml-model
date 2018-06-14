@@ -1,27 +1,88 @@
 <!doctype html>
-<html class="no-js" lang="fi">
-
+<html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="x-ua-compatible" content="ie=edge">
     <title>Jukola Vaihtoajat</title>
-    <meta name="description" content="">
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <!-- Place favicon.ico in the root directory -->
-
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://cdn.plot.ly/plotly-1.38.3.min.js"></script>
+    <script src="web-lib/jstat.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"
+            integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="web-lib/lodash-core.min.js"></script>
+    <style>
+        h1,#plotty {
+            margin: 20px;
+        }
+    </style>
 </head>
-
 <body>
-<!--[if lte IE 9]>
-<p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade
-    your browser</a> to improve your experience and security.</p>
-<![endif]-->
-
 <h1>Jukola Vaihtoajat</h1>
-<!-- Add your site or application content here -->
-<p>Hello world! This is HTML5 Boilerplate.</p>
 
+<div id="plotty"></div>
+<script>
+
+  function simulateRuns(logMeans, logStds) {
+    var runs = jStat.create(1, 1000, function (row, col) {
+      var runMins = jStat.lognormal.sample(logMeans, logStds);
+      var finishTime = new Date('2018-06-16 23:00:00');
+      finishTime.setMinutes(finishTime.getMinutes() + runMins);
+      return finishTime
+    });
+    runs = jStat.row(runs, 0) // To js array
+    //console.log("Runs", runs)
+    return runs
+  }
+
+  function createBoxPlotData(logMeans, logStds, name) {
+    return {
+      x: simulateRuns(logMeans, logStds),
+      type: 'box',
+      name: name
+    };
+  }
+
+  function addPlot(teamId) {
+    var teamRunners = _.filter(window.runners, function (runner) {
+      return runner.team_id === teamId
+    })
+
+    var runnerPlotData = _.map(teamRunners, function (runner) {
+      return createBoxPlotData(runner.fin_sum_log_mean, runner.fin_sum_log_std, runner.leg + " " + runner.name)
+    })
+
+    runnerPlotData = runnerPlotData.reverse()
+    console.log("Team " + teamId, teamRunners)
+    var layout = {
+      title: "Team " + teamId
+    };
+    // hide the modebar (hover bar) buttons, plotly logo. show plotly tooltips
+    var defaultPlotlyConfiguration = {
+      modeBarButtonsToRemove: ['sendDataToCloud', 'autoScale2d', 'hoverClosestCartesian', 'hoverCompareCartesian', 'lasso2d', 'select2d'],
+      displaylogo: false,
+      showTips: true
+    };
+    return Plotly.newPlot('plotty', runnerPlotData, layout, defaultPlotlyConfiguration);
+  }
+
+  $.getJSON("web-lib/for_web_ju2018.json", function (runners) {
+    //console.log(runners)
+    window.runners = runners
+    var searchParams = new URLSearchParams(window.location.search)
+    var teamId = parseInt(searchParams.get('team'))
+    addPlot(teamId)
+  });
+
+</script>
+
+<!-- Optional JavaScript -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+-->
 </body>
-
 </html>
