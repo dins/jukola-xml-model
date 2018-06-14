@@ -29,6 +29,7 @@ def fetch_order(url):
     output_rows = []
     current_team_id = ""
     current_team_base_name = ""
+    current_team_name = ""
     for row in rows:
         team_id = next(iter(row.xpath('.//td[1]/text()') or []), None)
         if team_id is not None:
