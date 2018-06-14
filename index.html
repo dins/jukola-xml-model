@@ -41,7 +41,7 @@
   function createBoxPlotData(logMeans, logStds, name) {
     return {
       x: simulateRuns(logMeans, logStds),
-      type: 'box',
+      type: "histogram",
       name: name,
       boxpoints: false
     };
@@ -56,7 +56,7 @@
       return createBoxPlotData(runner.fin_sum_log_mean, runner.fin_sum_log_std, runner.leg + " " + runner.name)
     })
 
-    runnerPlotData = runnerPlotData.reverse()
+    //runnerPlotData = runnerPlotData.reverse()
     var layout = {
       title: "Team " + teamId + " " + teamRunners[0].team
     };
