@@ -42,7 +42,8 @@
     return {
       x: simulateRuns(logMeans, logStds),
       type: 'box',
-      name: name
+      name: name,
+      boxpoints: false
     };
   }
 
@@ -56,9 +57,8 @@
     })
 
     runnerPlotData = runnerPlotData.reverse()
-    console.log("Team " + teamId, teamRunners)
     var layout = {
-      title: "Team " + teamId
+      title: "Team " + teamId + " " + teamRunners[0].team
     };
     // hide the modebar (hover bar) buttons, plotly logo. show plotly tooltips
     var defaultPlotlyConfiguration = {
