@@ -9,11 +9,13 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
           integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <script src="https://cdn.plot.ly/plotly-1.38.3.min.js"></script>
+
+
     <script src="web-lib/jstat.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"
             integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <script src="web-lib/lodash-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.min.js"></script>
     <style>
         h1, #plotty {
             margin: 20px;
@@ -41,29 +43,26 @@
     <tbody>
     </tbody>
 </table>
-<div id="plotty"></div>
+
+<canvas id="chartjs-plot" width="400" height="250"></canvas>
+
 <script>
 
-  function simulateRuns(logMeans, logStds) {
-    var runs = jStat.create(1, 1000, function (row, col) {
-      var runMins = jStat.lognormal.sample(logMeans, logStds);
-      var finishTime = new Date('2018-06-16 23:00:00');
-      finishTime.setMinutes(finishTime.getMinutes() + runMins);
-      return finishTime
-    });
-    runs = jStat.row(runs, 0) // To js array
-    //console.log("Runs", runs)
-    return runs
+  function produceDataPoints(logMeans, logStds) {
+    var indexes = Array.from(Array(10000).keys())
+    var wholeRange = _.map(indexes, function (i) {
+      var min = i * 2
+      var propability = jStat.lognormal.pdf(min, logMeans, logStds)
+
+      var finishTime = new Date('2018-06-16 23:00:00')
+      finishTime.setMinutes(finishTime.getMinutes() + min)
+      return {x: finishTime, y: propability}
+    })
+    return _.filter(wholeRange, function (point) {
+      return point.y > 0.00001
+    })
   }
 
-  function createBoxPlotData(logMeans, logStds, name) {
-    return {
-      x: simulateRuns(logMeans, logStds),
-      type: "histogram",
-      name: name,
-      boxpoints: false
-    };
-  }
 
   function showTeam(teamId) {
     var teamRunners = _.filter(window.runners, function (runner) {
@@ -74,21 +73,74 @@
       $("#estimate-summary tbody").append("<tr><th scope=\"row\">" + runner.leg + "</th><td>" + runner.name + "</td><td>" + runner.fint_median + "</td><td>" + runner.fint_start95 + " - " + runner.fint_end95 + "</td></tr>")
     })
 
-    var runnerPlotData = _.map(teamRunners, function (runner) {
-      return createBoxPlotData(runner.fin_sum_log_mean, runner.fin_sum_log_std, runner.leg + " " + runner.name)
+    var colors = {
+      blue: "rgb(54, 162, 235)",
+      green: "rgb(75, 192, 192)",
+      grey: "rgb(201, 203, 207)",
+      orange: "rgb(255, 159, 64)",
+      purple: "rgb(153, 102, 255)",
+      red: "rgb(255, 99, 132)",
+      yellow: "rgb(255, 205, 86)"
+    }
+    var colorNames = Object.keys(colors)
+    var teamDatasets = _.map(teamRunners, function (runner) {
+      var color = colors[colorNames[runner.leg - 1]];
+      return {
+        label: runner.leg + " " + runner.name,
+        backgroundColor: color,
+        borderColor: color,
+        data: produceDataPoints(runner.fin_sum_log_mean, runner.fin_sum_log_std),
+        fill: true
+      }
     })
 
-    //runnerPlotData = runnerPlotData.reverse()
-    var layout = {
-      title: "Team " + teamId + " " + teamRunners[0].team
-    };
-    // hide the modebar (hover bar) buttons, plotly logo. show plotly tooltips
-    var defaultPlotlyConfiguration = {
-      modeBarButtonsToRemove: ['sendDataToCloud', 'autoScale2d', 'hoverClosestCartesian', 'hoverCompareCartesian', 'lasso2d', 'select2d'],
-      displaylogo: false,
-      showTips: true
-    };
-    return Plotly.newPlot('plotty', runnerPlotData, layout, defaultPlotlyConfiguration);
+    var chartOptions = {
+      //responsive: true,
+      title: {
+        display: true,
+        text: teamId + " " + teamRunners[0].team
+      },
+      tooltips: {
+        mode: 'index',
+        intersect: false,
+      },
+      hover: {
+        mode: 'nearest',
+        intersect: true
+      },
+      scales: {
+        xAxes: [{
+          type: 'time',
+          time: {
+            unit: 'minute',
+            displayFormats: {
+              minute: 'hh:mm'
+            }
+          },
+          display: true,
+          scaleLabel: {
+            display: true,
+            labelString: 'Kellonaika'
+          }
+        }],
+        yAxes: [{
+          display: true,
+          scaleLabel: {
+            display: true,
+            labelString: 'Todennäköisyys'
+          }
+        }]
+      }
+    }
+    //Chart.defaults.line.spanGaps = true;
+    var myLineChart = new Chart("chartjs-plot", {
+      type: 'line',
+      data: {
+        datasets: teamDatasets
+      },
+      options: chartOptions
+    });
+
   }
 
   $.getJSON("web-lib/for_web_ju2018.json", function (runners) {
