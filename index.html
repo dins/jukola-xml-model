@@ -36,7 +36,7 @@
     <tr>
         <th scope="col">Osuus</th>
         <th scope="col">Nimi</th>
-        <th scope="col">Todennäköisin maaliintulo</th>
+        <th scope="col">Keskimääräinen maaliintulo</th>
         <th scope="col">Todennäköinen aikaväli</th>
     </tr>
     </thead>
@@ -90,7 +90,8 @@
         backgroundColor: color,
         borderColor: color,
         data: produceDataPoints(runner.fin_sum_log_mean, runner.fin_sum_log_std),
-        fill: true
+        fill: false,
+        pointRadius: 1
       }
     })
 
@@ -128,7 +129,7 @@
           display: true,
           scaleLabel: {
             display: true,
-            labelString: 'Todennäköisyys'
+            labelString: 'Maaliintulon todennäköisyys'
           }
         }]
       }
