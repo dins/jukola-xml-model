@@ -54,7 +54,7 @@
       var min = i * 2
       var propability = jStat.lognormal.pdf(min, logMeans, logStds)
 
-      var finishTime = new Date('2018-06-16 23:00:00')
+      var finishTime = new Date('2018-06-16T23:00:00')
       finishTime.setMinutes(finishTime.getMinutes() + min)
       return {x: finishTime, y: propability}
     })
