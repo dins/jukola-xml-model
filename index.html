@@ -17,7 +17,7 @@
     <script src="web-lib/lodash-core.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.min.js"></script>
     <style>
-        h1, #plotty {
+        h1 {
             margin: 20px;
         }
 
@@ -58,20 +58,25 @@
       finishTime.setMinutes(finishTime.getMinutes() + min)
       return {x: finishTime, y: propability}
     })
+    // Remove points where propability is too low for printing
     return _.filter(wholeRange, function (point) {
       return point.y > 0.00001
     })
   }
 
 
-  function showTeam(teamId) {
-    var teamRunners = _.filter(window.runners, function (runner) {
+  function showTeam(teamId, runners) {
+    var teamRunners = _.filter(runners, function (runner) {
       return runner.team_id === teamId
     })
 
-    _.each(teamRunners, function (runner) {
-      $("#estimate-summary tbody").append("<tr><th scope=\"row\">" + runner.leg + "</th><td>" + runner.name + "</td><td>" + runner.fint_median + "</td><td>" + runner.fint_start95 + " - " + runner.fint_end95 + "</td></tr>")
-    })
+    function addRunnerToTable(runner) {
+      $("#estimate-summary tbody").append(
+        "<tr><th scope=\"row\">" + runner.leg + "</th><td>" + runner.name + "</td><td>" + runner.fint_median
+        + "</td><td>" + runner.fint_start95 + " - " + runner.fint_end95 + "</td></tr>")
+    }
+
+    _.each(teamRunners, addRunnerToTable)
 
     var colors = {
       blue: "rgb(54, 162, 235)",
@@ -85,11 +90,13 @@
     var colorNames = Object.keys(colors)
     var teamDatasets = _.map(teamRunners, function (runner) {
       var color = colors[colorNames[runner.leg - 1]];
+      var dataPoints = produceDataPoints(runner.fin_sum_log_mean, runner.fin_sum_log_std)
+      console.log("dataPoints", dataPoints)
       return {
         label: runner.leg + " " + runner.name,
         backgroundColor: color,
         borderColor: color,
-        data: produceDataPoints(runner.fin_sum_log_mean, runner.fin_sum_log_std),
+        data: dataPoints,
         fill: false,
         pointRadius: 1
       }
@@ -146,11 +153,9 @@
   }
 
   $.getJSON("web-lib/for_web_ju2018.json", function (runners) {
-    //console.log(runners)
-    window.runners = runners
     var searchParams = new URLSearchParams(window.location.search)
     var teamId = parseInt(searchParams.get('team'))
-    showTeam(teamId)
+    showTeam(teamId, runners)
   });
 
 </script>
