@@ -10,6 +10,8 @@ import xml.etree.ElementTree as ET
 # time for year in $(seq 2011 2017); do echo "YEAR $year"; time wget -P data http://results.jukola.com/tulokset/results_j${year}_ju.xml; done
 # time for year in $(seq 2012 2017); do echo "YEAR $year"; time pipenv run python result_xml_to_csv.py $year && head data/csv-results_j${year}_ju.tsv; done
 
+# wget -P data http://online.jukola.com/tulokset/results_j2018_ju.xml
+
 year = sys.argv[1]
 tree = ET.parse('data/results_j%s_ju.xml' % year)
 root = tree.getroot()
@@ -60,6 +62,7 @@ for team in root.iter('team'):
 
         default_leg_time = "NA"
         if len(control_times) > 0:
+            # FIXME this is sometimes ok, sometimes also totally wrong.
             default_leg_time = control_times[-1] # Use last control as default if no tsecs (=disqualified?)
         row.append(leg.findtext("tsecs", default_leg_time))
 
