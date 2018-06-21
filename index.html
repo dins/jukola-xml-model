@@ -16,6 +16,7 @@
             integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <script src="web-lib/lodash-core.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.min.js"></script>
+    <script src="web-lib/chartjs-plugin-annotation.min.js"></script>
     <style>
         h1 {
             margin: 20px;
@@ -44,18 +45,21 @@
     </tbody>
 </table>
 
-<canvas id="chartjs-plot" width="300" height="250"></canvas>
+<canvas id="chartjs-plot" width="300" height="150"></canvas>
 
 <script>
+
+  function raceMinutesToDate(minutesSinceRaceStart) {
+    var date = new Date('2018-06-16T23:00:00')
+    return date.setMinutes(date.getMinutes() + minutesSinceRaceStart)
+  }
 
   function produceDataPoints(logMeans, logStds) {
     var indexes = Array.from(Array(10000).keys())
     var wholeRange = _.map(indexes, function (i) {
       var min = i * 2
       var propability = jStat.lognormal.pdf(min, logMeans, logStds)
-
-      var finishTime = new Date('2018-06-16T23:00:00')
-      finishTime.setMinutes(finishTime.getMinutes() + min)
+      var finishTime = raceMinutesToDate(min)
       return {x: finishTime, y: propability}
     })
     // Remove points where propability is too low for printing
@@ -70,10 +74,26 @@
       return runner.team_id === teamId
     })
 
+    function timestampToDate(utcTimestamp) {
+      return new Date(utcTimestamp)
+    }
+
+    function formatTime(utcTimestamp) {
+      function pad(number) {
+        if (number < 10) {
+          return '0' + number;
+        }
+        return number;
+      }
+
+      var date = timestampToDate(utcTimestamp);
+      return pad(date.getHours()) + ":" + pad(date.getMinutes())
+    }
+
     function addRunnerToTable(runner) {
       $("#estimate-summary tbody").append(
-        "<tr><th scope=\"row\">" + runner.leg + "</th><td>" + runner.name + "</td><td>" + runner.fint_median
-        + "</td><td>" + runner.fint_start95 + " - " + runner.fint_end95 + "</td></tr>")
+        "<tr><th scope=\"row\">" + runner.leg + "</th><td>" + runner.name + "</td><td>" + formatTime(runner.fint_median)
+        + "</td><td>" + formatTime(runner.fint_start95) + " - " + formatTime(runner.fint_end95) + "</td></tr>")
     }
 
     _.each(teamRunners, addRunnerToTable)
@@ -89,16 +109,35 @@
     }
     var colorNames = Object.keys(colors)
     var teamDatasets = _.map(teamRunners, function (runner) {
-      var color = colors[colorNames[runner.leg - 1]];
+      var color = colors[colorNames[runner.leg - 1]]
       var dataPoints = produceDataPoints(runner.fin_sum_log_mean, runner.fin_sum_log_std)
-      console.log("dataPoints", dataPoints)
       return {
+        type: 'line',
         label: runner.leg + " " + runner.name,
         backgroundColor: color,
         borderColor: color,
         data: dataPoints,
         fill: false,
         pointRadius: 1
+      }
+    })
+
+    var verticalLineAnnotations = _.map(teamRunners, function (runner) {
+      var color = colors[colorNames[runner.leg - 1]]
+      var realFinish = raceMinutesToDate(runner.real_mins)
+      return {
+        id: 'vline_' + runner.leg,
+        type: 'line',
+        mode: 'vertical',
+        scaleID: 'x-axis-0',
+        value: realFinish,
+        borderColor: "grey",
+        borderWidth: 2,
+        label: {
+          backgroundColor: color,
+          content: formatTime(realFinish),
+          enabled: true
+        }
       }
     })
 
@@ -139,6 +178,9 @@
             labelString: 'Maaliintulon todennäköisyys'
           }
         }]
+      },
+      annotation: {
+        annotations: verticalLineAnnotations
       }
     }
     //Chart.defaults.line.spanGaps = true;
@@ -152,7 +194,7 @@
 
   }
 
-  $.getJSON("web-lib/for_web_ju2018.json", function (runners) {
+  $.getJSON("web-lib/with_result_ju2018.json", function (runners) {
     var searchParams = new URLSearchParams(window.location.search)
     var teamId = parseInt(searchParams.get('team'))
     showTeam(teamId, runners)
