@@ -7,7 +7,7 @@ import xml.etree.ElementTree as ET
 
 # time pipenv run python result_xml_to_csv.py 2017
 
-# time for year in $(seq 2011 2017); do echo "YEAR $year"; time wget -P data http://results.jukola.com/tulokset/results_j${year}_ju.xml; done
+# time for year in $(seq 2011 2017); do echo "YEAR $year"; time wget -P data http://online.jukola.com/tulokset/results_j${year}_ju.xml; done
 # time for year in $(seq 2012 2017); do echo "YEAR $year"; time pipenv run python result_xml_to_csv.py $year && head data/csv-results_j${year}_ju.tsv; done
 
 # wget -P data http://online.jukola.com/tulokset/results_j2018_ju.xml
