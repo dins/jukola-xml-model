@@ -50,7 +50,7 @@
 <script>
 
   function raceMinutesToDate(minutesSinceRaceStart) {
-    var date = new Date('2018-06-16T23:00:00')
+    var date = new Date(Date.parse('2018-06-16T23:00:00+03:00'))
     return date.setMinutes(date.getMinutes() + minutesSinceRaceStart)
   }
 
