@@ -8,7 +8,7 @@ import xml.etree.ElementTree as ET
 # time pipenv run python result_xml_to_csv.py 2017
 
 # time for year in $(seq 2011 2017); do echo "YEAR $year"; time wget -P data http://online.jukola.com/tulokset/results_j${year}_ju.xml; done
-# time for year in $(seq 2012 2017); do echo "YEAR $year"; time pipenv run python result_xml_to_csv.py $year && head data/csv-results_j${year}_ju.tsv; done
+# time for year in $(seq 2012 2018); do echo "YEAR $year"; time pipenv run python result_xml_to_csv.py $year && head data/csv-results_j${year}_ju.tsv; done
 
 # wget -P data http://online.jukola.com/tulokset/results_j2018_ju.xml
 
@@ -60,10 +60,8 @@ for team in root.iter('team'):
                                          seconds=struct_time.tm_sec).total_seconds()
             control_times.append(str(int(ct_secs)))
 
+        # if no tsecs (=runner or team disqualified?)
         default_leg_time = "NA"
-        if len(control_times) > 0:
-            # FIXME this is sometimes ok, sometimes also totally wrong.
-            default_leg_time = control_times[-1] # Use last control as default if no tsecs (=disqualified?)
         row.append(leg.findtext("tsecs", default_leg_time))
 
         row.append(leg.find("nm").text)
