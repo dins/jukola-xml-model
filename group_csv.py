@@ -8,7 +8,7 @@ from collections import defaultdict
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
 
-years = ["2017", "2016", "2015", "2014", "2013", "2012"]
+years = ["2018", "2017", "2016", "2015", "2014", "2013", "2012"]
 
 # time for year in $(seq 2011 2017); do echo "$year: [$(curl http://results.jukola.com/tulokset/fi/j${year}_ju/ | grep "<td><a href='/tulokset/fi/" | grep -E "Vaihto |Maali "| cut -d " " -f 3| tr ',' '.' | tr '\n' ',')]," >> years.txt; done
 distances = {2011: [11.5, 11.4, 13.6, 8.3, 8.5, 10.5, 15.6],
@@ -17,7 +17,8 @@ distances = {2011: [11.5, 11.4, 13.6, 8.3, 8.5, 10.5, 15.6],
              2014: [10.1, 11.5, 10.2, 7.6, 7.7, 10.7, 14.0],
              2015: [13.8, 12.3, 15.8, 8.1, 8.6, 12.6, 14.6],
              2016: [10.7, 12.8, 14.1, 8.6, 8.7, 12.4, 16.5],
-             2017: [12.8, 14.3, 12.3, 7.7, 7.8, 11.1, 13.8]}
+             2017: [12.8, 14.3, 12.3, 7.7, 7.8, 11.1, 13.8],
+             2018: [11.0, 11.9, 12.7, 8.8, 8.7, 10.8, 15.1]}
 
 by_name = {}
 
@@ -112,14 +113,14 @@ for unique_name, runs in by_unique_name.items():
 
 out_file.close()
 
-runs_file_cols = ["name", "team_id", "pace", "leg_nro", "num_runs"]
+runs_file_cols = ["name", "year", "team_id", "team", "pace", "leg_nro", "num_runs"]
 (runs_out_file, runs_csvwriter) = open_output_file('data/runs_ju.tsv', runs_file_cols)
 
 for unique_name, runs in by_unique_name.items():
     for run in runs:
         pace = run["pace"]
         if pace != "NA":
-            row = [unique_name, run["team_id"], pace, run["leg_nro"], len(runs)]
+            row = [unique_name, run["year"], run["team_id"], run["team"], pace, run["leg_nro"], len(runs)]
             runs_csvwriter.writerow(row)
 
 runs_out_file.close()
