@@ -11,6 +11,7 @@ scipy = "*"
 scikit-learn = "*"
 lxml = "*"
 requests = "*"
+seaborn = "*"
 
 [dev-packages]
 
