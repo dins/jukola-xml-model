@@ -5,20 +5,20 @@ import sys
 import time
 import xml.etree.ElementTree as ET
 
-# time pipenv run python result_xml_to_csv.py 2017
+# time pipenv run python result_xml_to_csv.py 2017 ve
 
-# time for year in $(seq 2011 2017); do echo "YEAR $year"; time wget -P data http://online.jukola.com/tulokset/results_j${year}_ju.xml; done
-# time for year in $(seq 2012 2018); do echo "YEAR $year"; time pipenv run python result_xml_to_csv.py $year && head data/csv-results_j${year}_ju.tsv; done
+# time for year in $(seq 2012 2018); do echo "YEAR $year"; time pipenv run python result_xml_to_csv.py $year ve && head data/csv-results_j${year}_ve.tsv; done
 
 # wget -P data http://online.jukola.com/tulokset/results_j2018_ju.xml
 
 year = sys.argv[1]
-tree = ET.parse('data/results_j%s_ju.xml' % year)
+ve_or_ju = sys.argv[2]
+tree = ET.parse(f'data/results_j{year}_{ve_or_ju}.xml')
 root = tree.getroot()
 
 # open a file for writing
 
-out_file_name = 'data/csv-results_j%s_ju.tsv' % year
+out_file_name = f'data/csv-results_j{year}_{ve_or_ju}.tsv'
 csv_file = open(out_file_name, 'w')
 
 # create the csv writer object

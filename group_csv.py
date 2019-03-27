@@ -1,29 +1,50 @@
 import csv
 import logging
+import sys
 
 import numpy as np
 from collections import defaultdict
 
-# time pipenv run python group_csv.py && head data/grouped_paces_ju.tsv
+# time pipenv run python group_csv.py ve && head data/grouped_paces_ve.tsv
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
 
-years = ["2018", "2017", "2016", "2015", "2014", "2013", "2012"]
+ve_or_ju = sys.argv[1]
+
+years = {
+    "ve": ["2017", "2016", "2014", "2013", "2012", "2011"],
+    "ju": ["2018", "2017", "2016", "2015", "2014", "2013", "2012"]
+}
 
 # time for year in $(seq 2011 2017); do echo "$year: [$(curl http://results.jukola.com/tulokset/fi/j${year}_ju/ | grep "<td><a href='/tulokset/fi/" | grep -E "Vaihto |Maali "| cut -d " " -f 3| tr ',' '.' | tr '\n' ',')]," >> years.txt; done
-distances = {2011: [11.5, 11.4, 13.6, 8.3, 8.5, 10.5, 15.6],
-             2012: [12.7, 12.7, 14.1, 7.7, 8.1, 10.2, 15.1],
-             2013: [12.2, 13.0, 14.4, 7.8, 7.7, 11.7, 15.1],
-             2014: [10.1, 11.5, 10.2, 7.6, 7.7, 10.7, 14.0],
-             2015: [13.8, 12.3, 15.8, 8.1, 8.6, 12.6, 14.6],
-             2016: [10.7, 12.8, 14.1, 8.6, 8.7, 12.4, 16.5],
-             2017: [12.8, 14.3, 12.3, 7.7, 7.8, 11.1, 13.8],
-             2018: [11.0, 11.9, 12.7, 8.8, 8.7, 10.8, 15.1]}
+
+distances = {
+    "ve": {
+        2011: [6.9, 6.2, 5.1, 8.5],
+        2012: [5.7, 5.8, 7.2, 8.4],
+        2013: [8.2, 6.2, 6.2, 8.7],
+        2014: [5.1, 5.0, 6.7, 7.4],
+        2015: [8.0, 6.0, 6.2, 8.8],
+        2016: [7.1, 6.7, 6.0, 9.1],
+        2017: [6.7, 6.6, 5.7, 8.0],
+        2018: [6.2, 6.2, 5.4, 7.9]
+    },
+    "ju": {
+        2011: [11.5, 11.4, 13.6, 8.3, 8.5, 10.5, 15.6],
+        2012: [12.7, 12.7, 14.1, 7.7, 8.1, 10.2, 15.1],
+        2013: [12.2, 13.0, 14.4, 7.8, 7.7, 11.7, 15.1],
+        2014: [10.1, 11.5, 10.2, 7.6, 7.7, 10.7, 14.0],
+        2015: [13.8, 12.3, 15.8, 8.1, 8.6, 12.6, 14.6],
+        2016: [10.7, 12.8, 14.1, 8.6, 8.7, 12.4, 16.5],
+        2017: [12.8, 14.3, 12.3, 7.7, 7.8, 11.1, 13.8],
+        2018: [11.0, 11.9, 12.7, 8.8, 8.7, 10.8, 15.1]
+    }
+}
 
 by_name = {}
 
-for year in years:
-    in_file_name = 'data/csv-results_j%s_ju.tsv' % year
+for year in years[ve_or_ju]:
+    in_file_name = f'data/csv-results_j{year}_{ve_or_ju}.tsv'
     with open(in_file_name) as csvfile:
         csvreader = csv.reader(csvfile, delimiter="\t")
         next(csvreader, None)  # skip the headers
@@ -37,7 +58,7 @@ for year in years:
             if leg_time_str == "NA":
                 leg_pace = "NA"
             else:
-                leg_distance = distances[int(year)][leg_nro - 1]
+                leg_distance = distances[ve_or_ju][int(year)][leg_nro - 1]
                 leg_pace = round((int(leg_time_str) / 60) / leg_distance, 3)
 
             if not name in by_name:
@@ -81,7 +102,7 @@ for name, runs in by_name.items():
 
 column_names = ["mean_team_id", "teams", "name", "num_runs", "num_valid_times", "mean_pace", "stdev", "pace_1", "pace_2",
                 "pace_3", "pace_4", "pace_5", "pace_6"]
-(out_file, csvwriter) = open_output_file('data/grouped_paces_ju.tsv', column_names)
+(out_file, csvwriter) = open_output_file(f'data/grouped_paces_{ve_or_ju}.tsv', column_names)
 
 for unique_name, runs in by_unique_name.items():
     team_ids = map(lambda run: run["team_id"], runs)
@@ -114,7 +135,7 @@ for unique_name, runs in by_unique_name.items():
 out_file.close()
 
 runs_file_cols = ["name", "year", "team_id", "team", "pace", "leg_nro", "num_runs"]
-(runs_out_file, runs_csvwriter) = open_output_file('data/runs_ju.tsv', runs_file_cols)
+(runs_out_file, runs_csvwriter) = open_output_file(f'data/runs_{ve_or_ju}.tsv', runs_file_cols)
 
 for unique_name, runs in by_unique_name.items():
     for run in runs:
