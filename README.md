@@ -3,14 +3,14 @@ Analyze and estimate Jukola Relay results
 
 ## Setup
 ```bash
-pipenv install
+pipenv sync
 ```
 
 Fetch xml files (history) and running order for year to predict:
 
 ```bash
 time for year in $(seq 2011 2017); do echo "YEAR $year"; time wget -P data http://results.jukola.com/tulokset/results_j${year}_ju.xml; done
-time pipenv run python fetch_running_order.py && wc data/running_order_j2018_ju.tsv
+time pipenv run python fetch_running_order.py 2017 && wc data/running_order_j2017_ju.tsv
 ```
 
 Convert xml to csv and join years by runner name and team:
