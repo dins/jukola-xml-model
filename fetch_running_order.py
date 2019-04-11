@@ -54,15 +54,18 @@ def fetch_running_order(year, ve_or_ju):
         current_team_id = ""
         current_team_base_name = ""
         current_team_name = ""
+        current_team_country = "NONE"
         for row in rows:
             team_id = next(iter(row.xpath('.//td[1]/text()') or []), None)
             if team_id is not None:
                 team_name = next(iter(row.xpath('.//td[2]/text()')))
+                current_team_country = next(iter(row.xpath('.//img/@title') or []), "NA")
                 current_team_id = team_id
                 team_base_name = parse_team_base_name(team_name)
                 current_team_name = team_name
                 current_team_base_name = team_base_name
-                logging.info("Team line: " + team_id + " " + team_name + " -> " + team_base_name)
+                logging.info(
+                    "Team line: " + current_team_country + " " + team_id + " " + team_name + " -> " + team_base_name)
             else:
                 leg = next(iter(row.xpath('.//td[2]/text()') or []), None)
                 name = next(iter(row.xpath('.//td[3]/text()') or []), None)
@@ -71,14 +74,15 @@ def fetch_running_order(year, ve_or_ju):
                     name = name.strip()
                     logging.info(current_team_id + " " + current_team_name + " " + str(leg) + " '" + name + "'")
                     output_rows.append(
-                        [current_team_id, current_team_name, current_team_base_name, leg, leg_dist(leg), name])
+                        [current_team_id, current_team_name, current_team_base_name, current_team_country, leg,
+                         leg_dist(leg), name])
         return output_rows
 
     out_file_name = f'data/running_order_j{year}_{ve_or_ju}.tsv'
     csv_file = open(out_file_name, 'w')
 
     csvwriter = csv.writer(csv_file, delimiter="\t", quoting=csv.QUOTE_ALL)
-    header = ["team_id", "team", "team_base_name", "leg", "leg_dist", "name"]
+    header = ["team_id", "team", "team_base_name", "team_country", "leg", "leg_dist", "name"]
 
     csvwriter.writerow(header)
 

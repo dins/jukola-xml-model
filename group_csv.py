@@ -12,7 +12,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
 ve_or_ju = sys.argv[1]
 
 years = {
-    "ve": ["2017", "2016", "2014", "2013", "2012", "2011"],
+    "ve": ["2018", "2017", "2016", "2015", "2014", "2013", "2012"],
     "ju": ["2018", "2017", "2016", "2015", "2014", "2013", "2012"]
 }
 
@@ -43,8 +43,23 @@ distances = {
 
 by_name = {}
 
+def read_team_countries(year, ve_or_ju):
+    with open(f'data/running_order_j{year}_{ve_or_ju}.tsv') as csvfile:
+        csvreader = csv.reader(csvfile, delimiter="\t")
+        next(csvreader, None)  # skip the headers
+        country_by_team_id = {}
+        for row in csvreader:
+            team_id = int(row[0])
+            team_country = row[3].upper()
+            country_by_team_id[team_id] = team_country
+
+        return country_by_team_id
+
+
 for year in years[ve_or_ju]:
-    in_file_name = f'data/csv-results_j{year}_{ve_or_ju}.tsv'
+    country_by_team_id = read_team_countries(year, ve_or_ju)
+
+    in_file_name = f'data/results_with_dist_j{year}_{ve_or_ju}.tsv'
     with open(in_file_name) as csvfile:
         csvreader = csv.reader(csvfile, delimiter="\t")
         next(csvreader, None)  # skip the headers
@@ -68,6 +83,9 @@ for year in years[ve_or_ju]:
             run["name"] = name
             run["team_id"] = team_id
             run["team"] = team_base_name
+            run["team_country"] = "NA"
+            if team_id in country_by_team_id:
+                run["team_country"] = country_by_team_id[team_id]
             run["year"] = year
             run["pace"] = leg_pace
             run["leg_nro"] = leg_nro
@@ -134,14 +152,14 @@ for unique_name, runs in by_unique_name.items():
 
 out_file.close()
 
-runs_file_cols = ["name", "year", "team_id", "team", "pace", "leg_nro", "num_runs"]
+runs_file_cols = ["name", "year", "team_id", "team", "team_country", "pace", "leg_nro", "num_runs"]
 (runs_out_file, runs_csvwriter) = open_output_file(f'data/runs_{ve_or_ju}.tsv', runs_file_cols)
 
 for unique_name, runs in by_unique_name.items():
     for run in runs:
         pace = run["pace"]
         if pace != "NA":
-            row = [unique_name, run["year"], run["team_id"], run["team"], pace, run["leg_nro"], len(runs)]
+            row = [unique_name, run["year"], run["team_id"], run["team"], run["team_country"], pace, run["leg_nro"], len(runs)]
             runs_csvwriter.writerow(row)
 
 runs_out_file.close()
