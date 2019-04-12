@@ -22,7 +22,7 @@ time pipenv run python group_csv.py ve && head data/grouped_paces_ve.tsv
 
 Start jupyter:
 ```bash
-pipenv run jupyter notebook
+nice pipenv run jupyter notebook
 ```
 
 And navigate to `2018-lognormal-estimates` in browser.
