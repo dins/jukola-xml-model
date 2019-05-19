@@ -1,9 +1,10 @@
+import collections
 import csv
 import logging
 import sys
+from collections import defaultdict
 
 import numpy as np
-from collections import defaultdict
 
 # time pipenv run python group_csv.py ve && head data/grouped_paces_ve.tsv
 
@@ -27,7 +28,8 @@ distances = {
         2015: [8.0, 6.0, 6.2, 8.8],
         2016: [7.1, 6.7, 6.0, 9.1],
         2017: [6.7, 6.6, 5.7, 8.0],
-        2018: [6.2, 6.2, 5.4, 7.9]
+        2018: [6.2, 6.2, 5.4, 7.9],
+        2019: [6.0, 5.7, 7.3, 7.9]
     },
     "ju": {
         2011: [11.5, 11.4, 13.6, 8.3, 8.5, 10.5, 15.6],
@@ -37,11 +39,13 @@ distances = {
         2015: [13.8, 12.3, 15.8, 8.1, 8.6, 12.6, 14.6],
         2016: [10.7, 12.8, 14.1, 8.6, 8.7, 12.4, 16.5],
         2017: [12.8, 14.3, 12.3, 7.7, 7.8, 11.1, 13.8],
-        2018: [11.0, 11.9, 12.7, 8.8, 8.7, 10.8, 15.1]
+        2018: [11.0, 11.9, 12.7, 8.8, 8.7, 10.8, 15.1],
+        2019: [10.9, 10.5, 13.2, 7.3, 7.8, 11.1, 12.9]
     }
 }
 
 by_name = {}
+
 
 def read_team_countries(year, ve_or_ju):
     with open(f'data/running_order_j{year}_{ve_or_ju}.tsv') as csvfile:
@@ -90,8 +94,6 @@ for year in years[ve_or_ju]:
             run["pace"] = leg_pace
             run["leg_nro"] = leg_nro
             by_name[name].append(run)
-            if name == "jussi kallioniemi":
-                logging.info(by_name[name])
         csvfile.close()
 
 
@@ -118,8 +120,9 @@ for name, runs in by_name.items():
             unique_name = name + ":" + team_name
             by_unique_name[unique_name] = runs_in_team
 
-column_names = ["mean_team_id", "teams", "name", "num_runs", "num_valid_times", "mean_pace", "stdev", "pace_1", "pace_2",
-                "pace_3", "pace_4", "pace_5", "pace_6"]
+column_names = ["mean_team_id", "teams", "name", "num_runs", "num_valid_times", "mean_pace", "stdev", "most_common_leg",
+                "most_common_country", "pace_1", "pace_2",
+                "pace_3", "pace_4", "pace_5", "pace_6", "pace_7"]
 (out_file, csvwriter) = open_output_file(f'data/grouped_paces_{ve_or_ju}.tsv', column_names)
 
 for unique_name, runs in by_unique_name.items():
@@ -129,11 +132,11 @@ for unique_name, runs in by_unique_name.items():
     paces = map(lambda run: run["pace"], runs)
 
     valid_paces = [pace for pace in paces if pace != "NA"]
-    six_paces = valid_paces[:6] + ["NA" for x in range(6 - len(valid_paces))]
+    available_paces = valid_paces[:7] + ["NA" for x in range(7 - len(valid_paces))]
 
-    mean_team_id = round(np.average(list(team_ids)), 1)
+    median_team_id = round(np.median(list(team_ids)), 1)
 
-    if len(valid_paces) > 6:
+    if len(valid_paces) > 7:
         print(unique_name)
         print(len(runs))
         for run in runs:
@@ -143,11 +146,16 @@ for unique_name, runs in by_unique_name.items():
         float_paces = np.array(valid_paces).astype(np.float)
         mean_pace = round(np.average(float_paces), 3)
         stdev = round(np.std(float_paces), 3)
+        legs = map(lambda run: run["leg_nro"], runs)
+        most_common_leg = collections.Counter(legs).most_common()[0][0]
+        countries = map(lambda run: run["team_country"], runs)
+        most_common_country = collections.Counter(countries).most_common()[0][0]
     else:
         mean_pace = "NA"
         stdev = "NA"
 
-    row = [mean_team_id, joined_teams, unique_name, len(runs), len(valid_paces), mean_pace, stdev] + six_paces
+    row = [median_team_id, joined_teams, unique_name, len(runs), len(valid_paces), mean_pace, stdev, most_common_leg,
+           most_common_country] + available_paces
     csvwriter.writerow(row)
 
 out_file.close()
@@ -159,7 +167,8 @@ for unique_name, runs in by_unique_name.items():
     for run in runs:
         pace = run["pace"]
         if pace != "NA":
-            row = [unique_name, run["year"], run["team_id"], run["team"], run["team_country"], pace, run["leg_nro"], len(runs)]
+            row = [unique_name, run["year"], run["team_id"], run["team"], run["team_country"], pace, run["leg_nro"],
+                   len(runs)]
             runs_csvwriter.writerow(row)
 
 runs_out_file.close()
