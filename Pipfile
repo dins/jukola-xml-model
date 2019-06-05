@@ -14,6 +14,7 @@ requests = "*"
 seaborn = "*"
 pymc-learn = "==0.0.1rc3"
 joblib = "*"
+arviz = "*"
 
 [dev-packages]
 
