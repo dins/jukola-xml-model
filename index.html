@@ -194,10 +194,14 @@
 
   }
 
-  $.getJSON("web-lib/for_web_ju_2019.json", function (runners) {
-    var searchParams = new URLSearchParams(window.location.search)
-    var teamId = parseInt(searchParams.get('team'))
-    showTeam(teamId, runners)
+  var searchParams = new URLSearchParams(window.location.search)
+  var ve_or_ju = searchParams.get('race')
+  if(ve_or_ju != "ve" && ve_or_ju != "ju") {
+    throw Error("Unrecognized race.")
+  }
+  var teamId = parseInt(searchParams.get('team'))
+  $.getJSON("web-lib/for_web_" + ve_or_ju + "_2019.json", function (runners) {
+    showTeam(teamId, runners, ve_or_ju)
   });
 
 </script>
