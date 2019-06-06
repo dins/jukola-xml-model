@@ -40,10 +40,10 @@ def get_matching_history_row_for_runner(running_order_row, history_df, no_histor
     return runners.sort_values("num_runs", ascending=False).head(1)
 
 
-def predict_without_history(features):
-    gbr = joblib.load('gbr.sav')
-    gbr_q_low = joblib.load('gbr_q_low.sav')
-    gbr_q_high = joblib.load('gbr_q_high.sav')
+def predict_without_history(features, ve_or_ju):
+    gbr = joblib.load(f'gbr_{ve_or_ju}.sav')
+    gbr_q_low = joblib.load(f'gbr_q_low_{ve_or_ju}.sav')
+    gbr_q_high = joblib.load(f'gbr_q_high_{ve_or_ju}.sav')
 
     gbr_preds = gbr.predict(features)
     gbr_q_low_preds = gbr_q_low.predict(features)
@@ -67,7 +67,8 @@ def preprocess_features(runs_df, top_countries, ve_or_ju):
     display(runs_df.info())
     # convert some int columns to labels
     runs = runs_df.assign(leg=runs_df.leg_nro.astype(str))
-    runs["runs"] = np.clip(runs.num_runs, 0, 8).astype(str)
+    # cliping 0 to 1 is a hack for when predicting for unknown runners
+    runs["runs"] = np.clip(runs.num_runs, 1, 8).astype(str)
 
     def truncate_to_top_values(value, top_values):
         if value in top_values:
