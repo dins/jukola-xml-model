@@ -4,6 +4,48 @@ import joblib
 import numpy as np
 import pandas as pd
 
+distances = {
+    "ve": {
+        2011: [6.9, 6.2, 5.1, 8.5],
+        2012: [5.7, 5.8, 7.2, 8.4],
+        2013: [8.2, 6.2, 6.2, 8.7],
+        2014: [5.1, 5.0, 6.7, 7.4],
+        2015: [8.0, 6.0, 6.2, 8.8],
+        2016: [7.1, 6.7, 6.0, 9.1],
+        2017: [6.7, 6.6, 5.7, 8.0],
+        2018: [6.2, 6.2, 5.4, 7.9],
+        2019: [6.0, 5.7, 7.3, 7.9]
+    },
+    "ju": {
+        2011: [11.5, 11.4, 13.6, 8.3, 8.5, 10.5, 15.6],
+        2012: [12.7, 12.7, 14.1, 7.7, 8.1, 10.2, 15.1],
+        2013: [12.2, 13.0, 14.4, 7.8, 7.7, 11.7, 15.1],
+        2014: [10.1, 11.5, 10.2, 7.6, 7.7, 10.7, 14.0],
+        2015: [13.8, 12.3, 15.8, 8.1, 8.6, 12.6, 14.6],
+        2016: [10.7, 12.8, 14.1, 8.6, 8.7, 12.4, 16.5],
+        2017: [12.8, 14.3, 12.3, 7.7, 7.8, 11.1, 13.8],
+        2018: [11.0, 11.9, 12.7, 8.8, 8.7, 10.8, 15.1],
+        2019: [10.9, 10.5, 13.2, 7.3, 7.8, 11.1, 12.9]
+    }
+}
+
+start_timestamp = {
+    "ve": {
+        2018: pd.Timestamp(year = 2018, month = 6, day = 16, hour = 14),
+        2019: pd.Timestamp(year = 2019, month = 6, day = 15, hour = 14)
+    },
+    "ju": {
+        2018: pd.Timestamp(year = 2018, month = 6, day = 16, hour = 23),
+        2019: pd.Timestamp(year = 2019, month = 6, day = 15, hour = 23)
+    }
+}
+
+
+num_legs = {
+    "ve": 4,
+    "ju": 7
+}
+
 
 def read_persisted_dummy_column_values(ve_or_ju):
     with open(f"data/top_countries_{ve_or_ju}.json") as json_file:
@@ -89,6 +131,13 @@ def preprocess_features(runs_df, top_countries, ve_or_ju):
 
     # Explode categories to dummy columns
     features = pd.get_dummies(runs[["leg", "c", "runs", "fn_pace_class", "fn_pace_std_class"]], sparse=True)
+
+    # Ensure that a column exists for each to country, despite none being in data
+    country_cols = [f"c_{country}" for country in top_countries]
+    missing_country_cols = [col for col in country_cols if not col in features.columns]
+    display(missing_country_cols)
+    missing_country_cols_df = pd.DataFrame({col: 0 for col in missing_country_cols}, index=features.index)
+    features = pd.concat([features, missing_country_cols_df], sort=False, axis=1)
 
     # allow linear regression to fit non-linear terms
     # features["team_id_log2"] = np.log2(runs.team_id)

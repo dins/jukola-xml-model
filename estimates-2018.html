@@ -37,8 +37,8 @@
     <tr>
         <th scope="col">Osuus</th>
         <th scope="col">Nimi</th>
-        <th scope="col">Todennäköinen aikaväli</th>
         <th scope="col">Keskimääräinen maaliintulo</th>
+        <th scope="col">Todennäköinen aikaväli</th>
     </tr>
     </thead>
     <tbody>
@@ -50,7 +50,7 @@
 <script>
 
   function raceMinutesToDate(minutesSinceRaceStart) {
-    var date = new Date(Date.parse('2019-06-15T23:00:00+03:00'))
+    var date = new Date(Date.parse('2018-06-16T23:00:00+03:00'))
     return date.setMinutes(date.getMinutes() + minutesSinceRaceStart)
   }
 
@@ -92,8 +92,8 @@
 
     function addRunnerToTable(runner) {
       $("#estimate-summary tbody").append(
-        "<tr><th scope=\"row\">" + runner.leg + "</th><td>" + runner.name + "</td><td>" + formatTime(runner.fin_time_start95) + " - " + formatTime(runner.fin_time_end95)
-        + "</td><td>" + formatTime(runner.fin_time_median) + "</td></tr>")
+        "<tr><th scope=\"row\">" + runner.leg + "</th><td>" + runner.name + "</td><td>" + formatTime(runner.fint_median)
+        + "</td><td>" + formatTime(runner.fint_start95) + " - " + formatTime(runner.fint_end95) + "</td></tr>")
     }
 
     _.each(teamRunners, addRunnerToTable)
@@ -194,7 +194,7 @@
 
   }
 
-  $.getJSON("web-lib/for_web_ju_2019.json", function (runners) {
+  $.getJSON("web-lib/with_result_ju2018.json", function (runners) {
     var searchParams = new URLSearchParams(window.location.search)
     var teamId = parseInt(searchParams.get('team'))
     showTeam(teamId, runners)
