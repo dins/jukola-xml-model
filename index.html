@@ -49,17 +49,22 @@
 
 <script>
 
-  function raceMinutesToDate(minutesSinceRaceStart) {
-    var date = new Date(Date.parse('2019-06-15T23:00:00+03:00'))
-    return date.setMinutes(date.getMinutes() + minutesSinceRaceStart)
+  var raceStart = {
+    ve: Date.parse('2019-06-15T14:00:00+03:00'),
+    ju: Date.parse('2019-06-15T23:00:00+03:00')
+  }
+  function raceMinutesToDate(minutesSinceRaceStart, ve_or_ju) {
+    var raceSatartTime = new Date(raceStart[ve_or_ju]) // create new to not modi
+    console.log(ve_or_ju, raceSatartTime)
+    return raceSatartTime.setMinutes(raceSatartTime.getMinutes() + minutesSinceRaceStart)
   }
 
-  function produceDataPoints(logMeans, logStds) {
-    var indexes = Array.from(Array(10000).keys())
+  function produceDataPoints(logMeans, logStds, ve_or_ju) {
+    var indexes = Array.from(Array(2000).keys())
     var wholeRange = _.map(indexes, function (i) {
       var min = i * 2
       var propability = jStat.lognormal.pdf(min, logMeans, logStds)
-      var finishTime = raceMinutesToDate(min)
+      var finishTime = raceMinutesToDate(min, ve_or_ju)
       return {x: finishTime, y: propability}
     })
     // Remove points where propability is too low for printing
@@ -69,7 +74,7 @@
   }
 
 
-  function showTeam(teamId, runners) {
+  function showTeam(teamId, runners, ve_or_ju) {
     var teamRunners = _.filter(runners, function (runner) {
       return runner.team_id === teamId
     })
@@ -110,7 +115,7 @@
     var colorNames = Object.keys(colors)
     var teamDatasets = _.map(teamRunners, function (runner) {
       var color = colors[colorNames[runner.leg - 1]]
-      var dataPoints = produceDataPoints(runner.fin_sum_log_mean, runner.fin_sum_log_std)
+      var dataPoints = produceDataPoints(runner.fin_sum_log_mean, runner.fin_sum_log_std, ve_or_ju)
       return {
         type: 'line',
         label: runner.leg + " " + runner.name,
@@ -121,10 +126,10 @@
         pointRadius: 1
       }
     })
-
+/*
     var verticalLineAnnotations = _.map(teamRunners, function (runner) {
       var color = colors[colorNames[runner.leg - 1]]
-      var realFinish = raceMinutesToDate(runner.real_mins)
+      var realFinish = raceMinutesToDate(runner.real_mins, ve_or_ju)
       return {
         id: 'vline_' + runner.leg,
         type: 'line',
@@ -140,7 +145,7 @@
         }
       }
     })
-
+*/
     var chartOptions = {
       //responsive: true,
       title: {
@@ -179,9 +184,9 @@
           }
         }]
       },
-      annotation: {
-        annotations: verticalLineAnnotations
-      }
+//      annotation: {
+//        annotations: verticalLineAnnotations
+//      }
     }
     //Chart.defaults.line.spanGaps = true;
     var myLineChart = new Chart("chartjs-plot", {

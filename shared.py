@@ -31,15 +31,32 @@ distances = {
 
 start_timestamp = {
     "ve": {
-        2018: pd.Timestamp(year = 2018, month = 6, day = 16, hour = 14),
-        2019: pd.Timestamp(year = 2019, month = 6, day = 15, hour = 14)
+        2018: pd.Timestamp(year=2018, month=6, day=16, hour=14),
+        2019: pd.Timestamp(year=2019, month=6, day=15, hour=14)
     },
     "ju": {
-        2018: pd.Timestamp(year = 2018, month = 6, day = 16, hour = 23),
-        2019: pd.Timestamp(year = 2019, month = 6, day = 15, hour = 23)
+        2018: pd.Timestamp(year=2018, month=6, day=16, hour=23),
+        2019: pd.Timestamp(year=2019, month=6, day=15, hour=23)
     }
 }
 
+changeover_closing = {
+    "ve": {
+        2018: pd.Timestamp(year=2018, month=6, day=16, hour=18, minute=30),
+        2019: pd.Timestamp(year=2019, month=6, day=15, hour=18, minute=30)
+    },
+    "ju": {
+        2018: pd.Timestamp(year=2018, month=6, day=17, hour=8, minute=45),
+        2019: pd.Timestamp(year=2019, month=6, day=16, hour=8, minute=45)
+    }
+}
+
+dark_period = {
+    2019: {
+        "start": pd.Timestamp(year=2019, month=6, day=15, hour=23, minute=4),
+        "end": pd.Timestamp(year=2019, month=6, day=16, hour=3, minute=41)
+    }
+}
 
 num_legs = {
     "ve": 4,
