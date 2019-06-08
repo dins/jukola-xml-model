@@ -55,7 +55,6 @@
   }
   function raceMinutesToDate(minutesSinceRaceStart, ve_or_ju) {
     var raceSatartTime = new Date(raceStart[ve_or_ju]) // create new to not modi
-    console.log(ve_or_ju, raceSatartTime)
     return raceSatartTime.setMinutes(raceSatartTime.getMinutes() + minutesSinceRaceStart)
   }
 
