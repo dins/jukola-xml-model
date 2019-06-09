@@ -27,20 +27,6 @@
             width: auto;
         }
 
-        .finished .estimate {
-            color: grey;
-            text-decoration: line-through;
-        }
-
-        .finish-time {
-            color: green;
-            font-weight: bold;
-        }
-
-        .unfinished .estimate {
-            font-style: italic;
-        }
-
     </style>
 </head>
 <body>
@@ -51,9 +37,8 @@
     <tr>
         <th scope="col">Osuus</th>
         <th scope="col">Nimi</th>
-        <th scope="col">Ennustettu aikaväli</th>
-        <th scope="col">Ennustettu maaliintulo</th>
-        <th scope="col">Maalissa</th>
+        <th scope="col">Todennäköinen aikaväli</th>
+        <th scope="col">Keskimääräinen maaliintulo</th>
     </tr>
     </thead>
     <tbody>
@@ -65,25 +50,20 @@
 <script>
 
   var raceStart = {
-    ve: new Date(Date.parse('2019-06-15T14:00:00+03:00')), // parse returns something else than Date
-    ju: new Date(Date.parse('2019-06-15T23:00:00+03:00'))
+    ve: Date.parse('2019-06-15T14:00:00+03:00'),
+    ju: Date.parse('2019-06-15T23:00:00+03:00')
+  }
+  function raceMinutesToDate(minutesSinceRaceStart, ve_or_ju) {
+    var raceSatartTime = new Date(raceStart[ve_or_ju]) // create new to not modify the original
+    return raceSatartTime.setMinutes(raceSatartTime.getMinutes() + minutesSinceRaceStart)
   }
 
-  function raceMinutesToDate(minutesSinceRaceStart, ve_or_ju, teamsLatestOnlineTimestamp) {
-    var raceSatartTime = raceStart[ve_or_ju]
-    if (teamsLatestOnlineTimestamp) {
-      raceSatartTime = new Date(teamsLatestOnlineTimestamp)
-    }
-    // create new to not modify the original
-    return new Date(raceSatartTime).setMinutes(raceSatartTime.getMinutes() + minutesSinceRaceStart)
-  }
-
-  function produceDataPoints(logMeans, logStds, ve_or_ju, teamsLatestOnlineTimestamp) {
+  function produceDataPoints(logMeans, logStds, ve_or_ju) {
     var indexes = Array.from(Array(2000).keys())
     var wholeRange = _.map(indexes, function (i) {
       var min = i * 2
       var propability = jStat.lognormal.pdf(min, logMeans, logStds)
-      var finishTime = raceMinutesToDate(min, ve_or_ju, teamsLatestOnlineTimestamp)
+      var finishTime = raceMinutesToDate(min, ve_or_ju)
       return {x: finishTime, y: propability}
     })
     // Remove points where propability is too low for printing
@@ -92,46 +72,35 @@
     })
   }
 
-  function timestampToDate(utcTimestamp) {
-    return new Date(utcTimestamp)
-  }
 
-  function formatTime(utcTimestamp) {
-    function pad(number) {
-      if (number < 10) {
-        return '0' + number;
-      }
-      return number;
-    }
-
-    var date = timestampToDate(utcTimestamp);
-    return pad(date.getHours()) + ":" + pad(date.getMinutes())
-  }
-
-  function addRunnerToTable(runner) {
-    var rowClass = ""
-    var intervalText = formatTime(runner.fin_time_start95) + " - " + formatTime(runner.fin_time_end95);
-    if (runner.onlineFinishTimestampLow95) {
-      intervalText = formatTime(runner.onlineFinishTimestampLow95) + " - " + formatTime(runner.onlineFinishTimestampHigh95);
-    }
-
-    var pointEstimateText = formatTime(runner.fin_time_median);
-    if (runner.onlineFinishTimestampMean) {
-      pointEstimateText = formatTime(runner.onlineFinishTimestampMean);
-      rowClass = "unfinished"
-    }
-    var finishTime = ""
-    if (runner.lastControlType === "Finish") {
-      finishTime = formatTime(runner.lastControlTimestamp)
-      rowClass = "finished"
-    }
-    $("#estimate-summary tbody").append(
-      "<tr class=" + rowClass + "><th scope=\"row\">" + runner.leg + "</th><td>" + runner.name + "</td><td class=estimate>" + intervalText + "</td><td class=estimate>" + pointEstimateText + "</td><td class=finish-time>" + finishTime + "</td></tr>")
-  }
-
-  function showTeam(teamId, teamRunners, ve_or_ju) {
+  function showTeam(teamId, runners, ve_or_ju) {
+    var teamRunners = _.filter(runners, function (runner) {
+      return runner.team_id === teamId
+    })
     console.log("teamId", teamId)
     console.log("teamRunners", teamRunners)
+
+    function timestampToDate(utcTimestamp) {
+      return new Date(utcTimestamp)
+    }
+
+    function formatTime(utcTimestamp) {
+      function pad(number) {
+        if (number < 10) {
+          return '0' + number;
+        }
+        return number;
+      }
+
+      var date = timestampToDate(utcTimestamp);
+      return pad(date.getHours()) + ":" + pad(date.getMinutes())
+    }
+
+    function addRunnerToTable(runner) {
+      $("#estimate-summary tbody").append(
+        "<tr><th scope=\"row\">" + runner.leg + "</th><td>" + runner.name + "</td><td>" + formatTime(runner.fin_time_start95) + " - " + formatTime(runner.fin_time_end95)
+        + "</td><td>" + formatTime(runner.fin_time_median) + "</td></tr>")
+    }
 
     _.each(teamRunners, addRunnerToTable)
 
@@ -145,18 +114,9 @@
       yellow: "rgb(255, 205, 86)"
     }
     var colorNames = Object.keys(colors)
-    var unFinishedRunners = _.filter(teamRunners, function (runner) {
-      return runner.lastControlType !== "Finish"
-    })
-    var finishedRunners = _.filter(teamRunners, function (runner) {
-      return runner.lastControlType === "Finish"
-    })
-
     var teamDatasets = _.map(teamRunners, function (runner) {
       var color = colors[colorNames[runner.leg - 1]]
-      var logMinsToFinish = runner.logMeanTimeLeft || runner.fin_sum_log_mean
-      var logMinsStdToFinish = runner.logsStdevTimeLeft || runner.fin_sum_log_std
-      var dataPoints = produceDataPoints(logMinsToFinish, logMinsStdToFinish, ve_or_ju, runner.teamsLatestOnlineTimestamp)
+      var dataPoints = produceDataPoints(runner.fin_sum_log_mean, runner.fin_sum_log_std, ve_or_ju)
       return {
         type: 'line',
         label: runner.leg + " " + runner.name,
@@ -167,26 +127,10 @@
         pointRadius: 1
       }
     })
-    var staticDatasets = []
-    /*    var staticDatasets = _.map(teamRunners, function (runner) {
-          var color = colors[colorNames[runner.leg - 1]]
-          var logMinsToFinish = runner.fin_sum_log_mean
-          var logMinsStdToFinish = runner.fin_sum_log_std
-          var dataPoints = produceDataPoints(logMinsToFinish, logMinsStdToFinish, ve_or_ju, undefined)
-          return {
-            type: 'line',
-            label: "Static " + runner.leg + " " + runner.name,
-            backgroundColor: color,
-            borderColor: color,
-            data: dataPoints,
-            fill: false,
-            pointRadius: 1
-          }
-        })
-        */
-    var verticalLineAnnotations = _.map(finishedRunners, function (runner) {
+/*
+    var verticalLineAnnotations = _.map(teamRunners, function (runner) {
       var color = colors[colorNames[runner.leg - 1]]
-      var realFinish = runner.lastControlTimestamp
+      var realFinish = raceMinutesToDate(runner.real_mins, ve_or_ju)
       return {
         id: 'vline_' + runner.leg,
         type: 'line',
@@ -202,6 +146,7 @@
         }
       }
     })
+*/
     var chartOptions = {
       //responsive: true,
       title: {
@@ -240,15 +185,15 @@
           }
         }]
       },
-      annotation: {
-        annotations: verticalLineAnnotations
-      }
+//      annotation: {
+//        annotations: verticalLineAnnotations
+//      }
     }
     //Chart.defaults.line.spanGaps = true;
     var myLineChart = new Chart("chartjs-plot", {
       type: 'line',
       data: {
-        datasets: teamDatasets.concat(staticDatasets)
+        datasets: teamDatasets
       },
       options: chartOptions
     });
@@ -257,21 +202,11 @@
 
   var searchParams = new URLSearchParams(window.location.search)
   var ve_or_ju = searchParams.get('race')
-  if (ve_or_ju != "ve" && ve_or_ju != "ju") {
+  if(ve_or_ju != "ve" && ve_or_ju != "ju") {
     throw Error("Unrecognized race.")
   }
-  var resultsQueryParamsStr = ""
-  var use2018LiveResultsWithRaceTime = searchParams.get('use2018LiveResultsWithRaceTime')
-  if (use2018LiveResultsWithRaceTime) {
-    if (use2018LiveResultsWithRaceTime.length != 8) {
-      throw Error("Unrecognized use2018LiveResultsWithRaceTime.")
-    }
-    resultsQueryParamsStr = "?use2018LiveResultsWithRaceTime=" + use2018LiveResultsWithRaceTime
-  }
-
   var teamId = parseInt(searchParams.get('team'))
-  var url = "https://ecbnnyd5j6.execute-api.eu-west-1.amazonaws.com/dev/" + ve_or_ju + "/" + teamId + resultsQueryParamsStr;
-  $.getJSON(url, function (runners) {
+  $.getJSON("web-lib/for_web_" + ve_or_ju + "_2019.json", function (runners) {
     showTeam(teamId, runners, ve_or_ju)
   });
 
