@@ -54,6 +54,8 @@
         <th scope="col">Ennustettu aikaväli</th>
         <th scope="col">Ennustettu maaliintulo</th>
         <th scope="col">Maalissa</th>
+        <th scope="col">Yhteislähdön todennäköisyys</th>
+        <th scope="col">Osuuden aikana on pimeää</th>
     </tr>
     </thead>
     <tbody>
@@ -108,6 +110,11 @@
     return pad(date.getHours()) + ":" + pad(date.getMinutes())
   }
 
+  function formatPercent(floatPropability) {
+
+    return (floatPropability * 100).toFixed(0) + '%'
+  }
+
   function addRunnerToTable(runner) {
     var rowClass = ""
     var intervalText = formatTime(runner.fin_time_start95) + " - " + formatTime(runner.fin_time_end95);
@@ -126,7 +133,14 @@
       rowClass = "finished"
     }
     $("#estimate-summary tbody").append(
-      "<tr class=" + rowClass + "><th scope=\"row\">" + runner.leg + "</th><td>" + runner.name + "</td><td class=estimate>" + intervalText + "</td><td class=estimate>" + pointEstimateText + "</td><td class=finish-time>" + finishTime + "</td></tr>")
+      "<tr class=" + rowClass + "><th scope=\"row\">" + runner.leg
+      + "</th><td>" + runner.name
+      + "</td><td class=estimate>" + intervalText
+      + "</td><td class=estimate>" + pointEstimateText
+      + "</td><td class=finish-time>" + finishTime
+      + "</td><td class=estimate>" + formatPercent(runner.mass_start)
+      + "</td><td class=estimate>" + formatPercent(runner.dark_during_leg)
+      + "</td></tr>")
   }
 
   function showTeam(teamId, teamRunners, ve_or_ju) {
