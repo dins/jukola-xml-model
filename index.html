@@ -69,13 +69,18 @@
     </tbody>
 </table>
 
-<canvas id="chartjs-plot" width="300" height="250"></canvas>
+<canvas id="chartjs-plot"></canvas>
 
 <script>
 
   var raceStart = {
     ve: new Date(Date.parse('2019-06-15T14:00:00+03:00')), // parse returns something else than Date
     ju: new Date(Date.parse('2019-06-15T23:00:00+03:00'))
+  }
+
+  var changeoverClosing = {
+    ve: new Date(Date.parse('2019-06-15T18:30:00+03:00')), // parse returns something else than Date
+    ju: new Date(Date.parse('2019-06-16T08:45:00+03:00'))
   }
 
   function raceMinutesToDate(minutesSinceRaceStart, ve_or_ju, teamsLatestOnlineTimestamp) {
@@ -175,14 +180,18 @@
 
     var teamDatasets = _.map(teamRunners, function (runner) {
       var color = colors[colorNames[runner.leg - 1]]
+      var borderColor = color
       var logMinsToFinish = runner.logMeanTimeLeft || runner.fin_sum_log_mean
       var logMinsStdToFinish = runner.logsStdevTimeLeft || runner.fin_sum_log_std
       var dataPoints = produceDataPoints(logMinsToFinish, logMinsStdToFinish, ve_or_ju, runner.teamsLatestOnlineTimestamp)
+      if(runner.lastControlType === "Finish") {
+        borderColor = "lightgrey"
+      }
       return {
         type: 'line',
         label: runner.leg + " " + runner.name,
         backgroundColor: color,
-        borderColor: color,
+        borderColor: borderColor,
         data: dataPoints,
         fill: false,
         pointRadius: 1
@@ -205,7 +214,7 @@
           }
         })
         */
-    var verticalLineAnnotations = _.map(finishedRunners, function (runner) {
+    var finishTimes = _.map(finishedRunners, function (runner) {
       var color = colors[colorNames[runner.leg - 1]]
       var realFinish = runner.lastControlTimestamp
       return {
@@ -223,8 +232,24 @@
         }
       }
     })
+
+    var massStart = {
+      id: 'vline_mass',
+      type: 'line',
+      mode: 'vertical',
+      scaleID: 'x-axis-0',
+      value: changeoverClosing[ve_or_ju],
+      borderColor: "grey",
+      borderWidth: 2,
+      label: {
+        //backgroundColor: color,
+        content: "Vaihto sulkeutuu: " + formatTime(changeoverClosing[ve_or_ju]),
+        enabled: true,
+        yAdjust: 30
+      }
+    }
     var chartOptions = {
-      //responsive: true,
+      responsive: true,
       title: {
         display: true,
         text: teamId + " " + teamRunners[0].team
@@ -245,7 +270,8 @@
             unit: 'minute',
             displayFormats: {
               minute: 'HH:mm'
-            }
+            },
+            min: raceStart[ve_or_ju]
           },
           display: true,
           scaleLabel: {
@@ -262,7 +288,7 @@
         }]
       },
       annotation: {
-        annotations: verticalLineAnnotations
+        annotations: finishTimes.concat(massStart)
       }
     }
     //Chart.defaults.line.spanGaps = true;
