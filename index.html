@@ -14,7 +14,11 @@
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-141811127-1"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
+
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+
       gtag('js', new Date());
 
       gtag('config', 'UA-141811127-1');
@@ -51,7 +55,7 @@
     </style>
 </head>
 <body>
-<h1>Jukola Vaihtoajat</h1>
+<h1></h1>
 
 <table class="table" id="estimate-summary">
     <thead>
@@ -159,6 +163,7 @@
     console.log("teamId", teamId)
     console.log("teamRunners", teamRunners)
 
+    $("h1").text("Vaihtoaikaennuste " + teamId + " " + teamRunners[0].team)
     _.each(teamRunners, addRunnerToTable)
 
     var colors = {
@@ -178,14 +183,22 @@
       return runner.lastControlType === "Finish"
     })
 
+    var latestOnlineTimestamps = _.filter(teamRunners, function (runner) {
+      return !!runner.lastControlTimestamp
+    }).sort(function (runner) {
+      return runner.lastControlTimestamp
+    }).reverse()
+
+    console.log("latestOnlineTimestamps", latestOnlineTimestamps)
+
     var teamDatasets = _.map(teamRunners, function (runner) {
       var color = colors[colorNames[runner.leg - 1]]
       var borderColor = color
       var logMinsToFinish = runner.logMeanTimeLeft || runner.fin_sum_log_mean
       var logMinsStdToFinish = runner.logsStdevTimeLeft || runner.fin_sum_log_std
       var dataPoints = produceDataPoints(logMinsToFinish, logMinsStdToFinish, ve_or_ju, runner.teamsLatestOnlineTimestamp)
-      if(runner.lastControlType === "Finish") {
-        borderColor = "lightgrey"
+      if (runner.lastControlType === "Finish") {
+        borderColor = "whitesmoke"
       }
       return {
         type: 'line',
@@ -242,12 +255,34 @@
       borderColor: "grey",
       borderWidth: 2,
       label: {
-        //backgroundColor: color,
+        backgroundColor: "grey",
         content: "Vaihto sulkeutuu: " + formatTime(changeoverClosing[ve_or_ju]),
         enabled: true,
         yAdjust: 30
       }
     }
+    var latestOnlineIntermediary = {}
+    if (latestOnlineTimestamps && latestOnlineTimestamps[0] && latestOnlineTimestamps[0].lastControlType !== "Finish") {
+      var latestRunner = latestOnlineTimestamps[0]
+      var color = colors[colorNames[latestRunner.leg - 1]]
+      latestOnlineIntermediary = {
+        id: 'vline_latest_intermediary',
+        type: 'line',
+        mode: 'vertical',
+        scaleID: 'x-axis-0',
+        value: latestRunner.lastControlTimestamp,
+        borderColor: color,
+        borderWidth: 2,
+        label: {
+          backgroundColor: color,
+          content: latestRunner.lastControlDistance + "km " + formatTime(latestRunner.lastControlTimestamp),
+          enabled: true,
+          yAdjust: -30
+        }
+      }
+    }
+
+    var extraAnnotations = [latestOnlineIntermediary, massStart]
     var chartOptions = {
       responsive: true,
       title: {
@@ -288,7 +323,7 @@
         }]
       },
       annotation: {
-        annotations: finishTimes.concat(massStart)
+        annotations: finishTimes.concat(extraAnnotations)
       }
     }
     //Chart.defaults.line.spanGaps = true;
