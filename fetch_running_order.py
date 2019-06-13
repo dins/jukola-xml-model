@@ -42,15 +42,14 @@ def fetch_running_order(year, ve_or_ju):
                 team_base_name = parse_team_base_name(team_name)
                 current_team_name = team_name
                 current_team_base_name = team_base_name
-                logging.info(
-                    "Team line: " + current_team_country + " " + team_id + " " + team_name + " -> " + team_base_name)
+                logging.info("Team line: " + current_team_country + " " + team_id + " " + team_name + " -> " + team_base_name)
             else:
                 leg = next(iter(row.xpath('.//td[2]/text()') or []), None)
                 name = next(iter(row.xpath('.//td[3]/text()') or []), None)
-                if name is not None and name != " " and leg is not None:
+                if name is not None and name.strip() != ""  and name != " " and leg is not None:
                     leg = int(leg.strip())
                     name = name.strip()
-                    logging.info(current_team_id + " " + current_team_name + " " + str(leg) + " '" + name + "'")
+                    #logging.info(current_team_id + " " + current_team_name + " " + str(leg) + " '" + name + "'")
                     output_rows.append(
                         [current_team_id, current_team_name, current_team_base_name, current_team_country, leg,
                          leg_dist(leg), name])
