@@ -167,8 +167,8 @@
       + "</td><td class=estimate>" + intervalText
       + "</td><td class=estimate>" + pointEstimateText
       + "</td><td class=finish-time>" + finishTime
-      + "</td><td class=estimate>" + formatPercent(runner.mass_start)
-      + "</td><td class=estimate>" + formatPercent(runner.dark_during_leg)
+      + "</td><td class=estimate>" + formatPercent(runner.inMassStart || runner.mass_start)
+      + "</td><td class=estimate>" + formatPercent(runner.darkDuringLeg || runner.dark_during_leg)
       + "</td></tr>")
   }
 
