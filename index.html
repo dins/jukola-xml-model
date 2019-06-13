@@ -29,6 +29,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js"></script>
     <script src="web-lib/chartjs-plugin-annotation.min.js"></script>
     <style>
+        body {
+            min-width: 450px;
+        }
         h1 {
             margin: 20px;
         }
@@ -36,6 +39,14 @@
         #estimate-summary {
             margin: auto;
             width: auto;
+        }
+        @media screen and (max-width: 720px) {
+            #estimate-summary th,td{
+                vertical-align: middle;
+                text-align:center;
+                padding: 1px;
+                font-size: 0.7rem;
+            }
         }
 
         .finished .estimate {
