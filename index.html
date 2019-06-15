@@ -114,12 +114,23 @@
     var wholeRange = _.map(indexes, function (i) {
       var min = i * 2
       var propability = jStat.lognormal.pdf(min, logMeans, logStds)
+
       var finishTime = raceMinutesToDate(min, ve_or_ju, teamsLatestOnlineTimestamp)
       return {x: finishTime, y: propability}
     })
+
     // Remove points where propability is too low for printing
-    return _.filter(wholeRange, function (point) {
+    var points = _.filter(wholeRange, function (point) {
       return point.y > 0.00001
+    });
+    var probsOnly = points.map(function (point) {
+      return point.y
+    })
+    var maxValue = jStat.max(probsOnly);
+    console.log("maxValue", maxValue)
+
+    return points.map(function (point) {
+      return {x: point.x, y: (point.y / maxValue) * 0.91}
     })
   }
 
@@ -152,8 +163,8 @@
     }
 
     var pointEstimateText = formatTime(runner.fin_time_median);
-    if (runner.onlineFinishTimestampMean) {
-      pointEstimateText = formatTime(runner.onlineFinishTimestampMean);
+    if (runner.onlineFinishTimestampMedian) {
+      pointEstimateText = formatTime(runner.onlineFinishTimestampMedian);
       rowClass = "unfinished"
     }
     var finishTime = ""
