@@ -29,6 +29,12 @@ distances = {
     }
 }
 
+
+def leg_distance(ve_or_ju, year, leg):
+    dist = distances[ve_or_ju][year]
+    return dist[leg - 1]
+
+
 start_timestamp = {
     "ve": {
         2018: pd.Timestamp(year=2018, month=6, day=16, hour=14),
@@ -76,11 +82,25 @@ def read_persisted_dummy_column_values(ve_or_ju):
 def get_matching_history_row_for_runner(running_order_row, history_df, no_history_row):
     # no_history_row = pd.DataFrame([[0, 0]], columns=["log_means", "log_stdevs"])
     name = running_order_row["name"].lower()
+    # Remove double spaces
+    name = " ".join(name.split())
 
     by_name = history_df[history_df['name'] == name]
     by_name_and_colon = history_df[history_df['name'].str.contains(name + ":", regex=False)]
 
     runners = by_name.append(by_name_and_colon)
+
+    if (len(runners) == 0) and " " in name:
+        names = name.split()
+        names.insert(0, names.pop())
+        switched_name = " ".join(names)
+        #print(f"No history for {name}, trying switched name {switched_name}")
+        by_name = history_df[history_df['name'] == switched_name]
+        by_name_and_colon = history_df[history_df['name'].str.contains(switched_name + ":", regex=False)]
+        runners = by_name.append(by_name_and_colon)
+        if (len(runners) > 0):
+            print(f"Found {len(runners)} history with switched name {switched_name} ")
+
     if (len(runners) == 1):
         # Only one runner with this name
         return runners
