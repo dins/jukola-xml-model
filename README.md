@@ -32,7 +32,14 @@ And navigate to `2018-lognormal-estimates` in browser.
 ## TODO
 
 * Weighted means and stds
-* Better estimate for unknown runners
-* Proper split to train and test data sets
-* Probability of mass start and need for head lamp
+* k-fold validation
+* Race and terrain specific things:
+  * Estimate Jukola paces from Venla paces
+  * Estimate paces from optimal times given by track designers
+  * Real time estimates for intermediaries
+* Data clean ups:
+  * Add runners from disqualified teams
+  * Clean up names, double spaces, lastname first name
+* Parse more years to distinguish long timers even better
 * Compare distributions. Is there something better than lognormal?
+    

@@ -120,7 +120,7 @@ for name, runs in by_name.items():
             unique_name = name + ":" + team_name
             by_unique_name[unique_name] = runs_in_team
 
-column_names = ["mean_team_id", "teams", "name", "num_runs", "num_valid_times", "mean_pace", "stdev", "most_common_leg",
+column_names = ["mean_team_id", "teams", "name", "num_runs", "num_valid_times", "mean_pace", "stdev", "log_stdev", "most_common_leg",
                 "most_common_country", "pace_1", "pace_2",
                 "pace_3", "pace_4", "pace_5", "pace_6", "pace_7"]
 (out_file, csvwriter) = open_output_file(f'data/grouped_paces_{ve_or_ju}.tsv', column_names)
@@ -144,8 +144,10 @@ for unique_name, runs in by_unique_name.items():
 
     if len(valid_paces) > 0:
         float_paces = np.array(valid_paces).astype(np.float)
-        mean_pace = round(np.average(float_paces), 3)
-        stdev = round(np.std(float_paces), 3)
+        # TODO weighted mean to emphasize recent values
+        mean_pace = round(np.average(float_paces), 4)
+        stdev = round(np.std(float_paces), 4)
+        log_stdev = round(np.std(np.log(float_paces)), 4)
         legs = map(lambda run: run["leg_nro"], runs)
         most_common_leg = collections.Counter(legs).most_common()[0][0]
         countries = map(lambda run: run["team_country"], runs)
@@ -154,7 +156,7 @@ for unique_name, runs in by_unique_name.items():
         mean_pace = "NA"
         stdev = "NA"
 
-    row = [median_team_id, joined_teams, unique_name, len(runs), len(valid_paces), mean_pace, stdev, most_common_leg,
+    row = [median_team_id, joined_teams, unique_name, len(runs), len(valid_paces), mean_pace, stdev, log_stdev, most_common_leg,
            most_common_country] + available_paces
     csvwriter.writerow(row)
 
