@@ -2,3 +2,4 @@ data/*
 jukola-xml-model.iml
 .ipynb_checkpoints/*
 *.sav
+scratch.txt

@@ -17,7 +17,7 @@ time for year in $(seq 2012 2018); do echo "YEAR $year"; time pipenv run python 
 Convert xml to csv and join years by runner name and team:
 
 ```bash
-time for year in $(seq 2012 2018); do echo "YEAR $year"; time pipenv run python result_xml_to_csv.py $year ve && head data/results_with_dist_j${year}_ve.tsv; done
+time for year in $(seq 1992 2018); do echo "YEAR $year"; time pipenv run python result_xml_to_csv.py $year ve && head data/results_with_dist_j${year}_ve.tsv; done
 time pipenv run python group_csv.py ve && head data/grouped_paces_ve.tsv
 ```
 
