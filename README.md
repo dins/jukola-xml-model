@@ -10,6 +10,7 @@ Fetch xml files (history) and running orders:
 
 ```bash
 time for year in $(seq 1992 2018); do echo "YEAR $year"; time wget -P data https://results.jukola.com/tulokset/results_j${year}_ju.xml; done
+time for year in $(seq 2009 2018); do echo "YEAR $year"; time pipenv run python fetch_team_countries.py ${year} && wc data/team_countries_j${year}_ju.tsv; done
 time for year in $(seq 2012 2018); do echo "YEAR $year"; time pipenv run python fetch_running_order.py ${year} && wc data/running_order_j${year}_ju.tsv; done
 
 ```
