@@ -27,20 +27,38 @@ Start jupyter:
 nice pipenv run jupyter notebook
 ```
 
+Run notebooks in following order:
+1. `cluster_names.ipynb` requires `grouped_paces_ve.tsv` and produces `name_pace_classes_ve.tsv`
+1. `unknown-runners.ipynb` requires `runs_ve.tsv` and plots and explores data
+1. `preprocess-priors.ipynb` requires `runs_ve.tsv` and produces `gbr_*_ve.sav`
+1. `estimate_paces.ipynb` requires `grouped_paces_ve.tsv` and produces `simple_preds_for_runners_with_history_14062019_ve.csv`
+1. `combine-estimates-with-running-order.ipynb` requires `running_order_j2019_ve.tsv` and `simple_preds_for_runners_with_history_14062019_ve.csv` and produces `running_order_2019_with_estimates_ve.tsv`
+1. `2019-relay-simulation.ipynb` requires `running_order_2019_with_estimates_ve.tsv` and produces `web-lib/for_web_ve_2019.json`
+1. `post-race-analysis.ipynb` requires `web-lib/for_web_ve_2019.json` and produces `web-lib/for_web_ve_2019.json`
+
+
 And navigate to `2018-lognormal-estimates` in browser.
+
 
 
 ## TODO
 
+* Reduce number of notebooks. Put code to .py files for better version control
+* Run for Venlas and Jukola at the same time
+* replace & with &amp; in xml files
+* Post analyze darkness and mass start estimates
 * Weighted means and stds
 * k-fold validation
 * Race and terrain specific things:
   * Estimate Jukola paces from Venla paces
   * Estimate paces from optimal times given by track designers
   * Real time estimates for intermediaries
+  * Data from year 2010 made predictions worse. Solve it by some kind of year/leg speed factor?
 * Data clean ups:
   * Add runners from disqualified teams
-  * Clean up names, double spaces, lastname first name
-* Parse more years to distinguish long timers even better
+  * Clean up names, double spaces, lastname first name, 
+  * Bayesian model for first name /last propability?
 * Compare distributions. Is there something better than lognormal?
+* Use grouped instead runs for priors. Might reduce overfitting to particular runner for example.
+* Use country specific continous varriables instead of classes. country_median for example. 
     
