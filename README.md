@@ -20,6 +20,7 @@ Convert xml to csv and join years by runner name and team:
 ```bash
 time for year in $(seq 1992 2018); do echo "YEAR $year"; time pipenv run python result_xml_to_csv.py $year ve && head data/results_with_dist_j${year}_ve.tsv; done
 time pipenv run python group_csv.py ve && head data/grouped_paces_ve.tsv
+time pipenv run python cluster_names.py && head data/name_pace_classes_ve.tsv
 ```
 
 Start jupyter:
@@ -28,7 +29,6 @@ nice pipenv run jupyter notebook
 ```
 
 Run notebooks in following order:
-1. `cluster_names.ipynb` requires `grouped_paces_ve.tsv` and produces `name_pace_classes_ve.tsv`
 1. `unknown-runners.ipynb` requires `runs_ve.tsv` and plots and explores data
 1. `preprocess-priors.ipynb` requires `runs_ve.tsv` and produces `gbr_*_ve.sav`
 1. `estimate_paces.ipynb` requires `grouped_paces_ve.tsv` and produces `simple_preds_for_runners_with_history_14062019_ve.csv`
