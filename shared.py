@@ -234,4 +234,7 @@ def preprocess_features(runs_df, top_countries, ve_or_ju):
 
     return features
 
-
+def write_simple_text_report(reports, file_name):
+    with open(f'reports/{file_name}', 'w') as outfile:
+        for line in reports:
+            outfile.write(line + "\n")
