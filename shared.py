@@ -3,6 +3,9 @@ import json
 import joblib
 import numpy as np
 import pandas as pd
+import logging
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
 
 num_pace_years = 8
 pace_columns = [f"pace_{i}" for i in range(1, num_pace_years + 1)]
@@ -116,6 +119,12 @@ num_legs = {
     "ju": 7
 }
 
+def log_df(value):
+    if isinstance(value, str):
+        logging.info(value)
+    else:
+        logging.info(f"\n{value}")
+
 def read_persisted_dummy_column_values(ve_or_ju):
     with open(f"data/top_countries_{ve_or_ju}.json") as json_file:
         top_countries = json.load(json_file)
@@ -183,13 +192,13 @@ def predict_without_history(features, ve_or_ju):
     # Propably unjustified way to estimate standard deviation
     gbr_sd_estimate["log_std"] = (gbr_sd_estimate.log_q_high - gbr_sd_estimate.log_q_low) / 2
 
-    display(gbr_sd_estimate.head(15).round(3))
-    display(gbr_sd_estimate["log_std"].mean())
+    logging.info(gbr_sd_estimate.head(15).round(3))
+    logging.info(gbr_sd_estimate["log_std"].mean())
     return gbr_sd_estimate
 
 
 def preprocess_features(runs_df, top_countries, ve_or_ju):
-    display(runs_df.info())
+    logging.info(runs_df.info())
     # convert some int columns to labels
     runs = runs_df.assign(leg=runs_df.leg_nro.astype(str))
     # cliping 0 to 1 is a hack for when predicting for unknown runners
@@ -204,7 +213,7 @@ def preprocess_features(runs_df, top_countries, ve_or_ju):
     # First name based pace category
     runs["first_name"] = runs.name.str.split(" ", expand=True).iloc[:, 0]
     name_pace_classes = pd.read_csv(f"data/name_pace_classes_{ve_or_ju}.tsv", delimiter="\t")
-    display(name_pace_classes.info())
+    logging.info(name_pace_classes.info())
     runs = runs.join(name_pace_classes.set_index('first_name'), on="first_name")
     runs["fn_pace_class"] = runs["fn_pace_class"].astype(str)
     runs["fn_pace_std_class"] = runs["fn_pace_std_class"].astype(str)
@@ -218,7 +227,7 @@ def preprocess_features(runs_df, top_countries, ve_or_ju):
     # Ensure that a column exists for each to country, despite none being in data
     country_cols = [f"c_{country}" for country in top_countries]
     missing_country_cols = [col for col in country_cols if not col in features.columns]
-    display(missing_country_cols)
+    logging.info(missing_country_cols)
     missing_country_cols_df = pd.DataFrame({col: 0 for col in missing_country_cols}, index=features.index)
     features = pd.concat([features, missing_country_cols_df], sort=False, axis=1)
 
