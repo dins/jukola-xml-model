@@ -3,6 +3,7 @@ import logging
 import re
 import sys
 import shared
+import normalize_names
 
 import requests
 from lxml import html
@@ -48,7 +49,7 @@ def fetch_running_order(year, ve_or_ju):
                 name = next(iter(row.xpath('.//td[3]/text()') or []), None)
                 if name is not None and name.strip() != ""  and name != " " and leg is not None:
                     leg = int(leg.strip())
-                    name = name.strip()
+                    name = normalize_names.normalize_name(name)
                     #logging.info(current_team_id + " " + current_team_name + " " + str(leg) + " '" + name + "'")
                     output_rows.append(
                         [current_team_id, current_team_name, current_team_base_name, current_team_country, leg,

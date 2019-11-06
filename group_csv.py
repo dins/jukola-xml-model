@@ -4,7 +4,9 @@ import logging
 import sys
 from collections import defaultdict
 import shared
+import normalize_names
 import numpy as np
+
 
 # time pipenv run python group_csv.py ve && head data/grouped_paces_ve.tsv
 
@@ -15,7 +17,6 @@ ve_or_ju = sys.argv[1]
 # time for year in $(seq 2011 2017); do echo "$year: [$(curl http://results.jukola.com/tulokset/fi/j${year}_ju/ | grep "<td><a href='/tulokset/fi/" | grep -E "Vaihto |Maali "| cut -d " " -f 3| tr ',' '.' | tr '\n' ',')]," >> years.txt; done
 
 by_name = defaultdict(list)
-
 
 def read_team_countries(year, ve_or_ju):
     with open(f'data/team_countries_j{year}_{ve_or_ju}.tsv') as csvfile:
@@ -41,6 +42,7 @@ for year in shared.years[ve_or_ju]:
             team_id = int(row[0])
             team_base_name = row[3].upper()
             name = row[8].lower()
+            name = normalize_names.normalize_name(name)
             leg_nro = int(row[5])
             leg_time_str = row[7]
 
@@ -50,21 +52,21 @@ for year in shared.years[ve_or_ju]:
                 leg_distance = shared.leg_distance(ve_or_ju, int(year), leg_nro)
                 leg_pace = round((int(leg_time_str) / 60) / leg_distance, 3)
 
-            run = {}
-            run["name"] = name
-            run["team_id"] = team_id
-            run["team"] = team_base_name
-            run["team_country"] = "NA"
-            if team_id in country_by_team_id:
-                run["team_country"] = country_by_team_id[team_id]
-            run["year"] = year
-            run["pace"] = leg_pace
-            run["leg_nro"] = leg_nro
-            if len(name) > 3:
-                by_name[name].append(run)
-            else:
+            if len(name) <= 5:
                 if leg_pace != "NA":
-                    print(f"Ignoring too short name '{name}' and run {run}")
+                    print(f"Ignoring too short name '{name}' with leg_pace {leg_pace} from {year}/{ve_or_ju} {team_id}/{leg_nro}")
+            else:
+                run = {}
+                run["name"] = name
+                run["team_id"] = team_id
+                run["team"] = team_base_name
+                run["team_country"] = "NA"
+                if team_id in country_by_team_id:
+                    run["team_country"] = country_by_team_id[team_id]
+                run["year"] = year
+                run["pace"] = leg_pace
+                run["leg_nro"] = leg_nro
+                by_name[name].append(run)
         csvfile.close()
 
 
