@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
+set -euf -o pipefail
 
-# ./preprocess-simulate-and-analyze-2019.sh ve
+# time ./preprocess-simulate-and-analyze-2019.sh ve
 # time ./preprocess-simulate-and-analyze-2019.sh ve && time ./preprocess-simulate-and-analyze-2019.sh ju
 VE_OR_JU=$1
 
