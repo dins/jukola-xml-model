@@ -28,6 +28,14 @@ time pipenv run python group_csv.py ve && head data/grouped_paces_ve.tsv && time
 time pipenv run python cluster_names.py && head data/name_pace_classes_ve.tsv
 ```
 
+Then either run a script or start jupyter and run notebooks in browser.
+
+### Run a single script 
+```bash
+time ./preprocess-simulate-and-analyze-2019.sh ve && time ./preprocess-simulate-and-analyze-2019.sh ju
+```
+
+### start jupyter and run notebooks in browser
 Start jupyter:
 ```bash
 nice pipenv run jupyter notebook
@@ -41,14 +49,10 @@ Run notebooks in following order:
 1. `post-race-analysis.ipynb` requires `web-lib/for_web_ve_2019.json` and produces `web-lib/for_web_ve_2019.json`
 
 
-
-And navigate to `2018-lognormal-estimates` in browser.
-
-
-
 ## TODO
 
-* Reduce number of notebooks. Put code to .py files for better version control
+* Check the difference on estimates when num_years is 3 and 4 
+* Put code from notebooks to .py files for better version control
 * Run for Venlas and Jukola at the same time
 * replace & with &amp; in xml files
 * Post analyze darkness and mass start estimates
@@ -61,8 +65,7 @@ And navigate to `2018-lognormal-estimates` in browser.
   * Data from year 2010 made predictions worse. Solve it by some kind of year/leg speed factor?
 * Data clean ups:
   * Add runners from disqualified teams
-  * Clean up names, double spaces, lastname first name, 
-  * Bayesian model for first name /last propability?
-* Compare distributions. Is there something better than lognormal?
+  * Match people with emit number, for example those that changed lastname at some point.
+* We no longer us lognormal. It's now log Student T. 
 * Use country specific continous varriables instead of classes. country_median for example. 
     

@@ -1,9 +1,7 @@
-import json
-
-import joblib
-import numpy as np
-import pandas as pd
 import logging
+import os
+
+import pandas as pd
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
 
@@ -119,6 +117,7 @@ num_legs = {
     "ju": 7
 }
 
+
 def log_df(value):
     if isinstance(value, str):
         logging.info(value)
@@ -130,3 +129,7 @@ def write_simple_text_report(reports, file_name):
     with open(f'reports/{file_name}', 'w') as outfile:
         for line in reports:
             outfile.write(f"{line}\n")
+
+
+def race_type(default_type="ve"):
+    return os.getenv('RACE_TYPE', default_type)
