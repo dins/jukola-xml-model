@@ -1,0 +1,46 @@
+Yksilöennusteen keskivirhe: 9.267 minuuttia
+Yksilöennusteen mediaanivirhe: 6.353 minuuttia
+Yksilön aikaväliennuste väärin: 3.9 %
+         ind_interval        ind_error        ind_interval_error      
+                 mean median      mean median               mean count
+num_runs                                                              
+0               81.77  78.70     13.41  10.22               0.02  1593
+1               75.41  73.85     10.28   6.83               0.02   981
+2               60.08  57.30      9.90   7.57               0.04   711
+3               47.51  44.67      8.42   6.45               0.06   684
+4               36.59  30.81      7.23   5.65               0.05   555
+5               38.07  32.93      7.27   5.26               0.08   543
+6               36.32  32.71      6.39   4.55               0.04   550
+7               34.87  31.45      5.75   4.09               0.04   566
+8               34.02  31.12      5.17   3.64               0.03   403
+9               36.55  36.55      6.63   6.63               0.00     2
+10              17.24  17.24      3.27   3.27               0.00     1
+Viestiennusteen keskivirhe: 16.603 minuuttia
+Viestiennusteen virheen mediaani: 10.486 minuuttia
+    relay_error             
+           mean median count
+leg                         
+1          7.96   5.78  1673
+2         13.40   9.42  1654
+3         19.90  13.90  1641
+4         25.45  18.09  1621
+Viestin aikaväliennuste väärin: 5.2 %
+    real_interval real_interval_error real_interval_error_fast real_interval_error_slow
+             mean                mean                     mean                     mean
+leg                                                                                    
+1          47.955               0.044                    0.014                    0.030
+2          72.744               0.040                    0.017                    0.023
+3          99.316               0.055                    0.034                    0.021
+4         120.053               0.068                    0.052                    0.017
+              real_interval real_interval_error real_interval_error_fast real_interval_error_slow
+                       mean                mean                     mean                     mean
+mean_num_runs                                                                                    
+0.0                 108.057               0.049                    0.020                    0.028
+1.0                 109.537               0.042                    0.026                    0.016
+2.0                  98.946               0.065                    0.055                    0.010
+3.0                  83.053               0.065                    0.047                    0.018
+4.0                  72.647               0.052                    0.025                    0.026
+5.0                  65.278               0.053                    0.015                    0.039
+6.0                  53.417               0.043                    0.013                    0.031
+7.0                  42.778               0.035                    0.004                    0.032
+8.0                  37.298               0.022                    0.011                    0.011

@@ -1,22 +1,21 @@
 import collections
 import csv
 import logging
-import sys
 from collections import defaultdict
-import shared
-import normalize_names
+
 import numpy as np
 
+import normalize_names
+import shared
 
-# time pipenv run python group_csv.py ve && head data/grouped_paces_ve.tsv
+# RACE_TYPE=ve FORECAST_YEAR=2019 time pipenv run python group_csv.py && head data/grouped_paces_ve.tsv
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
 
-ve_or_ju = sys.argv[1]
-
-# time for year in $(seq 2011 2017); do echo "$year: [$(curl http://results.jukola.com/tulokset/fi/j${year}_ju/ | grep "<td><a href='/tulokset/fi/" | grep -E "Vaihto |Maali "| cut -d " " -f 3| tr ',' '.' | tr '\n' ',')]," >> years.txt; done
+ve_or_ju = shared.race_type()
 
 by_name = defaultdict(list)
+
 
 def read_team_countries(year, ve_or_ju):
     with open(f'data/team_countries_j{year}_{ve_or_ju}.tsv') as csvfile:
@@ -31,7 +30,7 @@ def read_team_countries(year, ve_or_ju):
         return country_by_team_id
 
 
-for year in shared.years[ve_or_ju]:
+for year in shared.history_years():
     country_by_team_id = read_team_countries(year, ve_or_ju)
 
     in_file_name = f'data/results_with_dist_j{year}_{ve_or_ju}.tsv'
@@ -44,6 +43,7 @@ for year in shared.years[ve_or_ju]:
             name = row[8].lower()
             name = normalize_names.normalize_name(name)
             leg_nro = int(row[5])
+            emit_str = row[6]
             leg_time_str = row[7]
 
             if leg_time_str == "NA":
@@ -54,7 +54,8 @@ for year in shared.years[ve_or_ju]:
 
             if len(name) <= 5:
                 if leg_pace != "NA":
-                    print(f"Ignoring too short name '{name}' with leg_pace {leg_pace} from {year}/{ve_or_ju} {team_id}/{leg_nro}")
+                    print(
+                        f"Ignoring too short name '{name}' with leg_pace {leg_pace} from {year}/{ve_or_ju} {team_id}/{leg_nro}")
             else:
                 run = {}
                 run["name"] = name
@@ -65,12 +66,14 @@ for year in shared.years[ve_or_ju]:
                     run["team_country"] = country_by_team_id[team_id]
                 run["year"] = year
                 run["pace"] = leg_pace
+                run["emit"] = emit_str
                 run["leg_nro"] = leg_nro
                 by_name[name].append(run)
         csvfile.close()
 
 
 def open_output_file(out_file_name, column_names):
+    print(f"Writing output to {out_file_name}")
     out_file = open(out_file_name, 'w')
     csvwriter = csv.writer(out_file, delimiter="\t", quoting=csv.QUOTE_ALL)
     csvwriter.writerow(column_names)
@@ -96,7 +99,7 @@ for name, runs in by_name.items():
 column_names = ["mean_team_id", "teams", "name", "num_runs", "num_valid_times", "mean_pace", "stdev", "log_stdev",
                 "most_common_leg",
                 "most_common_country"] + shared.pace_columns
-(out_file, csvwriter) = open_output_file(f'data/grouped_paces_{ve_or_ju}.tsv', column_names)
+(out_file, csvwriter) = open_output_file(f'data/grouped_paces_{shared.race_id_str()}.tsv', column_names)
 
 max_years = shared.num_pace_years
 
@@ -139,7 +142,8 @@ for unique_name, runs in by_unique_name.items():
 out_file.close()
 
 runs_file_cols = ["name", "year", "team_id", "team", "team_country", "pace", "leg_nro", "num_runs"]
-(runs_out_file, runs_csvwriter) = open_output_file(f'data/runs_{ve_or_ju}.tsv', runs_file_cols)
+(runs_out_file, runs_csvwriter) = open_output_file(f'data/runs_{shared.race_id_str()}.tsv',
+                                                   runs_file_cols)
 
 for unique_name, runs in by_unique_name.items():
     for run in runs:

@@ -5,13 +5,37 @@ import pandas as pd
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
 
-num_pace_years = 8
+num_pace_years = 9
 pace_columns = [f"pace_{i}" for i in range(1, num_pace_years + 1)]
 
+
+def race_type(default = "ve"):
+    type = os.getenv('RACE_TYPE', default)
+    logging.info(f"RACE_TYPE: {type}")
+    return type
+
+
+def forecast_year(default = 2019):
+    year = os.getenv('FORECAST_YEAR', default)
+    logging.info(f"FORECAST_YEAR: {year}")
+    return int(year)
+
+def race_id_str():
+    return f"{race_type()}_fy_{forecast_year()}"
+
+
 years = {
-    "ve": ["2018", "2017", "2016", "2015", "2014", "2013", "2012", "2011"],
-    "ju": ["2018", "2017", "2016", "2015", "2014", "2013", "2012", "2011"]
+    "ve": ["2019", "2018", "2017", "2016", "2015", "2014", "2013", "2012", "2011"],
+    "ju": ["2019", "2018", "2017", "2016", "2015", "2014", "2013", "2012", "2011"]
 }
+
+def history_years():
+    all_years = years[race_type()]
+    fy = forecast_year()
+    history = list(filter(lambda year: year != fy, all_years))
+    logging.info(f"history_years: {history}")
+    return history
+
 
 # time for year in $(seq 1992 2019); do ./parse-leg-distances.sh $year ve; done
 distances = {
@@ -43,7 +67,8 @@ distances = {
         2016: [7.1, 6.7, 6.0, 9.1],
         2017: [6.7, 6.6, 5.8, 8.0],
         2018: [6.2, 6.2, 5.4, 7.9],
-        2019: [6.0, 5.7, 7.3, 7.9]
+        2019: [6.0, 5.7, 7.3, 7.9],
+        2020: [4.1, 4.1, 5.2, 5.2]
     },
     "ju": {
         1992: [12.2, 12.7, 14.4, 8.4, 8.3, 10.4, 13.7],
@@ -73,7 +98,8 @@ distances = {
         2016: [10.7, 12.8, 14.1, 8.6, 8.7, 12.4, 16.5],
         2017: [12.8, 14.3, 12.3, 7.7, 7.8, 11.1, 13.8],
         2018: [11.0, 11.9, 12.7, 8.8, 8.7, 10.8, 15.1],
-        2019: [10.9, 10.5, 13.2, 7.3, 7.8, 11.1, 12.9]
+        2019: [10.9, 10.5, 13.2, 7.3, 7.8, 11.1, 12.9],
+        2020: [10.1, 10.1, 11.9, 7.2, 7.2, 9.9, 11.9]
     }
 }
 
@@ -86,22 +112,26 @@ def leg_distance(ve_or_ju, year, leg):
 start_timestamp = {
     "ve": {
         2018: pd.Timestamp(year=2018, month=6, day=16, hour=14, tz="Europe/Helsinki"),
-        2019: pd.Timestamp(year=2019, month=6, day=15, hour=14, tz="Europe/Helsinki")
+        2019: pd.Timestamp(year=2019, month=6, day=15, hour=14, tz="Europe/Helsinki"),
+        2020: pd.Timestamp(year=2020, month=6, day=13, hour=14, tz="Europe/Helsinki")
     },
     "ju": {
         2018: pd.Timestamp(year=2018, month=6, day=16, hour=23, tz="Europe/Helsinki"),
-        2019: pd.Timestamp(year=2019, month=6, day=15, hour=23, tz="Europe/Helsinki")
+        2019: pd.Timestamp(year=2019, month=6, day=15, hour=23, tz="Europe/Helsinki"),
+        2020: pd.Timestamp(year=2020, month=6, day=13, hour=23, tz="Europe/Helsinki")
     }
 }
 
 changeover_closing = {
     "ve": {
         2018: pd.Timestamp(year=2018, month=6, day=16, hour=18, minute=30, tz="Europe/Helsinki"),
-        2019: pd.Timestamp(year=2019, month=6, day=15, hour=18, minute=30, tz="Europe/Helsinki")
+        2019: pd.Timestamp(year=2019, month=6, day=15, hour=18, minute=30, tz="Europe/Helsinki"),
+        2020: pd.Timestamp(year=2020, month=6, day=13, hour=18, minute=30, tz="Europe/Helsinki")
     },
     "ju": {
         2018: pd.Timestamp(year=2018, month=6, day=17, hour=8, minute=45, tz="Europe/Helsinki"),
-        2019: pd.Timestamp(year=2019, month=6, day=16, hour=8, minute=45, tz="Europe/Helsinki")
+        2019: pd.Timestamp(year=2019, month=6, day=16, hour=8, minute=45, tz="Europe/Helsinki"),
+        2020: pd.Timestamp(year=2019, month=6, day=14, hour=8, minute=45, tz="Europe/Helsinki")
     }
 }
 
@@ -109,6 +139,10 @@ dark_period = {
     2019: {
         "start": pd.Timestamp(year=2019, month=6, day=15, hour=23, minute=4, tz="Europe/Helsinki"),
         "end": pd.Timestamp(year=2019, month=6, day=16, hour=3, minute=41, tz="Europe/Helsinki")
+    },
+    2020: {
+        "start": pd.Timestamp(year=2020, month=6, day=13, hour=22, minute=46, tz="Europe/Helsinki"),
+        "end": pd.Timestamp(year=2020, month=6, day=14, hour=3, minute=54, tz="Europe/Helsinki")
     }
 }
 
@@ -122,14 +156,10 @@ def log_df(value):
     if isinstance(value, str):
         logging.info(value)
     else:
-        logging.info(f"\n{value}")
+        logging.info(f"FY{forecast_year()}\n{value}")
 
 
 def write_simple_text_report(reports, file_name):
     with open(f'reports/{file_name}', 'w') as outfile:
         for line in reports:
             outfile.write(f"{line}\n")
-
-
-def race_type(default_type="ve"):
-    return os.getenv('RACE_TYPE', default_type)

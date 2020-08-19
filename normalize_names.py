@@ -68,7 +68,7 @@ def _append_names(year, ve_or_ju, all_names):
 
 
 def analyze_names():
-    num_all_years = 27
+    num_all_years = 28
     all_years = [i for i in range(1992, 1992 + num_all_years)]
     logging.info(f"All years {all_years}")
 

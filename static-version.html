@@ -206,7 +206,7 @@
     throw Error("Unrecognized race.")
   }
   var teamId = parseInt(searchParams.get('team'))
-  $.getJSON("web-lib/for_web_" + ve_or_ju + "_2019.json", function (runners) {
+  $.getJSON("web-lib/for_web_" + ve_or_ju + "_fy_2019.json", function (runners) {
     showTeam(teamId, runners, ve_or_ju)
   });
 

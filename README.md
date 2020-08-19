@@ -9,8 +9,8 @@ pipenv sync
 Fetch xml files (history) and convert xml to csv:
 
 ```bash
-time for year in $(seq 1992 2018); do echo "YEAR $year"; time wget -P data https://results.jukola.com/tulokset/results_j${year}_ju.xml; done
-time for year in $(seq 1992 2018); do echo "YEAR $year"; time pipenv run python result_xml_to_csv.py $year ve && head data/results_with_dist_j${year}_ve.tsv; done
+time for year in $(seq 1992 2019); do echo "YEAR $year"; time wget -P data https://results.jukola.com/tulokset/results_j${year}_ju.xml; done
+time for year in $(seq 1992 2019); do echo "YEAR $year"; time pipenv run python result_xml_to_csv.py $year ve && head data/results_with_dist_j${year}_ve.tsv; done
 time pipenv run python normalize_names.py
 ```
 
@@ -24,15 +24,15 @@ time for year in $(seq 2012 2019); do echo "YEAR $year"; time pipenv run python 
 join years by runner name and team:
 
 ```bash
-time pipenv run python group_csv.py ve && head data/grouped_paces_ve.tsv && time pipenv run python group_csv.py ve && head data/grouped_paces_ve.tsv
-time pipenv run python cluster_names.py && head data/name_pace_classes_ve.tsv
+RACE_TYPE=ve FORECAST_YEAR=2019 time pipenv run python group_csv.py && RACE_TYPE=ju FORECAST_YEAR=2019 time pipenv run python group_csv.py
+RACE_TYPE=ve FORECAST_YEAR=2019 time pipenv run python cluster_names.py && RACE_TYPE=ju FORECAST_YEAR=2019 time pipenv run python cluster_names.py
 ```
 
 Then either run a script or start jupyter and run notebooks in browser.
 
 ### Run a single script 
 ```bash
-time ./preprocess-simulate-and-analyze-2019.sh ve && time ./preprocess-simulate-and-analyze-2019.sh ju
+RACE_TYPE=ve FORECAST_YEAR=2019 time ./preprocess-simulate-and-analyze-2019.sh && RACE_TYPE=ju FORECAST_YEAR=2019 time ./preprocess-simulate-and-analyze-2019.sh
 ```
 
 ### start jupyter and run notebooks in browser
