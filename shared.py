@@ -31,7 +31,7 @@ years = {
 
 def history_years():
     all_years = years[race_type()]
-    fy = forecast_year()
+    fy = str(forecast_year())
     history = list(filter(lambda year: year != fy, all_years))
     logging.info(f"history_years: {history}")
     return history

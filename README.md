@@ -6,12 +6,18 @@ Analyze and estimate Jukola Relay results
 pipenv sync
 ```
 
-Fetch xml files (history) and convert xml to csv:
+Fetch xml files (history):
 
 ```bash
 time for year in $(seq 1992 2019); do echo "YEAR $year"; time wget -P data https://results.jukola.com/tulokset/results_j${year}_ju.xml; done
+```
+Next manually replace `&` characters with `&amp;` in xml files, but not `&amp;` with `&&amp;` in all xml files.
+
+Convert xml to csv:
+
+```bash
 time for year in $(seq 1992 2019); do echo "YEAR $year"; time pipenv run python result_xml_to_csv.py $year ve && head data/results_with_dist_j${year}_ve.tsv; done
-time pipenv run python normalize_names.py
+time pipenv run python count_names.py
 ```
 
 Fetch team country and running orders:
@@ -54,7 +60,7 @@ Run notebooks in following order:
 * Check the difference on estimates when num_years is 3 and 4 
 * Put code from notebooks to .py files for better version control
 * Run for Venlas and Jukola at the same time
-* replace & with &amp; in xml files
+* replace & with &amp; in xml files, but not &amp; with &&amp;
 * Post analyze darkness and mass start estimates
 * Weighted means and stds
 * k-fold validation
@@ -66,6 +72,6 @@ Run notebooks in following order:
 * Data clean ups:
   * Add runners from disqualified teams
   * Match people with emit number, for example those that changed lastname at some point.
-* We no longer us lognormal. It's now log Student T. 
+* Document that we no longer use lognormal. It's now log Student T. 
 * Use country specific continous varriables instead of classes. country_median for example. 
     
