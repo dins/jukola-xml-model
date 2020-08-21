@@ -1,19 +1,21 @@
-import logging
-import pandas as pd
-import numpy as np
-import shared
 import json
+import logging
+
 import joblib
+import numpy as np
+import pandas as pd
+
+import shared
 
 # time pipenv run python static_individual_estimates.py
 
 logging.basicConfig(level=shared.log_df, format='%(asctime)s %(message)s')
 
 
-def read_persisted_dummy_column_values(ve_or_ju):
-    with open(f"data/top_countries_{ve_or_ju}.json") as json_file:
+def read_persisted_dummy_column_values():
+    with open(f"data/top_countries_{shared.race_id_str()}.json") as json_file:
         top_countries = json.load(json_file)
-    with open(f"data/top_first_names_{ve_or_ju}.json") as json_file:
+    with open(f"data/top_first_names_{shared.race_id_str()}.json") as json_file:
         top_first_names = json.load(json_file)
 
     return (top_countries, top_first_names)
@@ -59,12 +61,12 @@ def get_matching_history_row_for_runner(running_order_row, history_df, no_histor
     return runners.sort_values("num_runs", ascending=False).head(1)
 
 
-def predict_without_history(features, ve_or_ju):
-    gbr = joblib.load(f'gbr_{ve_or_ju}.sav')
-    gbr_q_low = joblib.load(f'gbr_q_low_{ve_or_ju}.sav')
-    gbr_q_high = joblib.load(f'gbr_q_high_{ve_or_ju}.sav')
+def predict_without_history(features):
+    gbr = joblib.load(f'models/gbr_{shared.race_id_str()}.sav')
+    gbr_q_low = joblib.load(f'models/gbr_q_low_{shared.race_id_str()}.sav')
+    gbr_q_high = joblib.load(f'models/gbr_q_high_{shared.race_id_str()}.sav')
 
-    gbr_preds = gbr.predict(features)
+    gbr_preds = gbr.predict(features)   
     gbr_q_low_preds = gbr_q_low.predict(features)
     gbr_q_high_preds = gbr_q_high.predict(features)
 
@@ -82,7 +84,7 @@ def predict_without_history(features, ve_or_ju):
     return gbr_sd_estimate
 
 
-def preprocess_features(runs_df, top_countries, ve_or_ju):
+def preprocess_features(runs_df, top_countries):
     logging.info(runs_df.info())
     # convert some int columns to labels
     runs = runs_df.assign(leg=runs_df.leg_nro.astype(str))
@@ -97,7 +99,7 @@ def preprocess_features(runs_df, top_countries, ve_or_ju):
 
     # First name based pace category
     runs["first_name"] = runs.name.str.split(" ", expand=True).iloc[:, 0]
-    name_pace_classes = pd.read_csv(f"data/name_pace_classes_{ve_or_ju}.tsv", delimiter="\t")
+    name_pace_classes = pd.read_csv(f"data/name_pace_classes_{shared.race_id_str()}.tsv", delimiter="\t")
     logging.info(name_pace_classes.info())
     runs = runs.join(name_pace_classes.set_index('first_name'), on="first_name")
     runs["fn_pace_class"] = runs["fn_pace_class"].astype(str)
@@ -129,8 +131,8 @@ def preprocess_features(runs_df, top_countries, ve_or_ju):
     return features
 
 
-def estimate_paces(ve_or_ju):
-    history = pd.read_csv(f'data/grouped_paces_{ve_or_ju}.tsv', delimiter="\t")
+def estimate_paces():
+    history = pd.read_csv(f'data/grouped_paces_{shared.race_id_str()}.tsv', delimiter="\t")
 
     # HISTORY: ""mean_team_id"	"teams"	"name"	"num_runs"	"num_valid_times"	"mean_pace"	"stdev"	"most_common_leg"	"most_common_country"
     # "pace_1"	"pace_2"	"pace_3"	"pace_4"	"pace_5"	"pace_6"	"pace_7"
@@ -139,14 +141,14 @@ def estimate_paces(ve_or_ju):
     history["team_id"] = history["mean_team_id"]
     history["team_country"] = history["most_common_country"]
 
-    (top_countries, top_first_names) = read_persisted_dummy_column_values(ve_or_ju)
+    (top_countries, top_first_names) = read_persisted_dummy_column_values()
 
-    features = preprocess_features(history, top_countries, ve_or_ju)
+    features = preprocess_features(history, top_countries)
     features
 
     shared.log_df(features.shape)
 
-    gbr_sd_estimate = predict_without_history(features, ve_or_ju)
+    gbr_sd_estimate = predict_without_history(features)
 
     #history['prior_mean'] = np.exp(pmlearn_preds[0])
     #history['prior_std'] = np.exp(pmlearn_preds[1])
@@ -172,18 +174,18 @@ def estimate_paces(ve_or_ju):
     simple_preds = history[
         ["mean_team_id", "num_valid_times", "mean_pace", "stdev", "log_stdev", "prior_mean", "prior_log_std",
          "predicted_log_pace_mean", "predicted_log_pace_std", "name", "teams"]].round(4)
-    simple_preds.to_csv(f"data/simple_preds_for_runners_with_history_14062019_{ve_or_ju}.csv", sep='\t')
+    simple_preds.to_csv(f"data/simple_preds_for_runners_with_history_{shared.race_id_str()}.csv", sep='\t')
 
 
-def combine_estimates_with_running_order(ve_or_ju):
-    running_order = pd.read_csv(f'data/running_order_j2019_{ve_or_ju}.tsv', delimiter="\t")
+def combine_estimates_with_running_order():
+    running_order = pd.read_csv(f'data/running_order_j{shared.forecast_year()}_{shared.race_type()}.tsv', delimiter="\t")
     shared.log_df(running_order.shape)
 
     running_order["leg_nro"] = running_order["leg"]
     running_order["orig_name"] = running_order["name"]
     running_order["name"] = running_order["name"].str.lower()
     
-    predictions_and_history = pd.read_csv(f"data/simple_preds_for_runners_with_history_14062019_{ve_or_ju}.csv", delimiter="\t")
+    predictions_and_history = pd.read_csv(f"data/simple_preds_for_runners_with_history_{shared.race_id_str()}.csv", delimiter="\t")
     shared.log_df(predictions_and_history.shape)
 
     predictions_and_history["num_runs"] = predictions_and_history["num_valid_times"]
@@ -202,14 +204,14 @@ def combine_estimates_with_running_order(ve_or_ju):
     running_order = running_order.assign(pred_log_mean = history_and_preds.pred_log_mean)
     running_order = running_order.assign(pred_log_std = history_and_preds.pred_log_std)
     
-    (top_countries, top_first_names) = read_persisted_dummy_column_values(ve_or_ju)
+    (top_countries, top_first_names) = read_persisted_dummy_column_values()
     
-    features = preprocess_features(running_order, top_countries, ve_or_ju)
+    features = preprocess_features(running_order, top_countries)
 
 
     shared.log_df(features.info())
     
-    gbr_sd_estimate = predict_without_history(features, ve_or_ju)
+    gbr_sd_estimate = predict_without_history(features)
 
     running_order["predicted"] = gbr_sd_estimate["predicted"]
     running_order["log_q_low"] = gbr_sd_estimate["log_q_low"]
@@ -249,15 +251,13 @@ def combine_estimates_with_running_order(ve_or_ju):
 
     shared.log_df(np.exp(running_order[["final_pace_mean", "final_pace_std"]]).describe(percentiles=[0.01, 0.02, 0.05, 0.1, .25, .5, .75, .9, .95, .99]))
     
-    running_order.to_csv(f"data/running_order_2019_with_estimates_{ve_or_ju}.tsv", "\t")
+    running_order.to_csv(f"data/running_order_with_estimates_{shared.race_id_str()}.tsv", "\t")
 
     shared.log_df(running_order[
         ['num_runs', 'pred_log_mean', "pred_log_std", "predicted", "log_std_fixed", "final_pace_mean", "final_pace_std"]
     ].groupby('num_runs').agg(["mean"]).round(2))
 
 
-#estimate_paces("ve")
-#estimate_paces("ju")
+#estimate_paces()
 
-#combine_estimates_with_running_order("ve")
-#combine_estimates_with_running_order("ju")
+#combine_estimates_with_running_order()

@@ -5,14 +5,14 @@ import pandas as pd
 import shared
 import json
 
-# time pipenv run python cluster_names.py
+# RACE_TYPE=ve FORECAST_YEAR=2019 time pipenv run python cluster_names.py
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
 
 
-def cluster_names(ve_or_ju):
-    logging.info(f"computing name clusters for {ve_or_ju}")
-    history = pd.read_csv(f'data/grouped_paces_{ve_or_ju}.tsv', delimiter="\t")
+def cluster_names():
+    logging.info(f"computing name clusters for {shared.race_id_str()}")
+    history = pd.read_csv(f'data/grouped_paces_{shared.race_id_str()}.tsv', delimiter="\t")
 
     # preprocess
     history["first_name"] = history.name.str.split(" ", expand=True).iloc[:, 0]
@@ -37,8 +37,7 @@ def cluster_names(ve_or_ju):
     sorted = names.sort_values(by=["mean_pace_count"], ascending=False)[
         ["mean_pace_count", "fn_pace_class", "fn_pace_std_class"]]
     logging.info(sorted)
-    sorted.to_csv(f"data/name_pace_classes_{ve_or_ju}.tsv", "\t")
+    sorted.to_csv(f"data/name_pace_classes_{shared.race_id_str()}.tsv", "\t")
 
 
-cluster_names("ve")
-cluster_names("ju")
+cluster_names()
