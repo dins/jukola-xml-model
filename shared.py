@@ -136,6 +136,10 @@ changeover_closing = {
 }
 
 dark_period = {
+    2018: {
+        "start": pd.Timestamp(year=2018, month=6, day=16, hour=22, minute=54, tz="Europe/Helsinki"),
+        "end": pd.Timestamp(year=2018, month=6, day=17, hour=3, minute=41, tz="Europe/Helsinki")
+    },
     2019: {
         "start": pd.Timestamp(year=2019, month=6, day=15, hour=23, minute=4, tz="Europe/Helsinki"),
         "end": pd.Timestamp(year=2019, month=6, day=16, hour=3, minute=41, tz="Europe/Helsinki")
