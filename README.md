@@ -59,6 +59,9 @@ Run notebooks in following order:
 
 * Check the difference on estimates when num_years is 3 and 4 
 * Put code from notebooks to .py files for better version control
+* Tune hyperparameters with https://scikit-optimize.github.io/stable/
+* After tuning fit prior models with whole data set (test set will be the year to predict)
+* Try regularization
 * Run for Venlas and Jukola at the same time
 * replace & with &amp; in xml files, but not &amp; with &&amp;
 * Post analyze darkness and mass start estimates
