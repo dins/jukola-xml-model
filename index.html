@@ -376,7 +376,8 @@
   }
 
   var teamId = parseInt(searchParams.get('team'))
-  var url = "https://ecbnnyd5j6.execute-api.eu-west-1.amazonaws.com/dev/" + ve_or_ju + "/" + teamId + resultsQueryParamsStr;
+  //var url = "https://ecbnnyd5j6.execute-api.eu-west-1.amazonaws.com/dev/" + ve_or_ju + "/" + teamId + resultsQueryParamsStr;
+  var url = "https://075x6c4ra2.execute-api.eu-west-1.amazonaws.com/dev/" + ve_or_ju + "/" + teamId + resultsQueryParamsStr;
   $.getJSON(url, function (runners) {
     showTeam(teamId, runners, ve_or_ju)
   });
