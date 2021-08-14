@@ -7,7 +7,7 @@ import shared
 import requests
 from lxml import html
 
-# time pipenv run python fetch_team_countries.py 2017 && wc data/team_countries_j2017_ju.tsv
+# time pipenv run python fetch_team_countries.py 2021 && wc data/team_countries_j2021_ju.tsv
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
 

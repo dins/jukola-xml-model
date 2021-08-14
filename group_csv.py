@@ -8,7 +8,7 @@ import numpy as np
 import normalize_names
 import shared
 
-# RACE_TYPE=ve FORECAST_YEAR=2019 time pipenv run python group_csv.py && head data/grouped_paces_ve.tsv
+# RACE_TYPE=ve FORECAST_YEAR=2021 time pipenv run python group_csv.py && head data/grouped_paces_ve.tsv
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
 

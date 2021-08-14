@@ -30,15 +30,15 @@ time for year in $(seq 2012 2019); do echo "YEAR $year"; time pipenv run python 
 join years by runner name and team:
 
 ```bash
-RACE_TYPE=ve FORECAST_YEAR=2019 time pipenv run python group_csv.py && RACE_TYPE=ju FORECAST_YEAR=2019 time pipenv run python group_csv.py
-RACE_TYPE=ve FORECAST_YEAR=2019 time pipenv run python cluster_names.py && RACE_TYPE=ju FORECAST_YEAR=2019 time pipenv run python cluster_names.py
+RACE_TYPE=ve FORECAST_YEAR=2021 time pipenv run python group_csv.py && RACE_TYPE=ju FORECAST_YEAR=2021 time pipenv run python group_csv.py
+RACE_TYPE=ve FORECAST_YEAR=2021 time pipenv run python cluster_names.py && RACE_TYPE=ju FORECAST_YEAR=2021 time pipenv run python cluster_names.py
 ```
 
 Then either run a script or start jupyter and run notebooks in browser.
 
 ### Run a single script 
 ```bash
-RACE_TYPE=ve FORECAST_YEAR=2019 time ./preprocess-simulate-and-analyze-2019.sh && RACE_TYPE=ju FORECAST_YEAR=2019 time ./preprocess-simulate-and-analyze-2019.sh
+RACE_TYPE=ve FORECAST_YEAR=2021 time ./preprocess-simulate-and-analyze-2019.sh && RACE_TYPE=ju FORECAST_YEAR=2021 time ./preprocess-simulate-and-analyze-2019.sh
 ```
 
 ### start jupyter and run notebooks in browser

@@ -68,7 +68,7 @@ distances = {
         2017: [6.7, 6.6, 5.8, 8.0],
         2018: [6.2, 6.2, 5.4, 7.9],
         2019: [6.0, 5.7, 7.3, 7.9],
-        2020: [4.1, 4.1, 5.2, 5.2]
+        2021: [7.3, 5.4, 9.1, 8.5]
     },
     "ju": {
         1992: [12.2, 12.7, 14.4, 8.4, 8.3, 10.4, 13.7],
@@ -99,7 +99,7 @@ distances = {
         2017: [12.8, 14.3, 12.3, 7.7, 7.8, 11.1, 13.8],
         2018: [11.0, 11.9, 12.7, 8.8, 8.7, 10.8, 15.1],
         2019: [10.9, 10.5, 13.2, 7.3, 7.8, 11.1, 12.9],
-        2020: [10.1, 10.1, 11.9, 7.2, 7.2, 9.9, 11.9]
+        2021: [12.9, 12.9, 16.6, 9.1, 8.9, 11.0, 16.4]
     }
 }
 
@@ -113,12 +113,12 @@ start_timestamp = {
     "ve": {
         2018: pd.Timestamp(year=2018, month=6, day=16, hour=14, tz="Europe/Helsinki"),
         2019: pd.Timestamp(year=2019, month=6, day=15, hour=14, tz="Europe/Helsinki"),
-        2020: pd.Timestamp(year=2020, month=6, day=13, hour=14, tz="Europe/Helsinki")
+        2021: pd.Timestamp(year=2021, month=8, day=21, hour=13, minute=45, tz="Europe/Helsinki")
     },
     "ju": {
         2018: pd.Timestamp(year=2018, month=6, day=16, hour=23, tz="Europe/Helsinki"),
         2019: pd.Timestamp(year=2019, month=6, day=15, hour=23, tz="Europe/Helsinki"),
-        2020: pd.Timestamp(year=2020, month=6, day=13, hour=23, tz="Europe/Helsinki")
+        2021: pd.Timestamp(year=2021, month=8, day=21, hour=23, tz="Europe/Helsinki")
     }
 }
 
@@ -126,12 +126,12 @@ changeover_closing = {
     "ve": {
         2018: pd.Timestamp(year=2018, month=6, day=16, hour=18, minute=30, tz="Europe/Helsinki"),
         2019: pd.Timestamp(year=2019, month=6, day=15, hour=18, minute=30, tz="Europe/Helsinki"),
-        2020: pd.Timestamp(year=2020, month=6, day=13, hour=18, minute=30, tz="Europe/Helsinki")
+        2021: pd.Timestamp(year=2021, month=8, day=21, hour=18, minute=15, tz="Europe/Helsinki")
     },
     "ju": {
         2018: pd.Timestamp(year=2018, month=6, day=17, hour=8, minute=45, tz="Europe/Helsinki"),
         2019: pd.Timestamp(year=2019, month=6, day=16, hour=8, minute=45, tz="Europe/Helsinki"),
-        2020: pd.Timestamp(year=2019, month=6, day=14, hour=8, minute=45, tz="Europe/Helsinki")
+        2021: pd.Timestamp(year=2021, month=8, day=22, hour=8, minute=45, tz="Europe/Helsinki")
     }
 }
 
@@ -144,9 +144,9 @@ dark_period = {
         "start": pd.Timestamp(year=2019, month=6, day=15, hour=23, minute=4, tz="Europe/Helsinki"),
         "end": pd.Timestamp(year=2019, month=6, day=16, hour=3, minute=41, tz="Europe/Helsinki")
     },
-    2020: {
-        "start": pd.Timestamp(year=2020, month=6, day=13, hour=22, minute=46, tz="Europe/Helsinki"),
-        "end": pd.Timestamp(year=2020, month=6, day=14, hour=3, minute=54, tz="Europe/Helsinki")
+    2021: {
+        "start": pd.Timestamp(year=2021, month=8, day=21, hour=21, minute=30, tz="Europe/Helsinki"),
+        "end": pd.Timestamp(year=2021, month=8, day=22, hour=5, minute=13, tz="Europe/Helsinki")
     }
 }
 

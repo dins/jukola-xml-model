@@ -5,7 +5,7 @@ import pandas as pd
 import shared
 import json
 
-# RACE_TYPE=ve FORECAST_YEAR=2019 time pipenv run python cluster_names.py
+# RACE_TYPE=ve FORECAST_YEAR=2021 time pipenv run python cluster_names.py
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
 
