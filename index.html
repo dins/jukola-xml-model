@@ -7,8 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
-          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-U1DAWAznBHeqEIlVSCgzq+c9gqGAJn5c/t99JyeKa9xxaYpSvHU5awsuZVVFIhvj" crossorigin="anonymous"></script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-141811127-1"></script>
@@ -20,7 +20,6 @@
       }
 
       gtag('js', new Date());
-
       gtag('config', 'UA-141811127-1');
     </script>
     <script src="web-lib/jstat.min.js"></script>
@@ -69,7 +68,6 @@
 </head>
 <body>
 <h1></h1>
-
 <table class="table" id="estimate-summary">
     <thead>
     <tr>
@@ -200,9 +198,6 @@
       yellow: "rgb(255, 205, 86)"
     }
     var colorNames = Object.keys(colors)
-    var unFinishedRunners = _.filter(teamRunners, function (runner) {
-      return runner.lastControlType !== "Finish"
-    })
     var finishedRunners = _.filter(teamRunners, function (runner) {
       return runner.lastControlType === "Finish"
     })
@@ -235,22 +230,6 @@
       }
     })
     var staticDatasets = []
-    /*    var staticDatasets = _.map(teamRunners, function (runner) {
-          var color = colors[colorNames[runner.leg - 1]]
-          var logMinsToFinish = runner.fin_sum_log_mean
-          var logMinsStdToFinish = runner.fin_sum_log_std
-          var dataPoints = produceDataPoints(logMinsToFinish, logMinsStdToFinish, ve_or_ju, undefined)
-          return {
-            type: 'line',
-            label: "Static " + runner.leg + " " + runner.name,
-            backgroundColor: color,
-            borderColor: color,
-            data: dataPoints,
-            fill: false,
-            pointRadius: 1
-          }
-        })
-        */
     var finishTimes = _.map(finishedRunners, function (runner) {
       var color = colors[colorNames[runner.leg - 1]]
       var realFinish = runner.lastControlTimestamp
@@ -376,18 +355,11 @@
   }
 
   var teamId = parseInt(searchParams.get('team'))
-  //var url = "https://ecbnnyd5j6.execute-api.eu-west-1.amazonaws.com/dev/" + ve_or_ju + "/" + teamId + resultsQueryParamsStr;
   var url = "https://075x6c4ra2.execute-api.eu-west-1.amazonaws.com/dev/" + ve_or_ju + "/" + teamId + resultsQueryParamsStr;
   $.getJSON(url, function (runners) {
     showTeam(teamId, runners, ve_or_ju)
   });
 
 </script>
-
-<!-- Optional JavaScript -->
-<!-- jQuery first, then Popper.js, then Bootstrap JS
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
--->
 </body>
 </html>
