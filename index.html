@@ -75,6 +75,9 @@
             font-style: italic;
         }
 
+        #search-box {
+            visibility: hidden;
+        }
     </style>
 </head>
 <body>
@@ -417,6 +420,7 @@
       _.each(runners, function (runner) {
         addRunnerOption(runner, "ju");
       });
+      $('#search-box').show();
       $('#search-box').selectpicker();
       $('#search-box').on('changed.bs.select', function (e, clickedIndex, isSelected, previousValue) {
         var selectedOption = $("#search-box option").get(clickedIndex);
