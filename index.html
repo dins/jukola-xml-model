@@ -7,8 +7,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-U1DAWAznBHeqEIlVSCgzq+c9gqGAJn5c/t99JyeKa9xxaYpSvHU5awsuZVVFIhvj" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-U1DAWAznBHeqEIlVSCgzq+c9gqGAJn5c/t99JyeKa9xxaYpSvHU5awsuZVVFIhvj"
+            crossorigin="anonymous"></script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-141811127-1"></script>
@@ -23,10 +26,17 @@
       gtag('config', 'UA-141811127-1');
     </script>
     <script src="web-lib/jstat.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.3.1.min.js" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+            integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
     <script src="web-lib/lodash-core.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js"></script>
     <script src="web-lib/chartjs-plugin-annotation.min.js"></script>
+
+    <!-- Must load after jQuery -->
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta2/dist/css/bootstrap-select.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta2/dist/js/bootstrap-select.min.js"></script>
+
     <style>
         body {
             min-width: 450px;
@@ -39,6 +49,7 @@
         #estimate-summary {
             margin: auto;
             width: auto;
+            display: none;
         }
 
         @media screen and (max-width: 720px) {
@@ -67,7 +78,13 @@
     </style>
 </head>
 <body>
-<h1></h1>
+<div class="container">
+    <h1>Vaihtoaikaennuste</h1>
+    <select id="search-box" data-live-search="true" data-width="75%"
+            data-live-search-placeholder="Hae joukkuetta tai juoksijaa">
+
+    </select>
+</div>
 <table class="table" id="estimate-summary">
     <thead>
     <tr>
@@ -186,6 +203,8 @@
     console.log("teamRunners", teamRunners)
 
     $("h1").text("Vaihtoaikaennuste " + teamId + " " + teamRunners[0].team)
+    $("#estimate-summary tbody").empty()
+    $("#estimate-summary").show()
     _.each(teamRunners, addRunnerToTable)
 
     var colors = {
@@ -342,9 +361,7 @@
 
   var searchParams = new URLSearchParams(window.location.search)
   var ve_or_ju = searchParams.get('race')
-  if (ve_or_ju != "ve" && ve_or_ju != "ju") {
-    throw Error("Unrecognized race.")
-  }
+
   var resultsQueryParamsStr = ""
   var use2018LiveResultsWithRaceTime = searchParams.get('use2018LiveResultsWithRaceTime')
   if (use2018LiveResultsWithRaceTime) {
@@ -355,10 +372,64 @@
   }
 
   var teamId = parseInt(searchParams.get('team'))
-  var url = "https://075x6c4ra2.execute-api.eu-west-1.amazonaws.com/dev/" + ve_or_ju + "/" + teamId + resultsQueryParamsStr;
-  $.getJSON(url, function (runners) {
-    showTeam(teamId, runners, ve_or_ju)
+
+  function fetchAndShowTeamEstimates(teamId, raceType) {
+    var url = "https://075x6c4ra2.execute-api.eu-west-1.amazonaws.com/dev/" + raceType + "/" + teamId + resultsQueryParamsStr;
+    $.getJSON(url, function (runners) {
+      showTeam(teamId, runners, raceType)
+    });
+  }
+
+  if (teamId > 0 && (ve_or_ju == "ve" || ve_or_ju == "ju")) {
+    fetchAndShowTeamEstimates(teamId, ve_or_ju);
+  }
+
+  function replaceUrlParam(url, paramName, paramValue) {
+    if (paramValue == null) {
+      paramValue = '';
+    }
+    var pattern = new RegExp('\\b(' + paramName + '=).*?(&|#|$)');
+    if (url.search(pattern) >= 0) {
+      return url.replace(pattern, '$1' + paramValue + '$2');
+    }
+    url = url.replace(/[?#]$/, '');
+    return url + (url.indexOf('?') > 0 ? '&' : '?') + paramName + '=' + paramValue;
+  }
+
+  function addRunnerOption(runner, raceType) {
+    const selectedStr = teamId === runner.team_id ? "selected" : ""
+    const raceStr = raceType === "ju" ? "Jukola" : "Venlat"
+    $("#search-box").append(
+      '<option ' + selectedStr + ' data-race-type="' + raceType
+      + '" data-team-id=' + runner.team_id + ' data-subtext="' + runner.name + ', #' + runner.leg + '">' + raceStr + ' ' + runner.team_id + ' ' + runner.team + '</option>'
+    )
+  }
+
+  var juRunnersUrl = "https://dins.github.io/jukola-xml-model/web-lib/for_web_ju_fy_2021.json";
+  var veRunnersUrl = "https://dins.github.io/jukola-xml-model/web-lib/for_web_ve_fy_2021.json";
+
+  $.getJSON(veRunnersUrl, function (runners) {
+    _.each(runners, function (runner) {
+      addRunnerOption(runner, "ve");
+    });
+
+    $.getJSON(juRunnersUrl, function (runners) {
+      _.each(runners, function (runner) {
+        addRunnerOption(runner, "ju");
+      });
+      $('#search-box').selectpicker();
+      $('#search-box').on('changed.bs.select', function (e, clickedIndex, isSelected, previousValue) {
+        var selectedOption = $("#search-box option").get(clickedIndex);
+        const selectedTeamId = $(selectedOption).data("team-id")
+        const selectedRaceType = $(selectedOption).data("race-type")
+        const currentUrl = window.location.href
+        var newUrl = replaceUrlParam(currentUrl, "team", selectedTeamId)
+        newUrl = replaceUrlParam(newUrl, "race", selectedRaceType)
+        window.location = newUrl
+      });
+    });
   });
+
 
 </script>
 </body>
