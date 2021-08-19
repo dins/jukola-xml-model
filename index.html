@@ -399,11 +399,11 @@
     return url + (url.indexOf('?') > 0 ? '&' : '?') + paramName + '=' + paramValue;
   }
 
-  function addRunnerOption(runner, raceType) {
-    const selectedStr = teamId === runner.team_id ? "selected" : ""
-    const raceStr = raceType === "ju" ? "Jukola" : "Venlat"
+  function addRunnerOption(runner, runnerRaceType, requestedRaceType) {
+    const selectedStr = teamId === runner.team_id && requestedRaceType === runnerRaceType ? "selected" : ""
+    const raceStr = runnerRaceType === "ju" ? "Jukola" : "Venlat"
     $("#search-box").append(
-      '<option ' + selectedStr + ' data-race-type="' + raceType
+      '<option ' + selectedStr + ' data-race-type="' + runnerRaceType
       + '" data-team-id=' + runner.team_id + ' data-subtext="' + runner.name + ', #' + runner.leg + '">' + raceStr + ' ' + runner.team_id + ' ' + runner.team + '</option>'
     )
   }
@@ -413,12 +413,12 @@
 
   $.getJSON(veRunnersUrl, function (runners) {
     _.each(runners, function (runner) {
-      addRunnerOption(runner, "ve");
+      addRunnerOption(runner, "ve", ve_or_ju);
     });
 
     $.getJSON(juRunnersUrl, function (runners) {
       _.each(runners, function (runner) {
-        addRunnerOption(runner, "ju");
+        addRunnerOption(runner, "ju", ve_or_ju);
       });
       $('#search-box').show();
       $('#search-box').selectpicker();
