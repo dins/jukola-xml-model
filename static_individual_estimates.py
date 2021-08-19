@@ -86,6 +86,7 @@ def predict_without_history(features):
 
 def preprocess_features(runs_df, top_countries):
     logging.info(runs_df.info())
+    logging.info(f"top_countries: {len(top_countries)}: {top_countries}")
     # convert some int columns to labels
     runs = runs_df.assign(leg=runs_df.leg_nro.astype(str))
     # cliping 0 to 1 is a hack for when predicting for unknown runners
@@ -111,10 +112,11 @@ def preprocess_features(runs_df, top_countries):
     # Explode categories to dummy columns
     features = pd.get_dummies(runs[["leg", "c", "runs", "fn_pace_class", "fn_pace_std_class"]], sparse=True)
 
-    # Ensure that a column exists for each to country, despite none being in data
+    # Ensure that a column exists for each top country + OTHER, despite none being in data
     country_cols = [f"c_{country}" for country in top_countries]
+    country_cols.append("c_OTHER")
     missing_country_cols = [col for col in country_cols if not col in features.columns]
-    logging.info(missing_country_cols)
+    logging.info(f"missing_country_cols: {missing_country_cols}")
     missing_country_cols_df = pd.DataFrame({col: 0 for col in missing_country_cols}, index=features.index)
     features = pd.concat([features, missing_country_cols_df], sort=False, axis=1)
 
@@ -127,6 +129,8 @@ def preprocess_features(runs_df, top_countries):
     features.insert(0, "team_id_square", np.square(runs.team_id))
     features.insert(0, "team_id_log10", np.log10(runs.team_id))
     features.insert(0, "team_id", runs["team_id"])
+
+    logging.info(f"features: {features.info()}")
 
     return features
 
