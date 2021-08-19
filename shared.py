@@ -15,7 +15,7 @@ def race_type(default = "ve"):
     return type
 
 
-def forecast_year(default = 2019):
+def forecast_year(default = 2021):
     year = os.getenv('FORECAST_YEAR', default)
     logging.info(f"FORECAST_YEAR: {year}")
     return int(year)

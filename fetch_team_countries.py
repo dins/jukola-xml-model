@@ -20,6 +20,7 @@ def fetch_team_country(year, ve_or_ju):
         tree = html.fromstring(page.content.decode('ISO-8859-1').encode("utf-8").strip())
         rows = tree.xpath('//*[@id="site_main"]/table/table/tr')
         logging.info(f"Found {len(rows)} rows")
+        assert len(rows) > 100
         output_rows = []
         for row in rows:
             if(len(row.xpath('td[1]')) > 0):
