@@ -115,9 +115,12 @@ def preprocess_features(runs_df, top_countries):
     # Ensure that a column exists for each top country + OTHER, despite none being in data
     country_cols = [f"c_{country}" for country in top_countries]
     country_cols.append("c_OTHER")
-    missing_country_cols = [col for col in country_cols if not col in features.columns]
-    logging.info(f"missing_country_cols: {missing_country_cols}")
-    missing_country_cols_df = pd.DataFrame({col: 0 for col in missing_country_cols}, index=features.index)
+    missing_cols = [col for col in country_cols if not col in features.columns]
+    logging.info(f"missing_cols: {missing_cols}")
+    pace_class_cols = [ f"fn_pace_class_{float(i)}" for i in range(10)]
+    missing_cols.extend([col for col in pace_class_cols if not col in features.columns])
+    logging.info(f"missing_cols: {missing_cols}")
+    missing_country_cols_df = pd.DataFrame({col: 0 for col in missing_cols}, index=features.index)
     features = pd.concat([features, missing_country_cols_df], sort=False, axis=1)
 
     # allow linear regression to fit non-linear terms
@@ -130,7 +133,11 @@ def preprocess_features(runs_df, top_countries):
     features.insert(0, "team_id_log10", np.log10(runs.team_id))
     features.insert(0, "team_id", runs["team_id"])
 
+    # TODO Test the effect of this
+    features = features.reindex(sorted(features.columns), axis=1)
+
     logging.info(f"features: {features.info()}")
+    logging.info(f"features columns {features.columns}")
 
     return features
 
