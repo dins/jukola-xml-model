@@ -1,6 +1,7 @@
 x.shape: (32978, 59)
 y.shape: (32978, 1)
 None
+x_train: (31329, 59), x_test: (1649, 59)
 <class 'sklearn.linear_model._base.LinearRegression'>: {'copy_X': True, 'fit_intercept': True, 'n_jobs': None, 'normalize': False}
 Explained variance score: 0.477
 <class 'sklearn.ensemble._gb.GradientBoostingRegressor'>: {'alpha': 0.9, 'ccp_alpha': 0.0, 'criterion': 'friedman_mse', 'init': None, 'learning_rate': 0.1, 'loss': 'ls', 'max_depth': 3, 'max_features': None, 'max_leaf_nodes': None, 'min_impurity_decrease': 0.0, 'min_impurity_split': None, 'min_samples_leaf': 1, 'min_samples_split': 2, 'min_weight_fraction_leaf': 0.0, 'n_estimators': 900, 'n_iter_no_change': None, 'presort': 'deprecated', 'random_state': 0, 'subsample': 1.0, 'tol': 0.0001, 'validation_fraction': 0.1, 'verbose': 1, 'warm_start': False}
@@ -19,4 +20,4 @@ std_correct.mean 1.1684
 abs_error_in_stds.mean 0.4395
 abs_error.mean 1.4571
 abs_error.median 0.9202
-runtime 1.54 mins
+runtime 2.03 mins
