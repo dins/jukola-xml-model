@@ -78,6 +78,12 @@
         #search-box {
             visibility: hidden;
         }
+        #info-box {
+            margin: auto;
+            margin-bottom: 40px;
+            margin-top: 40px;
+            width: 75%;
+        }
     </style>
 </head>
 <body>
@@ -103,6 +109,15 @@
     <tbody>
     </tbody>
 </table>
+
+<div id="info-box" class="alert alert-dark" role="alert">
+    <h3>Tietoa Palvelusta</h3>
+    <p>Ennuste perustuu juoksijan aikaisempien vuosien Jukola tuloksiin.
+    Mitä enemmän tuloksia on käytettävissä sitä vähemmän ennusteessa on epävarmuutta.
+    Ennusteen aikavälit aikavälit ovat aiemmin pitäneet paikkansa noin 85% juoksijoista.</p>
+    <p>Ennuste päivittyy mahdollisesti online-rastien leimauksista kilpailun edetessä.</p>
+    <p>Ennuste on tehty täysin harrasteprojektina. Turvallista ja onnistunutta Napapiiri-Jukolaa 2021 kaikille!</p>
+</div>
 
 <canvas id="chartjs-plot" width="1000" height="800"></canvas>
 
