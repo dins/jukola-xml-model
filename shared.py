@@ -9,16 +9,17 @@ num_pace_years = 9
 pace_columns = [f"pace_{i}" for i in range(1, num_pace_years + 1)]
 
 
-def race_type(default = "ve"):
+def race_type(default="ve"):
     type = os.getenv('RACE_TYPE', default)
     logging.info(f"RACE_TYPE: {type}")
     return type
 
 
-def forecast_year(default = 2021):
+def forecast_year(default=2021):
     year = os.getenv('FORECAST_YEAR', default)
     logging.info(f"FORECAST_YEAR: {year}")
     return int(year)
+
 
 def race_id_str():
     return f"{race_type()}_fy_{forecast_year()}"
@@ -28,6 +29,11 @@ years = {
     "ve": ["2019", "2018", "2017", "2016", "2015", "2014", "2013", "2012", "2011"],
     "ju": ["2019", "2018", "2017", "2016", "2015", "2014", "2013", "2012", "2011"]
 }
+
+# 2020 missing
+all_years = [1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009,
+             2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2021]
+
 
 def history_years():
     all_years = years[race_type()]
