@@ -12,7 +12,8 @@ from lxml import html
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
 
-
+# Fetches running order from registration site. It will become outdated on the race day.
+# Later changes are available on the online site.
 def fetch_running_order(year, ve_or_ju):
     def leg_dist(leg):
         dist = shared.distances[ve_or_ju][year]
