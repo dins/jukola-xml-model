@@ -8,5 +8,5 @@ time pipenv run jupyter nbconvert --to notebook --inplace --ExecutePreprocessor.
 echo $(date -u +"%F %T") "preprocess-priors ${RACE_TYPE} ${FORECAST_YEAR} DONE"
 time pipenv run jupyter nbconvert --to notebook --inplace --ExecutePreprocessor.timeout=1200 --execute 2019-relay-simulation.ipynb
 echo $(date -u +"%F %T") "2019-relay-simulation ${RACE_TYPE} ${FORECAST_YEAR} DONE"
-#time pipenv run jupyter nbconvert --to notebook --inplace --execute post-race-analysis.ipynb
-#echo $(date -u +"%F %T") "post-race-analysis ${RACE_TYPE} ${FORECAST_YEAR} DONE"
+time pipenv run jupyter nbconvert --to notebook --inplace --execute post-race-analysis.ipynb
+echo $(date -u +"%F %T") "post-race-analysis ${RACE_TYPE} ${FORECAST_YEAR} DONE"
