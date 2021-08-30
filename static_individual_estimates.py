@@ -189,7 +189,8 @@ def estimate_paces():
 
 
 def combine_estimates_with_running_order():
-    running_order = pd.read_csv(f'data/running_order_j{shared.forecast_year()}_{shared.race_type()}.tsv', delimiter="\t")
+    #running_order = pd.read_csv(f'data/running_order_j{shared.forecast_year()}_{shared.race_type()}.tsv', delimiter="\t")
+    running_order = pd.read_csv(f"data/running_order_final_{shared.race_id_str()}.tsv", delimiter="\t")
     shared.log_df(running_order.shape)
 
     running_order["leg_nro"] = running_order["leg"]

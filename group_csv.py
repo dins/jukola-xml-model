@@ -17,21 +17,8 @@ ve_or_ju = shared.race_type()
 by_name = defaultdict(list)
 
 
-def read_team_countries(year, ve_or_ju):
-    with open(f'data/team_countries_j{year}_{ve_or_ju}.tsv') as csvfile:
-        csvreader = csv.reader(csvfile, delimiter="\t")
-        next(csvreader, None)  # skip the headers
-        country_by_team_id = {}
-        for row in csvreader:
-            team_id = int(row[0])
-            team_country = row[2].upper()
-            country_by_team_id[team_id] = team_country
-
-        return country_by_team_id
-
-
 for year in shared.history_years():
-    country_by_team_id = read_team_countries(year, ve_or_ju)
+    country_by_team_id = shared.read_team_countries(year, ve_or_ju)
 
     in_file_name = f'data/results_with_dist_j{year}_{ve_or_ju}.tsv'
     with open(in_file_name) as csvfile:

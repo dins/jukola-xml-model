@@ -1,23 +1,23 @@
-x.shape: (15081, 45)
-y.shape: (15081, 1)
+x.shape: (15080, 45)
+y.shape: (15080, 1)
 None
-x_train: (14326, 45), x_test: (755, 45)
+x_train: (14326, 45), x_test: (754, 45)
 <class 'sklearn.linear_model._base.LinearRegression'>: {'copy_X': True, 'fit_intercept': True, 'n_jobs': None, 'normalize': False}
-Explained variance score: 0.423
+Explained variance score: 0.436
 <class 'sklearn.ensemble._gb.GradientBoostingRegressor'>: {'alpha': 0.9, 'ccp_alpha': 0.0, 'criterion': 'friedman_mse', 'init': None, 'learning_rate': 0.1, 'loss': 'ls', 'max_depth': 3, 'max_features': None, 'max_leaf_nodes': None, 'min_impurity_decrease': 0.0, 'min_impurity_split': None, 'min_samples_leaf': 1, 'min_samples_split': 2, 'min_weight_fraction_leaf': 0.0, 'n_estimators': 280, 'n_iter_no_change': None, 'presort': 'deprecated', 'random_state': 0, 'subsample': 1.0, 'tol': 0.0001, 'validation_fraction': 0.1, 'verbose': 1, 'warm_start': False}
-Explained variance score: 0.46
+Explained variance score: 0.478
 <class 'sklearn.ensemble._gb.GradientBoostingRegressor'>: {'alpha': 0.159, 'ccp_alpha': 0.0, 'criterion': 'friedman_mse', 'init': None, 'learning_rate': 0.1, 'loss': 'quantile', 'max_depth': 3, 'max_features': None, 'max_leaf_nodes': None, 'min_impurity_decrease': 0.0, 'min_impurity_split': None, 'min_samples_leaf': 1, 'min_samples_split': 2, 'min_weight_fraction_leaf': 0.0, 'n_estimators': 140, 'n_iter_no_change': None, 'presort': 'deprecated', 'random_state': 0, 'subsample': 1.0, 'tol': 0.0001, 'validation_fraction': 0.1, 'verbose': 1, 'warm_start': False}
-Explained variance score: 0.075
+Explained variance score: 0.092
 <class 'sklearn.ensemble._gb.GradientBoostingRegressor'>: {'alpha': 0.841, 'ccp_alpha': 0.0, 'criterion': 'friedman_mse', 'init': None, 'learning_rate': 0.1, 'loss': 'quantile', 'max_depth': 3, 'max_features': None, 'max_leaf_nodes': None, 'min_impurity_decrease': 0.0, 'min_impurity_split': None, 'min_samples_leaf': 1, 'min_samples_split': 2, 'min_weight_fraction_leaf': 0.0, 'n_estimators': 140, 'n_iter_no_change': None, 'presort': 'deprecated', 'random_state': 0, 'subsample': 1.0, 'tol': 0.0001, 'validation_fraction': 0.1, 'verbose': 1, 'warm_start': False}
-Explained variance score: 0.109
-q_low_error.mean 0.1603
-q_high_error.mean 0.1536
-q_error.mean 0.3139
-q_interval.mean 3.4795
-q_interval.median 3.4837
-std.mean 1.7398
-std_correct.mean 1.159
-abs_error_in_stds.mean 0.4645
-abs_error.mean 1.5086
-abs_error.median 1.0206
+Explained variance score: 0.142
+q_low_error.mean 0.1631
+q_high_error.mean 0.1671
+q_error.mean 0.3302
+q_interval.mean 3.4635
+q_interval.median 3.4448
+std.mean 1.7317
+std_correct.mean 1.1578
+abs_error_in_stds.mean 0.4746
+abs_error.mean 1.5408
+abs_error.median 1.0556
 runtime 0.19 mins

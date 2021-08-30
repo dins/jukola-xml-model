@@ -1,3 +1,4 @@
+import csv
 import logging
 import os
 
@@ -175,3 +176,16 @@ def write_simple_text_report(reports, file_name):
     with open(f'reports/{file_name}', 'w') as outfile:
         for line in reports:
             outfile.write(f"{line}\n")
+
+
+def read_team_countries(year, race_type):
+    with open(f'data/team_countries_j{year}_{race_type}.tsv') as csvfile:
+        csvreader = csv.reader(csvfile, delimiter="\t")
+        next(csvreader, None)  # skip the headers
+        country_by_team_id = {}
+        for row in csvreader:
+            team_id = int(row[0])
+            team_country = row[2].upper()
+            country_by_team_id[team_id] = team_country
+
+        return country_by_team_id

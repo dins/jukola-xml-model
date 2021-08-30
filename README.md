@@ -11,7 +11,7 @@ Fetch xml files (history):
 ```bash
 time for year in $(seq 1992 2019); do echo "YEAR $year"; time wget -P data https://results.jukola.com/tulokset/results_j${year}_ju.xml; done
 ```
-Next manually replace `&` characters with `&amp;` in xml files, but not `&amp;` with `&&amp;` in all xml files.
+Next manually replace `&` characters with `&amp;` (but not `&amp;` with `&&amp;`) in all xml files.
 
 Convert xml to csv:
 
@@ -24,7 +24,8 @@ Fetch team country and running orders:
 
 ```bash
 time for year in $(seq 2009 2019); do echo "YEAR $year"; time pipenv run python fetch_team_countries.py ${year} && wc data/team_countries_j${year}_ju.tsv; done
-time for year in $(seq 2012 2019); do echo "YEAR $year"; time pipenv run python fetch_running_order.py ${year} && wc data/running_order_j${year}_ju.tsv; done
+RACE_TYPE=ve FORECAST_YEAR=2021 time pipenv run python fetch_online_team_countries.py && RACE_TYPE=ju FORECAST_YEAR=2021 time pipenv run python fetch_online_team_countries.py 
+RACE_TYPE=ve FORECAST_YEAR=2021 time pipenv run python final_running_order.py # Post race running order from results
 ```
 
 join years by runner name and team:
