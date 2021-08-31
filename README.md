@@ -39,7 +39,7 @@ Then either run a script or start jupyter and run notebooks in browser.
 
 ### Run a single script 
 ```bash
-RACE_TYPE=ve FORECAST_YEAR=2021 time ./preprocess-simulate-and-analyze-2019.sh && RACE_TYPE=ju FORECAST_YEAR=2021 time ./preprocess-simulate-and-analyze-2019.sh
+time ./preprocess-simulate-and-analyze.sh
 ```
 
 ### start jupyter and run notebooks in browser
