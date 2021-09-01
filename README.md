@@ -25,7 +25,7 @@ Fetch team country and running orders:
 ```bash
 time for year in $(seq 2009 2019); do echo "YEAR $year"; time pipenv run python fetch_team_countries.py ${year} && wc data/team_countries_j${year}_ju.tsv; done
 RACE_TYPE=ve FORECAST_YEAR=2021 time pipenv run python fetch_online_team_countries.py && RACE_TYPE=ju FORECAST_YEAR=2021 time pipenv run python fetch_online_team_countries.py 
-RACE_TYPE=ve FORECAST_YEAR=2021 time pipenv run python final_running_order.py # Post race running order from results
+RACE_TYPE=ve FORECAST_YEAR=2021 time pipenv run python final_running_order.py && RACE_TYPE=ju FORECAST_YEAR=2021 time pipenv run python final_running_order.py  # Post race running order from results
 ```
 
 join years by runner name and team:
@@ -63,7 +63,6 @@ Run notebooks in following order:
 * Tune hyperparameters with https://scikit-optimize.github.io/stable/
 * After tuning fit prior models with whole data set (test set will be the year to predict)
 * Try regularization
-* Run for Venlas and Jukola at the same time
 * replace & with &amp; in xml files, but not &amp; with &&amp;
 * Post analyze darkness and mass start estimates
 * Weighted means and stds
