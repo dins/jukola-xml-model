@@ -13,6 +13,7 @@ lxml = "*"
 requests = "*"
 seaborn = "*"
 joblib = "*"
+statsmodels = "*"
 
 [dev-packages]
 
