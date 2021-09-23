@@ -27,6 +27,12 @@ def _cleanup_ideal_times(race_type, marked_route):
     marked_route_for_race_type = marked_route[marked_route["race_type"] == race_type]
     marked_route_for_race_type = marked_route_for_race_type[["year", "marking"]]
     cleaned = pd.merge(cleaned, marked_route_for_race_type, how="left", on=["year"])
+
+    leg_means = cleaned[["leg", "ideal_pace"]].groupby(["leg"]).agg("mean")
+    shared.log_df(leg_means)
+    cleaned["leg_avg"] = leg_means["ideal_pace"][cleaned["leg"]].values
+    cleaned["terrain_coefficient"] = cleaned["ideal_pace"] / cleaned["leg_avg"]
+
     cleaned.to_csv(f'Jukola-terrain/ideal-paces-{race_type}.tsv', sep="\t", index=False)
 
 

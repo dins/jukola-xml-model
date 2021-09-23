@@ -262,7 +262,21 @@ def combine_estimates_with_running_order():
     shared.log_df(running_order.head().round(3))
 
     shared.log_df(np.exp(running_order[["final_pace_mean", "final_pace_std"]]).describe(percentiles=[0.01, 0.02, 0.05, 0.1, .25, .5, .75, .9, .95, .99]))
-    
+
+    # Multiply by terrain coefficients
+    with open(f"data/default_personal_coefficients_{shared.race_id_str()}.json") as json_file:
+        defaults = json.load(json_file)
+
+    ideal_paces = pd.read_csv(f'Jukola-terrain/ideal-paces-{shared.race_type()}.tsv', delimiter='\t')
+    ideal_paces = ideal_paces[ideal_paces["year"] == shared.forecast_year()]
+    ideal_paces["leg_factor"] = defaults["default_intercept"] + defaults["default_coef"] * ideal_paces[
+        "terrain_coefficient"]
+    shared.log_df(ideal_paces)
+
+    running_order = pd.merge(running_order, ideal_paces[["leg", "leg_factor"]], how="left", on=["leg"])
+    # On log scale multiplication becomes addition
+    running_order["final_pace_mean"] = running_order["final_pace_mean"] + np.log(running_order["leg_factor"])
+
     running_order.to_csv(f"data/running_order_with_estimates_{shared.race_id_str()}.tsv", "\t")
 
     shared.log_df(running_order[
