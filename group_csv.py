@@ -128,6 +128,7 @@ for unique_name, runs in by_unique_name.items():
 
 out_file.close()
 
+# TODO rename leg_nro to leg
 runs_file_cols = ["name", "year", "team_id", "team", "team_country", "pace", "leg_nro", "num_runs"]
 (runs_out_file, runs_csvwriter) = open_output_file(f'data/runs_{shared.race_id_str()}.tsv',
                                                    runs_file_cols)

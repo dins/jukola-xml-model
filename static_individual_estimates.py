@@ -251,9 +251,12 @@ def combine_estimates_with_running_order():
     
     # remove extremes from unknown runners predictions
     unknown_runners = running_order["num_runs"].values < 1
-    running_order["final_pace_mean"].values[unknown_runners] = np.clip(running_order["final_pace_mean"].values[unknown_runners], np.log(7), np.log(15))
-    running_order["final_pace_std"].values[unknown_runners] = np.clip(running_order["final_pace_std"].values[unknown_runners], np.log(1.2), np.log(1.5))
-    
+    # TODO Try with more realistic lower bound?
+    running_order["final_pace_mean"].values[unknown_runners] = np.clip(
+        running_order["final_pace_mean"].values[unknown_runners], np.log(7), np.log(15))
+    running_order["final_pace_std"].values[unknown_runners] = np.clip(
+        running_order["final_pace_std"].values[unknown_runners], np.log(1.2), np.log(1.5))
+
     # remove extremes from all runners
     running_order["final_pace_mean"] = np.clip(running_order["final_pace_mean"].values, np.log(5.6), np.log(18))
     # TODO 1.6 is prob too high
@@ -267,6 +270,7 @@ def combine_estimates_with_running_order():
     with open(f"data/default_personal_coefficients_{shared.race_id_str()}.json") as json_file:
         defaults = json.load(json_file)
 
+    # default coefficients
     ideal_paces = pd.read_csv(f'Jukola-terrain/ideal-paces-{shared.race_type()}.tsv', delimiter='\t')
     ideal_paces = ideal_paces[ideal_paces["year"] == shared.forecast_year()]
     ideal_paces["leg_factor"] = defaults["default_intercept"] + defaults["default_coef"] * ideal_paces[
