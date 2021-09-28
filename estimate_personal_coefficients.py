@@ -21,13 +21,14 @@ logging.info(f"{ideal_paces.head().round(3)}")
 
 runs = pd.read_csv(f'data/runs_{shared.race_id_str()}.tsv', delimiter='\t')
 runs["leg"] = runs["leg_nro"]
+runs["log_pace"] = np.log(runs["pace"])
 runs = runs.query("num_runs > 1")
 
 # TODO use median or other means to reduce outliers
-runner_means = runs[["name", "pace"]].groupby(["name"]).agg("mean")
+runner_means = runs[["name", "log_pace"]].groupby(["name"]).agg("mean")
 
-runs["pace_mean"] = runner_means["pace"][runs["name"]].values
-runs["personal_coefficient"] = runs["pace"] / runs["pace_mean"]
+runs["pace_mean"] = runner_means["log_pace"][runs["name"]].values
+runs["personal_coefficient"] = runs["log_pace"] / runs["pace_mean"]
 
 runs = pd.merge(runs, ideal_paces[["year", "leg", "terrain_coefficient"]], how="left", on=["year", "leg"])
 logging.info(f"{runs.sample(10).round(3)}")
