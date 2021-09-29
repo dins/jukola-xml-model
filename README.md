@@ -35,7 +35,7 @@ Then either run a script or start jupyter and run notebooks in browser.
 
 ### Run a single script 
 ```bash
-time ./preprocess-simulate-and-analyze.sh
+time ./process-recent-years.sh
 ```
 
 ### start jupyter and run notebooks in browser

@@ -12,5 +12,5 @@ cp data/running_order_j2020_ve.tsv data/running_order_j2021_ve.tsv && cp data/ru
 RACE_TYPE=ve FORECAST_YEAR=2021 time pipenv run python group_csv.py && RACE_TYPE=ju FORECAST_YEAR=2021 time pipenv run python group_csv.py
 RACE_TYPE=ve FORECAST_YEAR=2021 time pipenv run python cluster_names.py && RACE_TYPE=ju FORECAST_YEAR=2021 time pipenv run python cluster_names.py
 
-RACE_TYPE=ve FORECAST_YEAR=2021 time ./preprocess-simulate-and-analyze-2019.sh && RACE_TYPE=ju FORECAST_YEAR=2021 time ./preprocess-simulate-and-analyze-2019.sh
+RACE_TYPE=ve FORECAST_YEAR=2021 time ./process-one-race.sh && RACE_TYPE=ju FORECAST_YEAR=2021 time ./process-one-race.sh
 

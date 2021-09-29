@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euf -o pipefail
 
-# RACE_TYPE=ve FORECAST_YEAR=2021 time ./preprocess-simulate-and-analyze-2019.sh
+# RACE_TYPE=ve FORECAST_YEAR=2021 time ./process-one-race.sh
 
 echo $(date -u +"%F %T") "RACE_TYPE: ${RACE_TYPE}, FORECAST_YEAR: ${FORECAST_YEAR}"
 time pipenv run python group_csv.py
