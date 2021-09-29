@@ -65,7 +65,6 @@ Run notebooks in following order:
 * Check the difference on estimates when num_years is 3 and 4 
 * Put code from notebooks to .py files for better version control
 * Tune hyperparameters with https://scikit-optimize.github.io/stable/
-* After tuning fit prior models with whole data set (test set will be the year to predict)
 * Try regularization
 * replace & with &amp; in xml files, but not &amp; with &&amp;
 * Post analyze darkness and mass start estimates
@@ -73,12 +72,11 @@ Run notebooks in following order:
 * k-fold validation
 * Race and terrain specific things:
   * Estimate Jukola paces from Venla paces
-  * Estimate paces from optimal times given by track designers
   * Real time estimates for intermediaries
   * Data from year 2010 made predictions worse. Solve it by some kind of year/leg speed factor?
 * Data clean ups:
   * Add runners from disqualified teams
   * Match people with emit number, for example those that changed lastname at some point.
 * Document that we no longer use lognormal. It's now log Student T. 
-* Use country specific continous varriables instead of classes. country_median for example. 
+* Use country specific continuous variables instead of classes. country_median for example. 
     
