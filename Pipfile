@@ -14,6 +14,7 @@ requests = "*"
 seaborn = "*"
 joblib = "*"
 statsmodels = "*"
+jupyter-contrib-nbextensions = "*"
 
 [dev-packages]
 

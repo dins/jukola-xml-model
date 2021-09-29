@@ -4,6 +4,9 @@ Analyze and estimate Jukola Relay results
 ## Setup
 ```bash
 pipenv sync
+# Enable jupyter execution time measurement extension
+pipenv run jupyter contrib nbextension install --user
+pipenv run jupyter nbextension enable execute_time/ExecuteTime
 ```
 
 Fetch xml files (history):
