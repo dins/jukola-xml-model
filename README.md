@@ -28,13 +28,6 @@ RACE_TYPE=ve FORECAST_YEAR=2021 time pipenv run python fetch_online_team_countri
 RACE_TYPE=ve FORECAST_YEAR=2021 time pipenv run python final_running_order.py && RACE_TYPE=ju FORECAST_YEAR=2021 time pipenv run python final_running_order.py  # Post race running order from results
 ```
 
-join years by runner name and team:
-
-```bash
-RACE_TYPE=ve FORECAST_YEAR=2021 time pipenv run python group_csv.py && RACE_TYPE=ju FORECAST_YEAR=2021 time pipenv run python group_csv.py
-RACE_TYPE=ve FORECAST_YEAR=2021 time pipenv run python cluster_names.py && RACE_TYPE=ju FORECAST_YEAR=2021 time pipenv run python cluster_names.py
-```
-
 Then either run a script or start jupyter and run notebooks in browser.
 
 ### Run a single script 
@@ -43,6 +36,14 @@ time ./preprocess-simulate-and-analyze.sh
 ```
 
 ### start jupyter and run notebooks in browser
+Join years by runner name and team:
+
+```bash
+RACE_TYPE=ve FORECAST_YEAR=2021 time pipenv run python group_csv.py && RACE_TYPE=ju FORECAST_YEAR=2021 time pipenv run python group_csv.py
+RACE_TYPE=ve FORECAST_YEAR=2021 time pipenv run python cluster_names.py && RACE_TYPE=ju FORECAST_YEAR=2021 time pipenv run python cluster_names.py
+```
+
+
 Start jupyter:
 ```bash
 nice pipenv run jupyter notebook

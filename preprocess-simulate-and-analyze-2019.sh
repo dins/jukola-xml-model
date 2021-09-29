@@ -4,6 +4,10 @@ set -euf -o pipefail
 # RACE_TYPE=ve FORECAST_YEAR=2021 time ./preprocess-simulate-and-analyze-2019.sh
 
 echo $(date -u +"%F %T") "RACE_TYPE: ${RACE_TYPE}, FORECAST_YEAR: ${FORECAST_YEAR}"
+time pipenv run python group_csv.py
+echo $(date -u +"%F %T") "group_csv ${RACE_TYPE} ${FORECAST_YEAR}"
+time pipenv run python cluster_names.py
+echo $(date -u +"%F %T") "cluster_names ${RACE_TYPE} ${FORECAST_YEAR}"
 time pipenv run python estimate_personal_coefficients.py
 echo $(date -u +"%F %T") "personal_coefficients ${RACE_TYPE} ${FORECAST_YEAR}"
 time pipenv run jupyter nbconvert --to notebook --inplace --ExecutePreprocessor.timeout=180 --execute preprocess-priors-grouped.ipynb
