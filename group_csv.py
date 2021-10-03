@@ -29,20 +29,20 @@ for year in shared.history_years():
             team_base_name = row[3].upper()
             name = row[8].lower()
             name = normalize_names.normalize_name(name)
-            leg_nro = int(row[5])
+            leg = int(row[5])
             emit_str = row[6]
             leg_time_str = row[7]
 
             if leg_time_str == "NA":
                 leg_pace = "NA"
             else:
-                leg_distance = shared.leg_distance(ve_or_ju, int(year), leg_nro)
+                leg_distance = shared.leg_distance(ve_or_ju, int(year), leg)
                 leg_pace = round((int(leg_time_str) / 60) / leg_distance, 3)
 
             if len(name) <= 5:
                 if leg_pace != "NA":
                     print(
-                        f"Ignoring too short name '{name}' with leg_pace {leg_pace} from {year}/{ve_or_ju} {team_id}/{leg_nro}")
+                        f"Ignoring too short name '{name}' with leg_pace {leg_pace} from {year}/{ve_or_ju} {team_id}/{leg}")
             else:
                 run = {}
                 run["name"] = name
@@ -54,7 +54,7 @@ for year in shared.history_years():
                 run["year"] = year
                 run["pace"] = leg_pace
                 run["emit"] = emit_str
-                run["leg_nro"] = leg_nro
+                run["leg"] = leg
                 by_name[name].append(run)
         csvfile.close()
 
@@ -113,7 +113,7 @@ for unique_name, runs in by_unique_name.items():
         mean_pace = round(np.average(float_paces), 4)
         stdev = round(np.std(float_paces), 4)
         log_stdev = round(np.std(np.log(float_paces)), 4)
-        legs = map(lambda run: run["leg_nro"], runs)
+        legs = map(lambda run: run["leg"], runs)
         most_common_leg = collections.Counter(legs).most_common()[0][0]
         countries = map(lambda run: run["team_country"], runs)
         most_common_country = collections.Counter(countries).most_common()[0][0]
@@ -128,8 +128,7 @@ for unique_name, runs in by_unique_name.items():
 
 out_file.close()
 
-# TODO rename leg_nro to leg
-runs_file_cols = ["name", "year", "team_id", "team", "team_country", "pace", "leg_nro", "num_runs"]
+runs_file_cols = ["name", "year", "team_id", "team", "team_country", "pace", "leg", "num_runs"]
 (runs_out_file, runs_csvwriter) = open_output_file(f'data/runs_{shared.race_id_str()}.tsv',
                                                    runs_file_cols)
 
@@ -137,7 +136,7 @@ for unique_name, runs in by_unique_name.items():
     for run in runs:
         pace = run["pace"]
         if pace != "NA":
-            row = [unique_name, run["year"], run["team_id"], run["team"], run["team_country"], pace, run["leg_nro"],
+            row = [unique_name, run["year"], run["team_id"], run["team"], run["team_country"], pace, run["leg"],
                    len(runs)]
             runs_csvwriter.writerow(row)
 

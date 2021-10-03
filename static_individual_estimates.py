@@ -88,7 +88,7 @@ def preprocess_features(runs_df, top_countries):
     logging.info(runs_df.info())
     logging.info(f"top_countries: {len(top_countries)}: {top_countries}")
     # convert some int columns to labels
-    runs = runs_df.assign(leg=runs_df.leg_nro.astype(str))
+    runs = runs_df.assign(leg=runs_df.leg.astype(str))
     # cliping 0 to 1 is a hack for when predicting for unknown runners
     runs["runs"] = np.clip(runs.num_runs, 1, shared.num_pace_years + 1).astype(str)
 
@@ -147,8 +147,8 @@ def estimate_paces():
 
     # HISTORY: ""mean_team_id"	"teams"	"name"	"num_runs"	"num_valid_times"	"mean_pace"	"stdev"	"most_common_leg"	"most_common_country"
     # "pace_1"	"pace_2"	"pace_3"	"pace_4"	"pace_5"	"pace_6"	"pace_7"
-    # RUNS: "team"	"team_country"	"pace"	"leg_nro"	"num_runs"
-    history["leg_nro"] = history["most_common_leg"]
+    # RUNS: "team"	"team_country"	"pace"	"leg"	"num_runs"
+    history["leg"] = history["most_common_leg"]
     history["team_id"] = history["mean_team_id"]
     history["team_country"] = history["most_common_country"]
 
@@ -193,7 +193,6 @@ def combine_estimates_with_running_order():
     running_order = pd.read_csv(f"data/running_order_final_{shared.race_id_str()}.tsv", delimiter="\t")
     shared.log_df(running_order.shape)
 
-    running_order["leg_nro"] = running_order["leg"]
     running_order["orig_name"] = running_order["name"]
     running_order["name"] = running_order["name"].str.lower()
     
