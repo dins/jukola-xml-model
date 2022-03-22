@@ -11,3 +11,4 @@ RACE_TYPE=ve FORECAST_YEAR=2021 time ./process-one-race.sh
 RACE_TYPE=ju FORECAST_YEAR=2021 time ./process-one-race.sh
 
 git diff --color=always --word-diff=color -U0 reports/ | grep -E "aikaväliennuste väärin|keskivirhe"
+grep depth models/best_params_gbr_*

@@ -3,12 +3,14 @@ import logging
 import os
 
 import pandas as pd
+import numpy as np
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
 
 num_pace_years = 9
 pace_columns = [f"pace_{i}" for i in range(1, num_pace_years + 1)]
 
+np.random.seed(2019)
 
 def race_type(default="ve"):
     type = os.getenv('RACE_TYPE', default)

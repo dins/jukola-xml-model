@@ -84,6 +84,42 @@ def predict_without_history(features):
     return gbr_sd_estimate
 
 
+def preprocess_countries_names_and_features():
+    grouped = pd.read_csv(f'data/grouped_paces_{shared.race_id_str()}.tsv', delimiter="\t")
+    grouped["leg"] = grouped["most_common_leg"]
+    grouped["team_id"] = grouped["mean_team_id"]
+
+    # top_countries
+    grouped["team_country"] = grouped["most_common_country"]
+    country_counts = grouped["team_country"].value_counts()
+    top_country_counts = country_counts[country_counts > 30]
+    top_countries = top_country_counts.keys().tolist()
+    logging.info(f"top_countries: {len(top_countries)}: {top_countries}")
+
+    with open(f"data/top_countries_{shared.race_id_str()}.json", 'w') as outfile:
+        json.dump(top_countries, outfile)
+
+    # TODO do this before top_countries ?
+    grouped = grouped[grouped["mean_pace"].notna()]
+
+    # top_first_names
+    grouped["first_name"] = grouped.name.str.split(" ", expand=True).iloc[:, 0]
+    fn_counts = grouped["first_name"].value_counts()
+    top_fn_counts = fn_counts[fn_counts > 10]
+    top_first_names = top_fn_counts.keys().tolist()
+
+    with open(f"data/top_first_names_{shared.race_id_str()}.json", 'w') as outfile:
+        json.dump(top_first_names, outfile)
+
+    features = preprocess_features(grouped, top_countries)
+    x = features.values
+    y = np.log(grouped.mean_pace.values)
+    y = y.reshape(len(y), 1).ravel()
+
+    logging.info(f"x: {x.shape}, y: {y.shape}, features: {features.shape}, ")
+
+    return (x, y, features)
+
 def preprocess_features(runs_df, top_countries):
     logging.info(runs_df.info())
     logging.info(f"top_countries: {len(top_countries)}: {top_countries}")
@@ -129,6 +165,7 @@ def preprocess_features(runs_df, top_countries):
     # features["team_id_log100"] = np.log(runs.team_id) / np.log(100)
     # features["team_id_square"] = np.square(runs.team_id)
 
+    # TODO remove and maybe replace with log 100
     features.insert(0, "team_id_square", np.square(runs.team_id))
     features.insert(0, "team_id_log10", np.log10(runs.team_id))
     features.insert(0, "team_id", runs["team_id"])

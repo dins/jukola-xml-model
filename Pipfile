@@ -15,6 +15,7 @@ seaborn = "*"
 joblib = "*"
 statsmodels = "*"
 jupyter-contrib-nbextensions = "*"
+scikit-optimize = "*"
 
 [dev-packages]
 
