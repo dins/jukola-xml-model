@@ -62,9 +62,12 @@ Run notebooks in following order:
 
 ## TODO
 
+* Speedup processing:
+  * preprocess name joins (mapping history to a competitor)
+  * Vectorize simulation
+  * reduce categorial variables?
 * Check the difference on estimates when num_years is 3 and 4 
-* Put code from notebooks to .py files for better version control
-* Tune hyperparameters with https://scikit-optimize.github.io/stable/
+* Move code from notebooks to .py files for better version control
 * Try regularization
 * replace & with &amp; in xml files, but not &amp; with &&amp;
 * Post analyze darkness and mass start estimates
