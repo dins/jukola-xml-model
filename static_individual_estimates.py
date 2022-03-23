@@ -314,7 +314,7 @@ def combine_estimates_with_running_order():
     shared.log_df(ideal_paces)
 
     running_order = pd.merge(running_order, ideal_paces[["leg", "leg_factor"]], how="left", on=["leg"])
-    # On log scale multiplication becomes addition
+    # log scale multiplication equals addition on normal scale
     running_order["final_pace_mean"] = running_order["final_pace_mean"] + np.log(running_order["leg_factor"])
 
     running_order.to_csv(f"data/running_order_with_estimates_{shared.race_id_str()}.tsv", "\t")
