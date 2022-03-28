@@ -21,6 +21,7 @@ def read_persisted_dummy_column_values():
     return (top_countries, top_first_names)
 
 
+# TODO this takes most time in simulation
 def get_matching_history_row_for_runner(running_order_row, history_df, no_history_row):
     # no_history_row = pd.DataFrame([[0, 0]], columns=["log_means", "log_stdevs"])
     name = running_order_row["name"].lower()
@@ -294,6 +295,7 @@ def combine_estimates_with_running_order():
         running_order["final_pace_std"].values[unknown_runners], np.log(1.2), np.log(1.5))
 
     # remove extremes from all runners
+    # TODO for 2022 we may need to lower 5.6 ???
     running_order["final_pace_mean"] = np.clip(running_order["final_pace_mean"].values, np.log(5.6), np.log(18))
     # TODO 1.6 is prob too high
     running_order["final_pace_std"] = np.clip(running_order["final_pace_std"], np.log(1.07), np.log(1.6))

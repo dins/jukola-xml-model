@@ -12,6 +12,9 @@ pace_columns = [f"pace_{i}" for i in range(1, num_pace_years + 1)]
 
 np.random.seed(2019)
 
+def random_seed():
+    return 2019
+
 def race_type(default="ve"):
     type = os.getenv('RACE_TYPE', default)
     logging.info(f"RACE_TYPE: {type}")
