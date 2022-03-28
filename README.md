@@ -62,6 +62,7 @@ Run notebooks in following order:
 
 ## TODO
 
+* Use median instead of mean to reduce effect of single mistakes?
 * Speedup processing:
   * preprocess name joins (mapping history to a competitor)
   * Vectorize simulation
