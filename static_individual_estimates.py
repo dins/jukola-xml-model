@@ -183,46 +183,12 @@ def preprocess_features(runs_df, top_countries):
 def estimate_paces():
     history = pd.read_csv(f'data/grouped_paces_{shared.race_id_str()}.tsv', delimiter="\t")
 
-    # HISTORY: ""mean_team_id"	"teams"	"name"	"num_runs"	"num_valid_times"	"mean_pace"	"stdev"	"most_common_leg"	"most_common_country"
-    # "pace_1"	"pace_2"	"pace_3"	"pace_4"	"pace_5"	"pace_6"	"pace_7"
-    # RUNS: "team"	"team_country"	"pace"	"leg"	"num_runs"
-    history["leg"] = history["most_common_leg"]
-    history["team_id"] = history["mean_team_id"]
-    history["team_country"] = history["most_common_country"]
-
-    (top_countries, top_first_names) = read_persisted_dummy_column_values()
-
-    features = preprocess_features(history, top_countries)
-    features
-
-    shared.log_df(features.shape)
-
-    gbr_sd_estimate = predict_without_history(features)
-
-    #history['prior_mean'] = np.exp(pmlearn_preds[0])
-    #history['prior_std'] = np.exp(pmlearn_preds[1])
-    history['prior_mean'] = gbr_sd_estimate["predicted"]
-    history['prior_log_std'] = gbr_sd_estimate["log_std"]
-
-    history['prior_mean_error'] = np.abs(history['prior_mean'] - history['mean_pace'])
-    shared.log_df(f"prior_mean_error mean: {np.mean(history['prior_mean_error']).round(4)}")
-    history['prior_mean_error_in_sd'] = history['prior_mean_error'] / np.exp(history['prior_log_std'])
-    shared.log_df(f"prior_mean_error_in_sd mean: {np.mean(history['prior_mean_error_in_sd']).round(4)}")
-
-    log_stdev = np.nanstd(np.log(history[shared.pace_columns]), axis=1)
-    log_mean = np.nanmean(np.log(history[shared.pace_columns]), axis=1)
-    history["log_stdev"] = log_stdev
-    history["log_mean"] = log_mean
-    shared.log_df(history[["stdev", "log_stdev", "prior_log_std"]].describe(percentiles=[0.05, .25, .5, .75, .95, .99]))
-
-    shared.log_df(history[['num_valid_times', "stdev", "prior_mean_error", "log_stdev", "prior_log_std", "prior_mean_error_in_sd"]].groupby('num_valid_times').agg("mean").round(2))
-
-    history["predicted_log_pace_mean"] = history["log_mean"]
-    history["predicted_log_pace_std"] = history["log_stdev"]
+    history["predicted_log_pace_mean"] = np.nanmean(np.log(history[shared.pace_columns]), axis=1)
+    history["predicted_log_pace_std"] = np.nanstd(np.log(history[shared.pace_columns]), axis=1)
 
     simple_preds = history[
-        ["mean_team_id", "num_valid_times", "mean_pace", "stdev", "log_stdev", "prior_mean", "prior_log_std",
-         "predicted_log_pace_mean", "predicted_log_pace_std", "name", "teams"]].round(4)
+        ["num_valid_times",
+         "predicted_log_pace_mean", "predicted_log_pace_std", "name", "teams"]].round(5)
     simple_preds.to_csv(f"data/simple_preds_for_runners_with_history_{shared.race_id_str()}.csv", sep='\t')
 
 
@@ -242,7 +208,6 @@ def combine_estimates_with_running_order():
 
     def get_history_and_preds(running_order_row):
         history_row = get_matching_history_row_for_runner(running_order_row, predictions_and_history, no_history_row)
-        #print(f"estimate_row log_means {history_row.log_means} {history_row.log_stdevs}")
         pred_log_mean = history_row.predicted_log_pace_mean.values[0]
         pred_log_std = history_row.predicted_log_pace_std.values[0]
         num_valid_times = history_row.num_valid_times.values[0]

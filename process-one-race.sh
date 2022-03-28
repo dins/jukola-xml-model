@@ -4,13 +4,13 @@ set -ef -o pipefail
 # RACE_TYPE=ve FORECAST_YEAR=2021 time ./process-one-race.sh
 # RACE_TYPE=ve FORECAST_YEAR=2021 TUNE_HYPERPARAMS="true" time ./process-one-race.sh
 
-echo $(date -u +"%F %T") "RACE_TYPE: ${RACE_TYPE}, FORECAST_YEAR: ${FORECAST_YEAR}"
+echo $(date -u +"%F %T") "RACE_TYPE: ${RACE_TYPE}, FORECAST_YEAR: ${FORECAST_YEAR} DONE"
 time pipenv run python group_csv.py
-echo $(date -u +"%F %T") "group_csv ${RACE_TYPE} ${FORECAST_YEAR}"
+echo $(date -u +"%F %T") "group_csv ${RACE_TYPE} ${FORECAST_YEAR} DONE"
 time pipenv run python cluster_names.py
-echo $(date -u +"%F %T") "cluster_names ${RACE_TYPE} ${FORECAST_YEAR}"
+echo $(date -u +"%F %T") "cluster_names ${RACE_TYPE} ${FORECAST_YEAR} DONE"
 time pipenv run python estimate_personal_coefficients.py
-echo $(date -u +"%F %T") "personal_coefficients ${RACE_TYPE} ${FORECAST_YEAR}"
+echo $(date -u +"%F %T") "personal_coefficients ${RACE_TYPE} ${FORECAST_YEAR} DONE"
 if [[ -z "${TUNE_HYPERPARAMS}"  ]]; then
   echo $(date -u +"%F %T") "SKIPPING hyperparameter-tuning ${RACE_TYPE} ${FORECAST_YEAR}"
 else
