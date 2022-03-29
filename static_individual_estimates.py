@@ -199,7 +199,8 @@ def combine_estimates_with_running_order():
 
     running_order["orig_name"] = running_order["name"]
     running_order["name"] = running_order["name"].str.lower()
-    
+
+    # TODO remove this file
     predictions_and_history = pd.read_csv(f"data/simple_preds_for_runners_with_history_{shared.race_id_str()}.csv", delimiter="\t")
     shared.log_df(predictions_and_history.shape)
 
