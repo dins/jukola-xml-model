@@ -67,7 +67,7 @@ def predict_without_history(features):
     gbr_q_low = joblib.load(f'models/gbr_q_low_{shared.race_id_str()}.sav')
     gbr_q_high = joblib.load(f'models/gbr_q_high_{shared.race_id_str()}.sav')
 
-    gbr_preds = gbr.predict(features)   
+    gbr_preds = gbr.predict(features)
     gbr_q_low_preds = gbr_q_low.predict(features)
     gbr_q_high_preds = gbr_q_high.predict(features)
 
@@ -121,6 +121,7 @@ def preprocess_countries_names_and_features():
 
     return (x, y, features)
 
+
 def preprocess_features(runs_df, top_countries):
     logging.info(runs_df.info())
     logging.info(f"top_countries: {len(top_countries)}: {top_countries}")
@@ -154,7 +155,7 @@ def preprocess_features(runs_df, top_countries):
     country_cols.append("c_OTHER")
     missing_cols = [col for col in country_cols if not col in features.columns]
     logging.info(f"missing_cols: {missing_cols}")
-    pace_class_cols = [ f"fn_pace_class_{float(i)}" for i in range(10)]
+    pace_class_cols = [f"fn_pace_class_{float(i)}" for i in range(10)]
     missing_cols.extend([col for col in pace_class_cols if not col in features.columns])
     logging.info(f"missing_cols: {missing_cols}")
     missing_country_cols_df = pd.DataFrame({col: 0 for col in missing_cols}, index=features.index)
@@ -180,52 +181,49 @@ def preprocess_features(runs_df, top_countries):
     return features
 
 
-def estimate_paces():
+def _load_history_and_calculate_log_paces():
     history = pd.read_csv(f'data/grouped_paces_{shared.race_id_str()}.tsv', delimiter="\t")
 
     history["predicted_log_pace_mean"] = np.nanmean(np.log(history[shared.pace_columns]), axis=1)
     history["predicted_log_pace_std"] = np.nanstd(np.log(history[shared.pace_columns]), axis=1)
 
-    simple_preds = history[
-        ["num_valid_times",
-         "predicted_log_pace_mean", "predicted_log_pace_std", "name", "teams"]].round(5)
-    simple_preds.to_csv(f"data/simple_preds_for_runners_with_history_{shared.race_id_str()}.csv", sep='\t')
+    return history[["num_valid_times", "predicted_log_pace_mean", "predicted_log_pace_std", "name", "teams"]]
 
 
 def combine_estimates_with_running_order():
-    #running_order = pd.read_csv(f'data/running_order_j{shared.forecast_year()}_{shared.race_type()}.tsv', delimiter="\t")
+    # running_order = pd.read_csv(f'data/running_order_j{shared.forecast_year()}_{shared.race_type()}.tsv', delimiter="\t")
     running_order = pd.read_csv(f"data/running_order_final_{shared.race_id_str()}.tsv", delimiter="\t")
     shared.log_df(running_order.shape)
 
     running_order["orig_name"] = running_order["name"]
     running_order["name"] = running_order["name"].str.lower()
 
-    # TODO remove this file
-    predictions_and_history = pd.read_csv(f"data/simple_preds_for_runners_with_history_{shared.race_id_str()}.csv", delimiter="\t")
-    shared.log_df(predictions_and_history.shape)
+    historical_log_paces = _load_history_and_calculate_log_paces()
+    shared.log_df(historical_log_paces.shape)
 
-    predictions_and_history["num_runs"] = predictions_and_history["num_valid_times"]
-    no_history_row = pd.DataFrame([[0, 0, 0]], columns=["predicted_log_pace_mean", "predicted_log_pace_std", "num_valid_times"])
+    historical_log_paces["num_runs"] = historical_log_paces["num_valid_times"]
+    no_history_row = pd.DataFrame([[0, 0, 0]],
+                                  columns=["predicted_log_pace_mean", "predicted_log_pace_std", "num_valid_times"])
 
     def get_history_and_preds(running_order_row):
-        history_row = get_matching_history_row_for_runner(running_order_row, predictions_and_history, no_history_row)
+        history_row = get_matching_history_row_for_runner(running_order_row, historical_log_paces, no_history_row)
         pred_log_mean = history_row.predicted_log_pace_mean.values[0]
         pred_log_std = history_row.predicted_log_pace_std.values[0]
         num_valid_times = history_row.num_valid_times.values[0]
-        return pd.Series({"pred_log_mean": pred_log_mean, "pred_log_std": pred_log_std, "num_valid_times": num_valid_times})
-    
+        return pd.Series(
+            {"pred_log_mean": pred_log_mean, "pred_log_std": pred_log_std, "num_valid_times": num_valid_times})
+
     history_and_preds = running_order.apply(lambda row: get_history_and_preds(row), axis=1)
-    running_order = running_order.assign(num_runs = history_and_preds.num_valid_times)
-    running_order = running_order.assign(pred_log_mean = history_and_preds.pred_log_mean)
-    running_order = running_order.assign(pred_log_std = history_and_preds.pred_log_std)
-    
+    running_order = running_order.assign(num_runs=history_and_preds.num_valid_times)
+    running_order = running_order.assign(pred_log_mean=history_and_preds.pred_log_mean)
+    running_order = running_order.assign(pred_log_std=history_and_preds.pred_log_std)
+
     (top_countries, top_first_names) = read_persisted_dummy_column_values()
-    
+
     features = preprocess_features(running_order, top_countries)
 
-
     shared.log_df(features.info())
-    
+
     gbr_sd_estimate = predict_without_history(features)
 
     running_order["predicted"] = gbr_sd_estimate["predicted"]
@@ -234,24 +232,24 @@ def combine_estimates_with_running_order():
     running_order["log_std"] = gbr_sd_estimate["log_std"]
 
     shared.log_df(running_order["log_std"].describe(percentiles=[0.01, 0.05, .25, .5, .75, .95, .99]))
-    
+
     running_order["log_std_fixed"] = running_order["log_std"]
-    #running_order["log_std_fixed"] = np.clip(running_order["log_std"], 0.1, 0.5)
-    #running_order["log_std"].values[running_order["log_std"].values < 0] = 0.1
-    
-    #def select_final_ind_preds(row):
+    # running_order["log_std_fixed"] = np.clip(running_order["log_std"], 0.1, 0.5)
+    # running_order["log_std"].values[running_order["log_std"].values < 0] = 0.1
+
+    # def select_final_ind_preds(row):
     #    return pd.Series({"pred_log_mean": pred_log_mean, "pred_log_std": pred_log_std, "num_valid_times": num_valid_times})
-    
-    
-    #final_ind_preds = running_order.apply(lambda row: select_final_ind_preds(row), axis=1)
-    
+
+    # final_ind_preds = running_order.apply(lambda row: select_final_ind_preds(row), axis=1)
+
     running_order["final_pace_mean"] = np.log(running_order["predicted"])
     running_order["final_pace_std"] = running_order["log_std"]
     use_predicted_mean = running_order["num_runs"].values >= 1
-    running_order["final_pace_mean"].values[use_predicted_mean] = running_order["pred_log_mean"].values[use_predicted_mean]
+    running_order["final_pace_mean"].values[use_predicted_mean] = running_order["pred_log_mean"].values[
+        use_predicted_mean]
     use_predicted_std = running_order["num_runs"].values >= 4
     running_order["final_pace_std"].values[use_predicted_std] = running_order["pred_log_std"].values[use_predicted_std]
-    
+
     # remove extremes from unknown runners predictions
     unknown_runners = running_order["num_runs"].values < 1
     # TODO Try with more realistic lower bound?
@@ -268,7 +266,8 @@ def combine_estimates_with_running_order():
 
     shared.log_df(running_order.head().round(3))
 
-    shared.log_df(np.exp(running_order[["final_pace_mean", "final_pace_std"]]).describe(percentiles=[0.01, 0.02, 0.05, 0.1, .25, .5, .75, .9, .95, .99]))
+    shared.log_df(np.exp(running_order[["final_pace_mean", "final_pace_std"]]).describe(
+        percentiles=[0.01, 0.02, 0.05, 0.1, .25, .5, .75, .9, .95, .99]))
 
     # Multiply by terrain coefficients
     with open(f"data/default_personal_coefficients_{shared.race_id_str()}.json") as json_file:
@@ -288,10 +287,8 @@ def combine_estimates_with_running_order():
     running_order.to_csv(f"data/running_order_with_estimates_{shared.race_id_str()}.tsv", "\t")
 
     shared.log_df(running_order[
-        ['num_runs', 'pred_log_mean', "pred_log_std", "predicted", "log_std_fixed", "final_pace_mean", "final_pace_std"]
-    ].groupby('num_runs').agg(["mean"]).round(2))
+                      ['num_runs', 'pred_log_mean', "pred_log_std", "predicted", "log_std_fixed", "final_pace_mean",
+                       "final_pace_std"]
+                  ].groupby('num_runs').agg(["mean"]).round(2))
 
-
-#estimate_paces()
-
-#combine_estimates_with_running_order()
+# combine_estimates_with_running_order()
