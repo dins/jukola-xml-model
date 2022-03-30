@@ -127,12 +127,14 @@ def leg_distance(ve_or_ju, year, leg):
 
 start_timestamp = {
     "ve": {
+        2017: pd.Timestamp(year=2018, month=6, day=17, hour=14, tz="Europe/Helsinki"),
         2018: pd.Timestamp(year=2018, month=6, day=16, hour=14, tz="Europe/Helsinki"),
         2019: pd.Timestamp(year=2019, month=6, day=15, hour=14, tz="Europe/Helsinki"),
         2021: pd.Timestamp(year=2021, month=8, day=21, hour=13, minute=45, tz="Europe/Helsinki"),
         2022: pd.Timestamp(year=2022, month=6, day=18, hour=14, tz="Europe/Helsinki")
     },
     "ju": {
+        2017: pd.Timestamp(year=2018, month=6, day=17, hour=23, tz="Europe/Helsinki"),
         2018: pd.Timestamp(year=2018, month=6, day=16, hour=23, tz="Europe/Helsinki"),
         2019: pd.Timestamp(year=2019, month=6, day=15, hour=23, tz="Europe/Helsinki"),
         2021: pd.Timestamp(year=2021, month=8, day=21, hour=23, tz="Europe/Helsinki"),
@@ -142,11 +144,13 @@ start_timestamp = {
 
 changeover_closing = {
     "ve": {
+        2017: pd.Timestamp(year=2018, month=6, day=17, hour=18, minute=30, tz="Europe/Helsinki"),
         2018: pd.Timestamp(year=2018, month=6, day=16, hour=18, minute=30, tz="Europe/Helsinki"),
         2019: pd.Timestamp(year=2019, month=6, day=15, hour=18, minute=30, tz="Europe/Helsinki"),
         2021: pd.Timestamp(year=2021, month=8, day=21, hour=18, minute=15, tz="Europe/Helsinki")
     },
     "ju": {
+        2017: pd.Timestamp(year=2018, month=6, day=18, hour=8, minute=45, tz="Europe/Helsinki"),
         2018: pd.Timestamp(year=2018, month=6, day=17, hour=8, minute=45, tz="Europe/Helsinki"),
         2019: pd.Timestamp(year=2019, month=6, day=16, hour=8, minute=45, tz="Europe/Helsinki"),
         2021: pd.Timestamp(year=2021, month=8, day=22, hour=8, minute=45, tz="Europe/Helsinki")
@@ -154,6 +158,10 @@ changeover_closing = {
 }
 
 dark_period = {
+    2017: {
+        "start": pd.Timestamp(year=2017, month=6, day=17, hour=22, minute=58, tz="Europe/Helsinki"),
+        "end": pd.Timestamp(year=2017, month=6, day=18, hour=3, minute=1, tz="Europe/Helsinki")
+    },
     2018: {
         "start": pd.Timestamp(year=2018, month=6, day=16, hour=22, minute=54, tz="Europe/Helsinki"),
         "end": pd.Timestamp(year=2018, month=6, day=17, hour=3, minute=41, tz="Europe/Helsinki")
