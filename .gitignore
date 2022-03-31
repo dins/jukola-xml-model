@@ -3,4 +3,5 @@ jukola-xml-model.iml
 .ipynb_checkpoints/*
 *.sav
 scratch.txt
-/web-lib/for_web_ve_fy_2018.json
+/web-lib/for_web_ve_fy_201*
+/web-lib/for_web_ju_fy_201*

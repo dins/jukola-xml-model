@@ -41,8 +41,8 @@ def get_matching_history_row_for_runner(running_order_row, history_df, no_histor
         by_name = history_df[history_df['name'] == switched_name]
         by_name_and_colon = history_df[history_df['name'].str.contains(switched_name + ":", regex=False)]
         runners = by_name.append(by_name_and_colon)
-        if (len(runners) > 0):
-            print(f"Found {len(runners)} history with switched name {switched_name} ")
+        # if (len(runners) > 0):
+          #  print(f"Found {len(runners)} history with switched name {switched_name} ")
 
     if (len(runners) == 1):
         # Only one runner with this name
