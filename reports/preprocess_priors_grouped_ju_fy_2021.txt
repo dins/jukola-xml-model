@@ -23,4 +23,4 @@ std_correct.mean 1.1694
 abs_error_in_stds.mean 0.4318
 abs_error.mean 1.4349
 abs_error.median 0.9398
-runtime 1.49 mins
+runtime 1.57 mins
