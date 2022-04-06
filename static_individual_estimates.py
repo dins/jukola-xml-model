@@ -95,7 +95,7 @@ def preprocess_features(runs_df, top_countries):
     # convert some int columns to labels
     runs = runs_df.assign(leg=runs_df.leg.astype(str))
     # cliping 0 to 1 is a hack for when predicting for unknown runners
-    runs["runs"] = np.clip(runs.num_runs, 1, shared.num_pace_years + 1).astype(int).astype(str)
+    runs["runs"] = np.clip(runs.num_runs, 1, shared.num_pace_years + 1).astype(int)
 
     def truncate_to_top_values(value, top_values):
         if value in top_values:
@@ -115,8 +115,8 @@ def preprocess_features(runs_df, top_countries):
     runs["c"] = runs.apply(lambda run: truncate_to_top_values(run["team_country"], top_countries), axis=1)
 
     # Explode categories to dummy columns
-    # TODO Try without runs as dummy?
-    features = pd.get_dummies(runs[["leg", "c", "runs", "fn_pace_class", "fn_pace_std_class"]], sparse=True)
+    features = pd.get_dummies(runs[["leg", "c", "fn_pace_class", "fn_pace_std_class"]], sparse=True)
+    features["runs"] = runs["runs"]
 
     # Ensure that a column exists for each top country + OTHER, despite none being in data
     country_cols = [f"c_{country}" for country in top_countries]
@@ -128,19 +128,10 @@ def preprocess_features(runs_df, top_countries):
     missing_cols.extend([col for col in pace_class_cols if not col in features.columns])
     logging.info(f"missing_cols: {missing_cols}")
 
-    runs_cols = [f"runs_{i}" for i in range(1, shared.num_pace_years + 2)]
-    missing_cols.extend([col for col in runs_cols if not col in features.columns])
-    logging.info(f"missing_cols: {missing_cols}")
-
     missing_country_cols_df = pd.DataFrame({col: 0 for col in missing_cols}, index=features.index)
     features = pd.concat([features, missing_country_cols_df], sort=False, axis=1)
 
     # allow linear regression to fit non-linear terms
-    # features["team_id_log2"] = np.log2(runs.team_id)
-    # features["team_id_log10"] = np.log10(runs.team_id)
-    # features["team_id_log100"] = np.log(runs.team_id) / np.log(100)
-    # features["team_id_square"] = np.square(runs.team_id)
-
     # TODO remove and maybe replace with log 100
     features.insert(0, "team_id_square", np.square(runs.team_id))
     features.insert(0, "team_id_log10", np.log10(runs.team_id))

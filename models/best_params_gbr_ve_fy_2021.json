@@ -1,1 +1,1 @@
-{"max_depth": 6, "n_estimators": 107, "learning_rate": 0.05}
+{"max_depth": 5, "n_estimators": 250, "learning_rate": 0.05}
