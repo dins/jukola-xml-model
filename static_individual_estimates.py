@@ -21,44 +21,6 @@ def read_persisted_dummy_column_values():
     return (top_countries, top_first_names)
 
 
-# TODO this takes most time in simulation
-def get_matching_history_row_for_runner(running_order_row, history_df, no_history_row):
-    name = running_order_row["name"].lower()
-    # Remove double spaces
-    name = " ".join(name.split())
-
-    by_name = history_df[history_df['name'] == name]
-    by_name_and_colon = history_df[history_df['name'].str.contains(name + ":", regex=False)]
-
-    runners = by_name.append(by_name_and_colon)
-
-    if (len(runners) == 0) and " " in name:
-        switched_name = switch_first_and_last_name(name)
-        # print(f"No history for {name}, trying switched name {switched_name}")
-        by_name = history_df[history_df['name'] == switched_name]
-        by_name_and_colon = history_df[history_df['name'].str.contains(switched_name + ":", regex=False)]
-        runners = by_name.append(by_name_and_colon)
-        # if (len(runners) > 0):
-        #  print(f"Found {len(runners)} history with switched name {switched_name} ")
-
-    if (len(runners) == 1):
-        # Only one runner with this name
-        return runners
-    # Try to match runner with team name
-    team_name = running_order_row["team_base_name"].upper()
-    runners = runners[runners['teams'].str.contains(team_name, regex=False)]
-    if (len(runners) == 1):
-        return runners
-    if (len(runners) == 0):
-        # No history found
-        return no_history_row
-    print(f"name '{name}' team_name '{team_name}'")
-    print(f"by_name {len(by_name)} by_name_and_colon {len(by_name_and_colon)} runners {len(runners)}")
-    print(f"Duplicate runner {runners}")
-    # print(f"TEAMS by_name_and_colon {by_name_and_colon['teams']}")
-    return runners.sort_values("num_runs", ascending=False).head(1)
-
-
 def switch_first_and_last_name(name):
     names = name.split()
     names.insert(0, names.pop())
@@ -166,7 +128,7 @@ def preprocess_features(runs_df, top_countries):
     missing_cols.extend([col for col in pace_class_cols if not col in features.columns])
     logging.info(f"missing_cols: {missing_cols}")
 
-    runs_cols = [f"runs_{i}" for i in range(1,shared.num_pace_years + 2)]
+    runs_cols = [f"runs_{i}" for i in range(1, shared.num_pace_years + 2)]
     missing_cols.extend([col for col in runs_cols if not col in features.columns])
     logging.info(f"missing_cols: {missing_cols}")
 
@@ -215,8 +177,8 @@ def combine_estimates_with_running_order():
     running_order["team_base_name_upper"] = running_order["team_base_name"].str.upper()
 
     history = _load_history_and_calculate_log_paces()
-    #logging.info(f"history.shape before cleanup: {history.shape}")
-    #history = history[history["num_valid_times"] >= 1].reset_index()
+    # logging.info(f"history.shape before cleanup: {history.shape}")
+    # history = history[history["num_valid_times"] >= 1].reset_index()
     logging.info(f"history.shape: {history.shape}")
     shared.log_df(history)
 
@@ -277,7 +239,7 @@ def combine_estimates_with_running_order():
     running_order_with_history.loc[multi_team, "num_runs"] = running_order_with_history[multi_team][
         "num_valid_times_multi_team"]
 
-    # By plain name
+    # By just name, no special tricks (plain name)
     running_order_with_history = pd.merge(running_order_with_history, history[history["duplicate_name"] == False],
                                           how="left", left_on=["name"], right_on=["name"],
                                           suffixes=("", "_plain_name"), )
@@ -301,36 +263,6 @@ def combine_estimates_with_running_order():
     shared.log_df(running_order_with_history[['name', 'num_runs', 'pred_log_mean']])
 
     logging.info(f"running_order_with_history.columns: {running_order_with_history.columns}")
-
-    def get_history_and_preds(running_order_row):
-        history_row = get_matching_history_row_for_runner(running_order_row, history, no_history_row)
-        pred_log_mean = history_row.predicted_log_pace_mean.values[0]
-        pred_log_std = history_row.predicted_log_pace_std.values[0]
-        num_valid_times = history_row.num_valid_times.values[0]
-        return pd.Series(
-            {"pred_log_mean": pred_log_mean, "pred_log_std": pred_log_std, "num_valid_times": num_valid_times})
-
-    #history_and_preds = running_order.apply(lambda row: get_history_and_preds(row), axis=1)
-    #running_order = running_order.assign(pred_log_mean=history_and_preds.pred_log_mean)
-    #running_order = running_order.assign(pred_log_std=history_and_preds.pred_log_std)
-    #running_order = running_order.assign(num_runs=history_and_preds.num_valid_times)
-
-    #logging.info(f"running_order.shape {running_order.shape}")
-    #logging.info(f"running_order.columns {running_order.columns}")
-
-    #shared.log_df(running_order_with_history[['name', 'num_runs', 'pred_log_mean']])
-
-    #running_order = running_order.assign(new_pred_log_mean=running_order_with_history.pred_log_mean)
-    #shared.log_df(running_order[['name', 'num_runs', 'pred_log_mean', 'new_pred_log_mean']])
-    #running_order["join_error"] = running_order["pred_log_mean"] != running_order["new_pred_log_mean"]
-    #logging.info(f"error rate: {running_order['join_error'].mean()}")
-    #logging.info(f"error count: {running_order['join_error'].sum()}")
-
-    #shared.log_df(
-    #    running_order[running_order['join_error']][
-    #        ['name', 'team', 'num_runs', 'pred_log_mean', 'new_pred_log_mean']])
-
-    # shared.log_df(running_order_with_history[['name', 'num_runs', 'pred_log_mean']])
 
     # TODO not running_order but running_order_with_history
     running_order = running_order_with_history[['team_id', 'team', 'team_base_name', 'team_country', 'leg', 'leg_dist',
@@ -410,5 +342,4 @@ def combine_estimates_with_running_order():
                        "final_pace_std"]
                   ].groupby('num_runs').agg(["mean"]).round(2))
 
-
-#combine_estimates_with_running_order()
+# combine_estimates_with_running_order()
