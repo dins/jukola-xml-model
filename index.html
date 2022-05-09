@@ -59,6 +59,10 @@
                 padding: 1px;
                 font-size: 0.7rem;
             }
+
+            th#leg {
+                font-size: 0;
+            }
         }
 
         .finished .estimate {
@@ -67,18 +71,52 @@
         }
 
         .finish-time {
-            color: green;
+            color: forestgreen;
             font-weight: bold;
         }
 
-        .unfinished .estimate {
-            font-style: italic;
+        .latestControl {
+            display: none;
+        }
+
+        .currentRunner .latestControl {
+            display: block;
+            color: white;
+            font-size: small;
+            border-radius: 10px;
+            padding: 10px;
+            background-color: forestgreen;
+        }
+
+        .latestControl .timeAndDistance {
+            font-weight: bold;
+        }
+
+        #estimate-summary .static {
+            color: grey;
+        }
+
+        #estimate-summary .online {
+            color: forestgreen;
+        }
+
+        #estimate-summary .name {
+            margin-bottom: 24px;
         }
 
         #search-box {
             visibility: hidden;
         }
-        #info-box {
+
+        .explanation #green {
+            color: forestgreen;
+        }
+
+        .explanation #grey {
+            color: grey;
+        }
+
+        .info-box {
             margin: auto;
             margin-bottom: 40px;
             margin-top: 40px;
@@ -91,31 +129,40 @@
     <h1>Vaihtoaikaennuste</h1>
     <select id="search-box" data-live-search="true" data-width="75%"
             data-live-search-placeholder="Hae joukkuetta tai juoksijaa">
-
     </select>
 </div>
-<table class="table" id="estimate-summary">
+
+<table class="table w-auto" id="estimate-summary">
     <thead>
     <tr>
-        <th scope="col">Osuus</th>
+        <th scope="col" id="leg">Osuus</th>
         <th scope="col">Nimi</th>
-        <th scope="col">Ennustettu aikaväli</th>
-        <th scope="col">Ennustettu maaliintulo</th>
+        <th scope="col">Ennusteen luottamus&shy;väli</th>
+        <!-- <th scope="col">Toden&shy;näköisin loppu&shy;aika</th>-->
+        <th scope="col">Loppu&shy;aika</th>
         <th scope="col">Maalissa</th>
-        <th scope="col">Yhteislähdön todennäköisyys</th>
-        <th scope="col">Osuuden aikana on pimeää</th>
+        <!-- <th scope="col">Yhteis&shy;lähdön toden&shy;näköisyys</th> -->
+        <th scope="col">Yhteis&shy;lähtö</th>
+        <!-- <th scope="col">Osuuden aikana on pimeää</th>-->
+        <th scope="col">Pimeää</th>
     </tr>
     </thead>
     <tbody>
     </tbody>
 </table>
 
-<div id="info-box" class="alert alert-dark" role="alert">
+<div class="info-box explanation">
+    <p>Staattisen ennusteen arvot on merkitty <span id="grey">harmaalla</span> värillä. Taulukossa esitetään sekä
+        vaihdon todennäköinen kellonaika, että osuuden kesto minuuteissa.</p>
+    <p>Kilpailun aikaisiin väliaikoihin perustuvat ennusteet on merkitty <span id="green">vihreällä</span> värillä.</p>
+</div>
+
+<div class="info-box alert alert-dark" role="alert">
     <h3>Tietoa Palvelusta</h3>
     <p>Ennuste perustuu juoksijan aikaisempien vuosien Jukola tuloksiin.
-    Mitä enemmän tuloksia on käytettävissä sitä vähemmän ennusteessa on epävarmuutta.
-    Ennusteen aikavälit ovat aiemmin pitäneet paikkansa noin 85% juoksijoista.</p>
-    <p>Ennuste päivittyy mahdollisesti online-rastien leimauksista kilpailun edetessä.</p>
+        Mitä enemmän tuloksia on käytettävissä sitä vähemmän ennusteessa on epävarmuutta.
+        Ennusteen aikavälit ovat aiemmin pitäneet paikkansa noin 85% juoksijoista.</p>
+    <p>Ennuste päivittyy mahdollisesti online-väliaikarastien leimauksista kilpailun edetessä.</p>
     <p>Ennuste on tehty täysin harrasteprojektina.</p>
 </div>
 
@@ -180,37 +227,70 @@
     }
 
     var date = timestampToDate(utcTimestamp);
-    return pad(date.getHours()) + ":" + pad(date.getMinutes())
+    var millisInMinute = 1000 * 60;
+    var roundedToEvenMinutes = new Date(Math.round(date.getTime() / millisInMinute) * millisInMinute)
+    return pad(roundedToEvenMinutes.getHours()) + ":" + pad(roundedToEvenMinutes.getMinutes())
   }
 
   function formatPercent(floatPropability) {
-
     return (floatPropability * 100).toFixed(0) + '%'
+  }
+
+  function formatInteger(floatValue) {
+    return floatValue.toFixed(0)
   }
 
   function addRunnerToTable(runner) {
     var rowClass = ""
-    var intervalText = formatTime(runner.fin_time_start95) + " - " + formatTime(runner.fin_time_end95);
+    var staticIntervalText = formatTime(runner.fin_time_start95) + " - " + formatTime(runner.fin_time_end95);
+    var onlineIntervalText = "";
     if (runner.onlineFinishTimestampLow95) {
-      intervalText = formatTime(runner.onlineFinishTimestampLow95) + " - " + formatTime(runner.onlineFinishTimestampHigh95);
+      onlineIntervalText = formatTime(runner.onlineFinishTimestampLow95) + " - " + formatTime(runner.onlineFinishTimestampHigh95);
     }
 
-    var pointEstimateText = formatTime(runner.fin_time_median);
+    var staticPersonalDurationIntervalText = formatInteger(runner.personal_start95) + "min - " + formatInteger(runner.personal_end95) + "min";
+
+    var staticPointEstimateText = formatTime(runner.fin_time_median);
+    var onlinePointEstimateText = "";
     if (runner.onlineFinishTimestampMedian) {
-      pointEstimateText = formatTime(runner.onlineFinishTimestampMedian);
+      onlinePointEstimateText = formatTime(runner.onlineFinishTimestampMedian);
       rowClass = "unfinished"
     }
+
+    var staticPointEstimateDurationText = formatInteger(Math.exp(runner.ind_log_mean) * runner.legDistance) + "min";
+
     var finishTime = ""
     if (runner.lastControlType === "Finish") {
       finishTime = formatTime(runner.lastControlTimestamp)
       rowClass = "finished"
     }
+    var latestControlText = ""
+    var currentRunnerClass = ""
+    if (runner.lastControlType === "Intermediary") {
+      latestControlText = runner.lastControlDistance + "km " + formatTime(runner.lastControlTimestamp)
+      currentRunnerClass = " currentRunner"
+    }
+
     $("#estimate-summary tbody").append(
-      "<tr class=" + rowClass + "><th scope=\"row\">" + runner.leg
-      + "</th><td>" + runner.name
-      + "</td><td class=estimate>" + intervalText
-      + "</td><td class=estimate>" + pointEstimateText
-      + "</td><td class=finish-time>" + finishTime
+      "<tr class='" + rowClass + currentRunnerClass + "'>" +
+      "<th scope=\"row\">" + runner.leg + "</th>" +
+      "<td>"
+      + "<div class='name'>" + runner.name + "</div>"
+      + "<span class='latestControl'>"
+      + "<div>Viimeisin väliaika:</div>"
+      + "<div class='timeAndDistance'>" + latestControlText + "</div>"
+      + "</span></td>"
+      + "<td class=estimate>"
+      + "<div class='static interval relay'>" + staticIntervalText + "</div>"
+      + "<div class='static interval duration'>" + staticPersonalDurationIntervalText + "</div>"
+      + "<div class='online interval relay'>" + onlineIntervalText + "</div>"
+      + "</td>"
+      + "<td class=estimate>"
+      + "<div class='static pointEstimate relay'>" + staticPointEstimateText + "</div>"
+      + "<div class='static pointEstimate duration'>" + staticPointEstimateDurationText + "</div>"
+      + "<div class='online pointEstimate relay'>" + onlinePointEstimateText + "</div>"
+      + "</td>" +
+      "<td class=finish-time>" + finishTime
       + "</td><td class=estimate>" + formatPercent(runner.inMassStart || runner.mass_start)
       + "</td><td class=estimate>" + formatPercent(runner.darkDuringLeg || runner.dark_during_leg)
       + "</td></tr>")
