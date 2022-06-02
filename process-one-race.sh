@@ -4,6 +4,7 @@ set -ef -o pipefail
 # RACE_TYPE=ve FORECAST_YEAR=2021 time ./process-one-race.sh
 # RACE_TYPE=ve FORECAST_YEAR=2021 TUNE_HYPERPARAMS="true" time ./process-one-race.sh
 
+# TUNE_HYPERPARAMS="true"
 echo $(date -u +"%F %T") "RACE_TYPE: ${RACE_TYPE}, FORECAST_YEAR: ${FORECAST_YEAR} DONE"
 time pipenv run python group_csv.py
 echo $(date -u +"%F %T") "group_csv ${RACE_TYPE} ${FORECAST_YEAR} DONE"
