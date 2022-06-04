@@ -149,7 +149,9 @@ def preprocess_features(runs_df, top_countries):
 def _load_history_and_calculate_log_paces():
     history = pd.read_csv(f'data/grouped_paces_{shared.race_id_str()}.tsv', delimiter="\t")
 
-    history["predicted_log_pace_mean"] = np.nanmean(np.log(history[shared.pace_columns]), axis=1)
+    # CHEAP TRICK: Use median instead of mean to filter out one time accidents,
+    # the std will still carry the uncertainty caused by those
+    history["predicted_log_pace_mean"] = np.nanmedian(np.log(history[shared.pace_columns]), axis=1)
     history["predicted_log_pace_std"] = np.nanstd(np.log(history[shared.pace_columns]), axis=1)
 
     return history[["num_valid_times", "predicted_log_pace_mean", "predicted_log_pace_std", "name", "teams"]]

@@ -15,7 +15,7 @@ np.random.seed(2019)
 def random_seed():
     return 2019
 
-def race_type(default="ve"):
+def race_type(default="ju"):
     type = os.getenv('RACE_TYPE', default)
     logging.info(f"RACE_TYPE: {type}")
     return type

@@ -110,7 +110,9 @@ for unique_name, runs in by_unique_name.items():
     if len(valid_paces) > 0:
         float_paces = np.array(valid_paces).astype(np.float)
         # TODO weighted mean to emphasize recent values
-        mean_pace = round(np.average(float_paces), 4)
+        # CHEAP TRICK: Use median instead of mean to filter out one time accidents,
+        # the std will still carry the uncertainty caused by those
+        mean_pace = round(np.median(float_paces), 4)
         stdev = round(np.std(float_paces), 4)
         log_stdev = round(np.std(np.log(float_paces)), 4)
         legs = map(lambda run: run["leg"], runs)
