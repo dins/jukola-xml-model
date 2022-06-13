@@ -7,7 +7,7 @@ import pandas as pd
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
 
-num_pace_years = 9
+num_pace_years = 10
 pace_columns = [f"pace_{i}" for i in range(1, num_pace_years + 1)]
 
 np.random.seed(2019)
@@ -34,8 +34,8 @@ def race_id_str():
 
 
 years = {
-    "ve": ["2019", "2018", "2017", "2016", "2015", "2014", "2013", "2012", "2011"],
-    "ju": ["2019", "2018", "2017", "2016", "2015", "2014", "2013", "2012", "2011"]
+    "ve": ["2021", "2019", "2018", "2017", "2016", "2015", "2014", "2013", "2012", "2011"],
+    "ju": ["2021", "2019", "2018", "2017", "2016", "2015", "2014", "2013", "2012", "2011"]
 }
 
 # 2020 missing
