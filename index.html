@@ -171,13 +171,13 @@
 <script>
 
   var raceStart = {
-    ve: new Date(Date.parse('2021-08-21T13:45:00+03:00')), // parse returns something else than Date
-    ju: new Date(Date.parse('2021-08-21T23:00:00+03:00'))
+    ve: new Date(Date.parse('2022-06-18T14:00:00+03:00')), // parse returns something else than Date
+    ju: new Date(Date.parse('2022-06-18T23:00:00+03:00'))
   }
 
   var changeoverClosing = {
-    ve: new Date(Date.parse('2021-08-21T18:15:00+03:00')), // parse returns something else than Date
-    ju: new Date(Date.parse('2021-08-22T08:45:00+03:00'))
+    ve: new Date(Date.parse('2022-06-18T18:30:00+03:00')), // parse returns something else than Date
+    ju: new Date(Date.parse('2022-06-19T08:45:00+03:00'))
   }
 
   function raceMinutesToDate(minutesSinceRaceStart, ve_or_ju, teamsLatestOnlineTimestamp) {
@@ -503,8 +503,8 @@
     )
   }
 
-  var juRunnersUrl = "https://dins.github.io/jukola-xml-model/web-lib/for_web_ju_fy_2021.json";
-  var veRunnersUrl = "https://dins.github.io/jukola-xml-model/web-lib/for_web_ve_fy_2021.json";
+  var juRunnersUrl = "https://dins.github.io/jukola-xml-model/web-lib/for_web_ju_fy_2022.json";
+  var veRunnersUrl = "https://dins.github.io/jukola-xml-model/web-lib/for_web_ve_fy_2022.json";
 
   $.getJSON(veRunnersUrl, function (runners) {
     _.each(runners, function (runner) {
