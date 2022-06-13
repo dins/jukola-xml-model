@@ -27,8 +27,8 @@ Fetch team country and running orders:
 
 ```bash
 time for year in $(seq 2009 2019); do echo "YEAR $year"; time pipenv run python fetch_team_countries.py ${year} && wc data/team_countries_j${year}_ju.tsv; done
-RACE_TYPE=ve FORECAST_YEAR=2021 time pipenv run python fetch_online_team_countries.py && RACE_TYPE=ju FORECAST_YEAR=2021 time pipenv run python fetch_online_team_countries.py 
-RACE_TYPE=ve FORECAST_YEAR=2021 time pipenv run python final_running_order.py && RACE_TYPE=ju FORECAST_YEAR=2021 time pipenv run python final_running_order.py  # Post race running order from results
+RACE_TYPE=ve FORECAST_YEAR=2022 time pipenv run python fetch_online_team_countries.py && RACE_TYPE=ju FORECAST_YEAR=2022 time pipenv run python fetch_online_team_countries.py 
+RACE_TYPE=ve FORECAST_YEAR=2022 time pipenv run python final_running_order.py && RACE_TYPE=ju FORECAST_YEAR=2022 time pipenv run python final_running_order.py  # Post race running order from results
 ```
 
 Then either run a script or start jupyter and run notebooks in browser.
@@ -42,8 +42,8 @@ time ./process-recent-years.sh
 Join years by runner name and team:
 
 ```bash
-RACE_TYPE=ve FORECAST_YEAR=2021 time pipenv run python group_csv.py && RACE_TYPE=ju FORECAST_YEAR=2021 time pipenv run python group_csv.py
-RACE_TYPE=ve FORECAST_YEAR=2021 time pipenv run python cluster_names.py && RACE_TYPE=ju FORECAST_YEAR=2021 time pipenv run python cluster_names.py
+RACE_TYPE=ve FORECAST_YEAR=2022 time pipenv run python group_csv.py && RACE_TYPE=ju FORECAST_YEAR=2022 time pipenv run python group_csv.py
+RACE_TYPE=ve FORECAST_YEAR=2022 time pipenv run python cluster_names.py && RACE_TYPE=ju FORECAST_YEAR=2022 time pipenv run python cluster_names.py
 ```
 
 
@@ -55,7 +55,7 @@ nice pipenv run jupyter notebook
 Run notebooks in following order:
 1. Optional `unknown-runners.ipynb` requires `runs_ve.tsv` and plots and explores data
 1. `preprocess-priors-grouped.ipynb` requires `grouped_paces_ve.tsv` and produces `gbr_*_ve.sav`
-1. `2019-relay-simulation.ipynb` requires `grouped_paces_ve.tsv`, `gbr_*_ve.sav` and `running_order_j2019_ve.tsv` and produces `web-lib/for_web_ve_2019.json` 
+1. `2019-relay-simulation.ipynb` requires `grouped_paces_ve.tsv` and `gbr_*_ve.sav` and produces `web-lib/for_web_ve_2019.json` 
 1. `post-race-analysis.ipynb` requires `web-lib/for_web_ve_2019.json` and produces `web-lib/for_web_ve_2019.json`
 
 

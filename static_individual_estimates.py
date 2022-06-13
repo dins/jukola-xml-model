@@ -335,4 +335,6 @@ def combine_estimates_with_running_order():
                        "final_pace_std"]
                   ].groupby('num_runs').agg(["mean"]).round(2))
 
-# combine_estimates_with_running_order()
+
+if __name__ == '__main__':
+    combine_estimates_with_running_order()

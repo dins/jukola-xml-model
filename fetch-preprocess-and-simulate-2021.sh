@@ -3,14 +3,11 @@ set -euf -o pipefail
 
 # time ./fetch-preprocess-and-simulate-2021.sh
 
-wc data/running_order_j2021_ju.tsv && wc data/running_order_j2021_ve.tsv
-# They are in 2020 in 2021
-time pipenv run python fetch_running_order.py 2020
-wc data/running_order_j2020_ju.tsv && wc data/running_order_j2020_ve.tsv
+wc data/running_order_final_ju_fy_2022.tsv && wc data/running_order_final_ve_fy_2022.tsv
+time pipenv run python fetch_running_order.py 2022
+wc data/running_order_final_ju_fy_2022.tsv && wc data/running_order_final_ve_fy_2022.tsv
 sleep 5
-cp data/running_order_j2020_ve.tsv data/running_order_j2021_ve.tsv && cp data/running_order_j2020_ju.tsv data/running_order_j2021_ju.tsv
-RACE_TYPE=ve FORECAST_YEAR=2021 time pipenv run python group_csv.py && RACE_TYPE=ju FORECAST_YEAR=2021 time pipenv run python group_csv.py
-RACE_TYPE=ve FORECAST_YEAR=2021 time pipenv run python cluster_names.py && RACE_TYPE=ju FORECAST_YEAR=2021 time pipenv run python cluster_names.py
 
-RACE_TYPE=ve FORECAST_YEAR=2021 time ./process-one-race.sh && RACE_TYPE=ju FORECAST_YEAR=2021 time ./process-one-race.sh
+BEFORE_RACE="true" RACE_TYPE=ve FORECAST_YEAR=2022 time ./process-one-race.sh
+BEFORE_RACE="true" RACE_TYPE=ju FORECAST_YEAR=2022 time ./process-one-race.sh
 

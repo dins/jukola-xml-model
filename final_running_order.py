@@ -5,7 +5,7 @@ import pandas as pd
 
 import shared
 
-# RACE_TYPE=ve FORECAST_YEAR=2021 time pipenv run python final_running_order.py && head data/running_order_final_ve_fy_2021.tsv
+# RACE_TYPE=ve FORECAST_YEAR=2022 time pipenv run python final_running_order.py && head data/running_order_final_ve_fy_2022.tsv
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
 

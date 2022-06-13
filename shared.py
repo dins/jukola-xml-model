@@ -2,8 +2,8 @@ import csv
 import logging
 import os
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
 
@@ -12,16 +12,18 @@ pace_columns = [f"pace_{i}" for i in range(1, num_pace_years + 1)]
 
 np.random.seed(2019)
 
+
 def random_seed():
     return 2019
 
-def race_type(default="ju"):
+
+def race_type(default="ve"):
     type = os.getenv('RACE_TYPE', default)
     logging.info(f"RACE_TYPE: {type}")
     return type
 
 
-def forecast_year(default=2021):
+def forecast_year(default=2022):
     year = os.getenv('FORECAST_YEAR', default)
     logging.info(f"FORECAST_YEAR: {year}")
     return int(year)
@@ -147,13 +149,15 @@ changeover_closing = {
         2017: pd.Timestamp(year=2018, month=6, day=17, hour=18, minute=30, tz="Europe/Helsinki"),
         2018: pd.Timestamp(year=2018, month=6, day=16, hour=18, minute=30, tz="Europe/Helsinki"),
         2019: pd.Timestamp(year=2019, month=6, day=15, hour=18, minute=30, tz="Europe/Helsinki"),
-        2021: pd.Timestamp(year=2021, month=8, day=21, hour=18, minute=15, tz="Europe/Helsinki")
+        2021: pd.Timestamp(year=2021, month=8, day=21, hour=18, minute=15, tz="Europe/Helsinki"),
+        2022: pd.Timestamp(year=2022, month=6, day=18, hour=18, minute=30, tz="Europe/Helsinki")
     },
     "ju": {
         2017: pd.Timestamp(year=2018, month=6, day=18, hour=8, minute=45, tz="Europe/Helsinki"),
         2018: pd.Timestamp(year=2018, month=6, day=17, hour=8, minute=45, tz="Europe/Helsinki"),
         2019: pd.Timestamp(year=2019, month=6, day=16, hour=8, minute=45, tz="Europe/Helsinki"),
-        2021: pd.Timestamp(year=2021, month=8, day=22, hour=8, minute=45, tz="Europe/Helsinki")
+        2021: pd.Timestamp(year=2021, month=8, day=22, hour=8, minute=45, tz="Europe/Helsinki"),
+        2022: pd.Timestamp(year=2022, month=6, day=19, hour=8, minute=45, tz="Europe/Helsinki")
     }
 }
 

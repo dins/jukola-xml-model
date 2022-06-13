@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 set -ef -o pipefail
 
-# RACE_TYPE=ve FORECAST_YEAR=2021 time ./process-one-race.sh
-# RACE_TYPE=ve FORECAST_YEAR=2021 TUNE_HYPERPARAMS="true" time ./process-one-race.sh
+# BEFORE_RACE="true" RACE_TYPE=ve FORECAST_YEAR=2022 time ./process-one-race.sh
+# RACE_TYPE=ve FORECAST_YEAR=2022 TUNE_HYPERPARAMS="true" time ./process-one-race.sh
 
 # TUNE_HYPERPARAMS="true"
+# BEFORE_RACE="true"
 echo $(date -u +"%F %T") "RACE_TYPE: ${RACE_TYPE}, FORECAST_YEAR: ${FORECAST_YEAR} DONE"
 time pipenv run python group_csv.py
 echo $(date -u +"%F %T") "group_csv ${RACE_TYPE} ${FORECAST_YEAR} DONE"
@@ -22,5 +23,11 @@ time pipenv run jupyter nbconvert --to notebook --inplace --ExecutePreprocessor.
 echo $(date -u +"%F %T") "preprocess-priors ${RACE_TYPE} ${FORECAST_YEAR} DONE"
 time pipenv run jupyter nbconvert --to notebook --inplace --ExecutePreprocessor.timeout=1200 --execute 2019-relay-simulation.ipynb
 echo $(date -u +"%F %T") "2019-relay-simulation ${RACE_TYPE} ${FORECAST_YEAR} DONE"
-time pipenv run jupyter nbconvert --to notebook --inplace --execute post-race-analysis.ipynb
-echo $(date -u +"%F %T") "post-race-analysis ${RACE_TYPE} ${FORECAST_YEAR} DONE"
+
+if [[ -z "${BEFORE_RACE}"  ]]; then
+  time pipenv run jupyter nbconvert --to notebook --inplace --execute post-race-analysis.ipynb
+  echo $(date -u +"%F %T") "post-race-analysis ${RACE_TYPE} ${FORECAST_YEAR} DONE"
+else
+  echo $(date -u +"%F %T") "SKIPPING post-race-analysis ${RACE_TYPE} ${FORECAST_YEAR}"
+fi
+
