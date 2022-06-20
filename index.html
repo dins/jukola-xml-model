@@ -260,8 +260,10 @@
     var staticPointEstimateDurationText = formatInteger(Math.exp(runner.ind_log_mean) * runner.legDistance) + "min";
 
     var finishTime = ""
+    var finishLegDuration = ""
     if (runner.lastControlType === "Finish") {
       finishTime = formatTime(runner.lastControlTimestamp)
+      finishLegDuration = "" + formatInteger(runner.durationInMinutes) + "min"
       rowClass = "finished"
     }
     var latestControlText = ""
@@ -289,8 +291,10 @@
       + "<div class='static pointEstimate relay'>" + staticPointEstimateText + "</div>"
       + "<div class='static pointEstimate duration'>" + staticPointEstimateDurationText + "</div>"
       + "<div class='online pointEstimate relay'>" + onlinePointEstimateText + "</div>"
-      + "</td>" +
-      "<td class=finish-time>" + finishTime
+      + "</td>"
+      + "<td class=finish-time>"
+      + "<div class='online finishTime relay'>" + finishTime + "</div>"
+      + "<div class='online finishTime duration'>" + finishLegDuration + "</div>"
       + "</td><td class=estimate>" + formatPercent(runner.inMassStart || runner.mass_start)
       + "</td><td class=estimate>" + formatPercent(runner.darkDuringLeg || runner.dark_during_leg)
       + "</td></tr>")
