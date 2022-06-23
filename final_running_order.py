@@ -34,5 +34,11 @@ def create_running_order_from_results():
     final = final[final["name"].str.strip() != ""]
     final.to_csv(f"data/running_order_final_{shared.race_id_str()}.tsv", "\t", quoting=csv.QUOTE_ALL, index=False)
 
+    # Write team_countries file also
+    team_countries = final[["team_id", "team_base_name", "team_country"]].sort_values("team_id").drop_duplicates()
+    tc_file = f'data/team_countries_j{year}_{race_type}.tsv'
+    team_countries.to_csv(tc_file, sep="\t", index=False)
+    logging.info("Wrote " + tc_file)
+
 
 create_running_order_from_results()
