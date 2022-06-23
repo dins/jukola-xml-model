@@ -1,8 +1,26 @@
-Yksilöennusteen etumerkillinen keskivirhe: 6.7 minuuttia
+Yksilöennusteen etumerkillinen keskivirhe (juoksija myöhästyi ennusteesta): 6.7 minuuttia
 Yksilöennusteen keskivirhe: 11.8 minuuttia
 Yksilöennusteen mediaanivirhe: 8.2 minuuttia
 Virheen suhde loppuaikaan: 12.3 %
 Yksilön aikaväliennuste väärin: 8.4 %
+Yksilö nopeampi kuin aikaväliennuste: 0.5 %
+Yksilö hitaampi kuin aikaväliennuste: 7.9 %
+Aikavälin keskikoko kertaa virhe: 5.0 minuuttia
+Aikavälin mediaani koko kertaa virhe: 4.4 minuuttia
+          ind_interval  ind_interval_error  ind_interval_error_size
+num_runs                                                           
+0                89.85                0.03                     2.37
+1                83.37                0.02                     1.76
+2                60.25                0.04                     2.32
+3                50.42                0.08                     4.18
+4                38.98                0.15                     5.91
+5                38.23                0.16                     5.96
+6                37.40                0.15                     5.42
+7                36.85                0.15                     5.49
+8                36.98                0.13                     4.74
+9                34.34                0.14                     4.79
+10               34.84                0.15                     5.12
+11               18.34                0.00                     0.00
          ind_interval        ind_error        ind_interval_error       ind_error_signed       
                  mean median      mean median               mean count             mean median
 num_runs                                                                                      
