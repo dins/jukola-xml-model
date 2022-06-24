@@ -5,8 +5,10 @@ Virheen suhde loppuaikaan: 12.0 %
 Yksilön aikaväliennuste väärin: 5.9 %
 Yksilö nopeampi kuin aikaväliennuste: 1.7 %
 Yksilö hitaampi kuin aikaväliennuste: 4.1 %
-Aikavälin keskikoko kertaa virhe: 5.2 minuuttia
-Aikavälin mediaani koko kertaa virhe: 4.5 minuuttia
+Yksilön aikavälin keskikoko: 87.9 minuuttia
+Yksilön aikavälin keskikoko kertaa virhe: 5.2 minuuttia
+Yksilön aikavälin mediaani koko: 76.9 minuuttia
+Yksilön aikavälin mediaani koko kertaa virhe: 4.5 minuuttia
           ind_interval  ind_interval_error  ind_interval_error_size
 num_runs                                                           
 0               134.42                0.03                     3.99
