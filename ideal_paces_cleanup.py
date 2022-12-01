@@ -17,13 +17,19 @@ def _cleanup_ideal_times(race_type, marked_route):
 
     cleaned["leg"] = raw["Osuus"].astype(int)
     cleaned["ideal_time"] = raw["Aika"].str.extract('(\d+)').astype(int)
-    cleaned["vertical"] = raw["Nousu"].str.extract('(\d+)')
+    cleaned["vertical"] = raw["Nousu"].str.extract('(\d+)').astype(float)
+    raw['Osuuspituus_str'] = raw['Osuuspituus'].str.extract('(\d+,\d+)')
+    cleaned["leg_distance"] = raw['Osuuspituus_str'].str.replace(",", ".").astype(float)
+    logging.info(f"Osuuspituudet: {cleaned['leg_distance'].values}")
 
-    def _resolve_leg_distance(row):
-        return shared.leg_distance(race_type, row["year"], row["leg"])
+    #def _resolve_leg_distance(row):
+    #    return shared.leg_distance(race_type, row["year"], row["leg"])
 
-    cleaned["leg_distance"] = cleaned.apply(_resolve_leg_distance, axis=1)
+    #cleaned["leg_distance"] = cleaned.apply(_resolve_leg_distance, axis=1)
+
     cleaned["ideal_pace"] = cleaned["ideal_time"] / cleaned["leg_distance"]
+    cleaned["vertical_per_km"] = cleaned["vertical"] / cleaned["leg_distance"]
+
 
     marked_route_for_race_type = marked_route[marked_route["race_type"] == race_type]
     marked_route_for_race_type = marked_route_for_race_type[["year", "marking"]]
