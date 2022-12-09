@@ -23,7 +23,7 @@ def race_type(default="ve"):
     return type
 
 
-def forecast_year(default=2022):
+def forecast_year(default=2023):
     year = os.getenv('FORECAST_YEAR', default)
     logging.info(f"FORECAST_YEAR: {year}")
     return int(year)
@@ -34,8 +34,8 @@ def race_id_str():
 
 
 years = {
-    "ve": ["2021", "2019", "2018", "2017", "2016", "2015", "2014", "2013", "2012", "2011"],
-    "ju": ["2021", "2019", "2018", "2017", "2016", "2015", "2014", "2013", "2012", "2011"]
+    "ve": ["2022", "2021", "2019", "2018", "2017", "2016", "2015", "2014", "2013", "2012", "2011"],
+    "ju": ["2022", "2021", "2019", "2018", "2017", "2016", "2015", "2014", "2013", "2012", "2011"]
 }
 
 # 2020 missing

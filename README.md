@@ -21,7 +21,7 @@ Right after the race fetch results from "online" site: `time wget -P data https:
 Convert xml to csv:
 
 ```bash
-time for year in $(seq 1992 2019); do echo "YEAR $year"; time pipenv run python result_xml_to_csv.py $year ve && head data/results_with_dist_j${year}_ve.tsv; done
+RACE_TYPE=ve && time for year in $(seq 1992 2019); do echo "YEAR $year RACE: $RACE_TYPE"; time pipenv run python result_xml_to_csv.py $year $RACE_TYPE && head data/results_with_dist_j${year}_${RACE_TYPE}.tsv; done
 time pipenv run python count_names.py
 ```
 

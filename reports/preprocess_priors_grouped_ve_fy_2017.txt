@@ -1,26 +1,26 @@
-x.shape: (16212, 37)
-y.shape: (16212,)
+x.shape: (17494, 37)
+y.shape: (17494,)
 None
-x_train: (15401, 37), x_test: (811, 37)
+x_train: (16619, 37), x_test: (875, 37)
 <class 'sklearn.linear_model._base.LinearRegression'>: {'copy_X': True, 'fit_intercept': True, 'n_jobs': None, 'normalize': False, 'positive': False}
-Explained variance score: 0.494
+Explained variance score: 0.446
 <class 'sklearn.linear_model._ridge.Ridge'>: {'alpha': 0.5, 'copy_X': True, 'fit_intercept': True, 'max_iter': None, 'normalize': False, 'random_state': None, 'solver': 'auto', 'tol': 0.001}
-Explained variance score: 0.494
+Explained variance score: 0.446
 GradientBoostingRegressor params: {'alpha': 0.9, 'ccp_alpha': 0.0, 'criterion': 'friedman_mse', 'init': None, 'learning_rate': 0.07, 'loss': 'ls', 'max_depth': 5, 'max_features': None, 'max_leaf_nodes': None, 'min_impurity_decrease': 0.0, 'min_impurity_split': None, 'min_samples_leaf': 1, 'min_samples_split': 2, 'min_weight_fraction_leaf': 0.0, 'n_estimators': 177, 'n_iter_no_change': None, 'random_state': 0, 'subsample': 1.0, 'tol': 0.0001, 'validation_fraction': 0.1, 'verbose': 1, 'warm_start': False}
 <class 'sklearn.ensemble._gb.GradientBoostingRegressor'>: {'alpha': 0.9, 'ccp_alpha': 0.0, 'criterion': 'friedman_mse', 'init': None, 'learning_rate': 0.07, 'loss': 'ls', 'max_depth': 5, 'max_features': None, 'max_leaf_nodes': None, 'min_impurity_decrease': 0.0, 'min_impurity_split': None, 'min_samples_leaf': 1, 'min_samples_split': 2, 'min_weight_fraction_leaf': 0.0, 'n_estimators': 177, 'n_iter_no_change': None, 'random_state': 0, 'subsample': 1.0, 'tol': 0.0001, 'validation_fraction': 0.1, 'verbose': 1, 'warm_start': False}
-Explained variance score: 0.505
+Explained variance score: 0.498
 <class 'sklearn.ensemble._gb.GradientBoostingRegressor'>: {'alpha': 0.159, 'ccp_alpha': 0.0, 'criterion': 'friedman_mse', 'init': None, 'learning_rate': 0.07, 'loss': 'quantile', 'max_depth': 5, 'max_features': None, 'max_leaf_nodes': None, 'min_impurity_decrease': 0.0, 'min_impurity_split': None, 'min_samples_leaf': 1, 'min_samples_split': 2, 'min_weight_fraction_leaf': 0.0, 'n_estimators': 177, 'n_iter_no_change': None, 'random_state': 0, 'subsample': 1.0, 'tol': 0.0001, 'validation_fraction': 0.1, 'verbose': 1, 'warm_start': False}
-Explained variance score: 0.124
+Explained variance score: 0.09
 <class 'sklearn.ensemble._gb.GradientBoostingRegressor'>: {'alpha': 0.841, 'ccp_alpha': 0.0, 'criterion': 'friedman_mse', 'init': None, 'learning_rate': 0.07, 'loss': 'quantile', 'max_depth': 5, 'max_features': None, 'max_leaf_nodes': None, 'min_impurity_decrease': 0.0, 'min_impurity_split': None, 'min_samples_leaf': 1, 'min_samples_split': 2, 'min_weight_fraction_leaf': 0.0, 'n_estimators': 177, 'n_iter_no_change': None, 'random_state': 0, 'subsample': 1.0, 'tol': 0.0001, 'validation_fraction': 0.1, 'verbose': 1, 'warm_start': False}
-Explained variance score: 0.067
-q_low_error.mean 0.1702
-q_high_error.mean 0.1332
-q_error.mean 0.3033
-q_interval.mean 3.5863
-q_interval.median 3.47
-std.mean 1.7932
-std_correct.mean 1.1636
-abs_error_in_stds.mean 0.4418
-abs_error.mean 1.4529
-abs_error.median 1.0066
+Explained variance score: 0.05
+q_low_error.mean 0.1646
+q_high_error.mean 0.1726
+q_error.mean 0.3371
+q_interval.mean 3.5114
+q_interval.median 3.5372
+std.mean 1.7557
+std_correct.mean 1.1626
+abs_error_in_stds.mean 0.4479
+abs_error.mean 1.464
+abs_error.median 1.0477
 runtime 0.41 mins
