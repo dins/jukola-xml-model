@@ -78,6 +78,7 @@ Run notebooks in following order:
   * Estimate Jukola paces from Venla paces
   * Real time estimates for intermediaries
   * Data from year 2010 made predictions worse. Solve it by some kind of year/leg speed factor?
+  * Match Venla names in Jukola
 * Data clean ups:
   * Add runners from disqualified teams
   * Match people with emit number, for example those that changed lastname at some point.
