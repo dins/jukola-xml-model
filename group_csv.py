@@ -8,7 +8,7 @@ import numpy as np
 import normalize_names
 import shared
 
-# RACE_TYPE=ve FORECAST_YEAR=2022 time pipenv run python group_csv.py && head data/grouped_paces_ve.tsv
+# RACE_TYPE=ve FORECAST_YEAR=2022 time poetry run python group_csv.py && head data/grouped_paces_ve.tsv
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
 
@@ -108,7 +108,7 @@ for unique_name, runs in by_unique_name.items():
             print(run)
 
     if len(valid_paces) > 0:
-        float_paces = np.array(valid_paces).astype(np.float)
+        float_paces = np.array(valid_paces).astype(float)
         # TODO weighted mean to emphasize recent values
         # CHEAP TRICK: Use median instead of mean to filter out one time accidents,
         # the std will still carry the uncertainty caused by those

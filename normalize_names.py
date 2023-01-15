@@ -1,7 +1,7 @@
 import json
 import logging
 
-# time pipenv run python normalize_names.py
+# time poetry run python normalize_names.py
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
 

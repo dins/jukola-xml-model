@@ -3,10 +3,10 @@ Analyze and estimate Jukola Relay results
 
 ## Setup
 ```bash
-pipenv sync
+poetry install
 # Enable jupyter execution time measurement extension
-pipenv run jupyter contrib nbextension install --user
-pipenv run jupyter nbextension enable execute_time/ExecuteTime
+poetry run jupyter contrib nbextension install --user
+poetry run jupyter nbextension enable execute_time/ExecuteTime
 ```
 
 Fetch xml files (history):
@@ -21,16 +21,16 @@ Right after the race fetch results from "online" site: `time wget -P data https:
 Convert xml to csv:
 
 ```bash
-RACE_TYPE=ve && time for year in $(seq 1992 2019); do echo "YEAR $year RACE: $RACE_TYPE"; time pipenv run python result_xml_to_csv.py $year $RACE_TYPE && head data/results_with_dist_j${year}_${RACE_TYPE}.tsv; done
-time pipenv run python count_names.py
+RACE_TYPE=ve && time for year in $(seq 1992 2019); do echo "YEAR $year RACE: $RACE_TYPE"; time poetry run python result_xml_to_csv.py $year $RACE_TYPE && head data/results_with_dist_j${year}_${RACE_TYPE}.tsv; done
+time poetry run python count_names.py
 ```
 
 Fetch team country and running orders:
 
 ```bash
-time for year in $(seq 2009 2019); do echo "YEAR $year"; time pipenv run python fetch_team_countries.py ${year} && wc data/team_countries_j${year}_ju.tsv; done
-RACE_TYPE=ve FORECAST_YEAR=2022 time pipenv run python fetch_online_team_countries.py && RACE_TYPE=ju FORECAST_YEAR=2022 time pipenv run python fetch_online_team_countries.py 
-RACE_TYPE=ve FORECAST_YEAR=2022 time pipenv run python final_running_order.py && RACE_TYPE=ju FORECAST_YEAR=2022 time pipenv run python final_running_order.py  # Post race running order from results
+time for year in $(seq 2009 2019); do echo "YEAR $year"; time poetry run python fetch_team_countries.py ${year} && wc data/team_countries_j${year}_ju.tsv; done
+RACE_TYPE=ve FORECAST_YEAR=2022 time poetry run python fetch_online_team_countries.py && RACE_TYPE=ju FORECAST_YEAR=2022 time poetry run python fetch_online_team_countries.py 
+RACE_TYPE=ve FORECAST_YEAR=2022 time poetry run python final_running_order.py && RACE_TYPE=ju FORECAST_YEAR=2022 time poetry run python final_running_order.py  # Post race running order from results
 ```
 
 Then either run a script or start jupyter and run notebooks in browser.
@@ -44,14 +44,14 @@ time ./process-recent-years.sh
 Join years by runner name and team:
 
 ```bash
-RACE_TYPE=ve FORECAST_YEAR=2022 time pipenv run python group_csv.py && RACE_TYPE=ju FORECAST_YEAR=2022 time pipenv run python group_csv.py
-RACE_TYPE=ve FORECAST_YEAR=2022 time pipenv run python cluster_names.py && RACE_TYPE=ju FORECAST_YEAR=2022 time pipenv run python cluster_names.py
+RACE_TYPE=ve FORECAST_YEAR=2022 time poetry run python group_csv.py && RACE_TYPE=ju FORECAST_YEAR=2022 time poetry run python group_csv.py
+RACE_TYPE=ve FORECAST_YEAR=2022 time poetry run python cluster_names.py && RACE_TYPE=ju FORECAST_YEAR=2022 time poetry run python cluster_names.py
 ```
 
 
 Start jupyter:
 ```bash
-nice pipenv run jupyter notebook
+nice poetry run jupyter notebook
 ```
 
 Run notebooks in following order:

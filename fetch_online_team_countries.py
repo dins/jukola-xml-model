@@ -5,7 +5,7 @@ import requests
 
 import shared
 
-# RACE_TYPE=ve FORECAST_YEAR=2022 time pipenv run python fetch_online_team_countries.py && wc data/team_countries_j2022_ve.tsv
+# RACE_TYPE=ve FORECAST_YEAR=2022 time poetry run python fetch_online_team_countries.py && wc data/team_countries_j2022_ve.tsv
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
 

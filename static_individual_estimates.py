@@ -7,7 +7,7 @@ import pandas as pd
 
 import shared
 
-# time pipenv run python static_individual_estimates.py
+# time poetry run python static_individual_estimates.py
 
 logging.basicConfig(level=shared.log_df, format='%(asctime)s %(message)s')
 

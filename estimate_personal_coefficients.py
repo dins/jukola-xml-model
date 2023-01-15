@@ -9,7 +9,7 @@ from sklearn.linear_model import LinearRegression
 
 import shared
 
-# time pipenv run python estimate_personal_coefficients.py
+# time poetry run python estimate_personal_coefficients.py
 
 race_type = shared.race_type()
 year = shared.forecast_year()

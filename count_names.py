@@ -3,7 +3,7 @@ import logging
 
 import pandas as pd
 import shared
-# time pipenv run python count_names.py
+# time poetry run python count_names.py
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
 

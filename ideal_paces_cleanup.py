@@ -5,7 +5,7 @@ import numpy as np
 
 import shared
 
-# time pipenv run python ideal_paces_cleanup.py
+# time poetry run python ideal_paces_cleanup.py
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
 

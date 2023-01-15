@@ -9,9 +9,9 @@ import xml.etree.ElementTree as ET
 
 import numpy as np
 
-# time pipenv run python result_xml_to_csv.py 2017 ve
+# time poetry run python result_xml_to_csv.py 2017 ve
 
-# time for year in $(seq 2012 2018); do echo "YEAR $year"; time pipenv run python result_xml_to_csv.py $year ve && head data/results_with_dist_j${year}_ve.tsv; done
+# time for year in $(seq 2012 2018); do echo "YEAR $year"; time poetry run python result_xml_to_csv.py $year ve && head data/results_with_dist_j${year}_ve.tsv; done
 
 # wget -P data http://online.jukola.com/tulokset/results_j2018_ju.xml
 

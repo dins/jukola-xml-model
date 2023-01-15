@@ -10,7 +10,7 @@ from lxml import html
 import normalize_names
 import shared
 
-# time pipenv run python fetch_running_order.py 2022 && wc data/running_order_final_ju_fy_2022.tsv
+# time poetry run python fetch_running_order.py 2022 && wc data/running_order_final_ju_fy_2022.tsv
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
 

@@ -5,7 +5,7 @@ set -euf -o pipefail
 
 wc data/running_order_final_ju_fy_2022.tsv && wc data/running_order_final_ve_fy_2022.tsv
 sleep 3
-time pipenv run python fetch_running_order.py 2022
+time poetry run python fetch_running_order.py 2022
 wc data/running_order_final_ju_fy_2022.tsv && wc data/running_order_final_ve_fy_2022.tsv
 sleep 5
 
