@@ -6,7 +6,7 @@ set -ef -o pipefail
 
 # TUNE_HYPERPARAMS="true"
 # BEFORE_RACE="true"
-echo $(date -u +"%F %T") "RACE_TYPE: ${RACE_TYPE}, FORECAST_YEAR: ${FORECAST_YEAR} DONE"
+echo $(date -u +"%F %T") "RACE_TYPE: ${RACE_TYPE}, FORECAST_YEAR: ${FORECAST_YEAR}, RUN_TS: ${RUN_TS}"
 time poetry run python group_csv.py
 echo $(date -u +"%F %T") "group_csv ${RACE_TYPE} ${FORECAST_YEAR} DONE"
 time poetry run python cluster_names.py
