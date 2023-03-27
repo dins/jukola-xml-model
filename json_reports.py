@@ -60,12 +60,14 @@ def read_all_json_files_from_folder_to_df():
     key_values_df = all_df[all_df["desc"].isin(
         ["Viestin aikaväliennuste väärin", "Yksilöennusteen keskivirhe", "Yksilön aikaväliennuste väärin"])]
     # Weighted by number of participants which is roughly legs * teams,
-    # so Venals with less legs have less influence
-    averages_df = key_values_df.groupby(["execution_timestamp", "desc"]).apply(lambda x: np.average(x.value, weights=x.num_runners)).reset_index()
+    # so Venlas with less legs have less influence
+    averages_df = key_values_df.groupby(["execution_timestamp", "desc"]).apply(
+        lambda x: np.average(x.value, weights=x.num_runners)).reset_index()
+    averages_df.columns = ["execution_timestamp", "kpi", "value"]
     shared.log_df(averages_df.round(3).to_string(index=False))
 
     summary_path = "reports/reports_summary.tsv"
-    averages_df.to_csv(summary_path, sep="\t", index=False)
+    averages_df.round(3).to_csv(summary_path, sep="\t", index=False)
     logging.info(f"Saved {len(averages_df)} rows to {summary_path}")
 
 

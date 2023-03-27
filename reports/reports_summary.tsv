@@ -1,4 +1,4 @@
-execution_timestamp	desc	0
-20230327_043005	Viestin aikaväliennuste väärin	0.06798891236115179
-20230327_043005	Yksilöennusteen keskivirhe	12.404014333408323
-20230327_043005	Yksilön aikaväliennuste väärin	0.056896507539159556
+execution_timestamp	kpi	value
+20230327_043005	Viestin aikaväliennuste väärin	0.068
+20230327_043005	Yksilöennusteen keskivirhe	12.404
+20230327_043005	Yksilön aikaväliennuste väärin	0.057
