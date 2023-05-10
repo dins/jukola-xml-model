@@ -95,6 +95,7 @@ def preprocess_features(runs_df, top_countries):
     # convert some int columns to labels
     runs = runs_df.assign(leg=runs_df.leg.astype(str))
     # cliping 0 to 1 is a hack for when predicting for unknown runners
+    # TODO should this be  +1 for all when predicting?
     runs["runs"] = np.clip(runs.num_runs, 1, shared.num_pace_years + 1).astype(int)
 
     def truncate_to_top_values(value, top_values):
@@ -176,8 +177,6 @@ def combine_estimates_with_running_order():
     shared.log_df(history)
 
     history["num_runs"] = history["num_valid_times"]
-    no_history_row = pd.DataFrame([[0, 0, 0]],
-                                  columns=["predicted_log_pace_mean", "predicted_log_pace_std", "num_valid_times"])
 
     history = history.assign(name_without_colon=history['name'].str.split(":").str[0])
     switched_names = [switch_first_and_last_name(name) for name in history["name_without_colon"].values]
@@ -281,11 +280,6 @@ def combine_estimates_with_running_order():
     # running_order["log_std_fixed"] = np.clip(running_order["log_std"], 0.1, 0.5)
     # running_order["log_std"].values[running_order["log_std"].values < 0] = 0.1
 
-    # def select_final_ind_preds(row):
-    #    return pd.Series({"pred_log_mean": pred_log_mean, "pred_log_std": pred_log_std, "num_valid_times": num_valid_times})
-
-    # final_ind_preds = running_order.apply(lambda row: select_final_ind_preds(row), axis=1)
-
     running_order["final_pace_mean"] = np.log(running_order["predicted"])
     running_order["final_pace_std"] = running_order["log_std"]
     use_predicted_mean = running_order["num_runs"].values >= 1
@@ -303,8 +297,7 @@ def combine_estimates_with_running_order():
         running_order["final_pace_std"].values[unknown_runners], np.log(1.2), np.log(1.5))
 
     # remove extremes from all runners
-    # TODO for 2022 we may need to lower 5.6 ???
-    running_order["final_pace_mean"] = np.clip(running_order["final_pace_mean"].values, np.log(5.6), np.log(18))
+    running_order["final_pace_mean"] = np.clip(running_order["final_pace_mean"].values, np.log(5.6), np.log(19))
     # TODO 1.6 is prob too high
     running_order["final_pace_std"] = np.clip(running_order["final_pace_std"], np.log(1.07), np.log(1.6))
 
