@@ -15,7 +15,7 @@ import numpy as np
 
 # wget -P data http://online.jukola.com/tulokset/results_j2018_ju.xml
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s [%(process)d] %(funcName)s [%(levelname)s] %(message)s')
 
 year = int(sys.argv[1])
 ve_or_ju = sys.argv[2]

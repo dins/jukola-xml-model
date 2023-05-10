@@ -9,7 +9,7 @@ import shared
 
 # time poetry run python static_individual_estimates.py
 
-logging.basicConfig(level=shared.log_df, format='%(asctime)s %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s [%(process)d] %(funcName)s [%(levelname)s] %(message)s')
 
 
 def read_persisted_dummy_column_values():

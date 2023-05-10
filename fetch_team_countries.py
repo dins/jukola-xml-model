@@ -7,7 +7,7 @@ from lxml import html
 
 # time poetry run python fetch_team_countries.py 2022 && wc data/team_countries_j2022_ju.tsv
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s [%(process)d] %(funcName)s [%(levelname)s] %(message)s')
 
 
 def fetch_team_country(year, ve_or_ju):

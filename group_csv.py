@@ -10,7 +10,7 @@ import shared
 
 # RACE_TYPE=ve FORECAST_YEAR=2022 time poetry run python group_csv.py && head data/grouped_paces_ve.tsv
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s [%(process)d] %(funcName)s [%(levelname)s] %(message)s')
 
 ve_or_ju = shared.race_type()
 

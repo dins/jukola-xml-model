@@ -9,7 +9,7 @@ import shared
 
 # time poetry run python json_reports.py && wc data/all_json_reports.tsv
 
-logging.basicConfig(level=shared.log_df, format='%(asctime)s %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s [%(process)d] %(funcName)s [%(levelname)s] %(message)s')
 
 
 def list_files_in_folder(folder_name):

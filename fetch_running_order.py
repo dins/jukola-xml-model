@@ -12,7 +12,7 @@ import shared
 
 # time poetry run python fetch_running_order.py 2022 && wc data/running_order_final_ju_fy_2022.tsv
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s [%(process)d] %(funcName)s [%(levelname)s] %(message)s')
 
 
 # Fetches running order from registration site. It will become outdated on the race day.
