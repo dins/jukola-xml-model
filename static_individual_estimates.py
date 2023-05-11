@@ -95,7 +95,6 @@ def preprocess_features(runs_df, top_countries):
     # convert some int columns to labels
     runs = runs_df.assign(leg=runs_df.leg.astype(str))
     # cliping 0 to 1 is a hack for when predicting for unknown runners
-    # TODO should this be  +1 for all when predicting?
     runs["runs"] = np.clip(runs.num_runs, 1, shared.num_pace_years + 1).astype(int)
 
     def truncate_to_top_values(value, top_values):
