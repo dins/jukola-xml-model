@@ -90,7 +90,7 @@ def preprocess_countries_names_and_features():
 
 def preprocess_features(runs_df, top_countries):
     logging.info("PREPROCESS FEATURES")
-    logging.info(runs_df.info())
+    logging.info(f"runs_df.columns: {runs_df.columns}")
     logging.info(f"top_countries: {len(top_countries)}: {top_countries}")
     # convert some int columns to labels
     runs = runs_df.assign(leg=runs_df.leg.astype(str))
