@@ -84,8 +84,7 @@ for name, runs in by_name.items():
             by_unique_name[unique_name] = runs_in_team
 
 column_names = ["mean_team_id", "teams", "name", "num_runs", "num_valid_times", "mean_pace", "stdev", "log_stdev",
-                "most_common_leg",
-                "most_common_country"] + shared.pace_columns
+                "most_common_leg", "most_common_country", "years_and_legs"] + shared.pace_columns
 (out_file, csvwriter) = open_output_file(f'data/grouped_paces_{shared.race_id_str()}.tsv', column_names)
 
 max_years = shared.num_pace_years
@@ -119,13 +118,14 @@ for unique_name, runs in by_unique_name.items():
         most_common_leg = collections.Counter(legs).most_common()[0][0]
         countries = map(lambda run: run["team_country"], runs)
         most_common_country = collections.Counter(countries).most_common()[0][0]
+        years_and_legs = map(lambda run: f'{run["year"]}.{run["leg"]}', runs)
+        years_and_legs_str = " ".join(years_and_legs)
     else:
         mean_pace = "NA"
         stdev = "NA"
 
     row = [median_team_id, joined_teams, unique_name, len(runs), len(valid_paces), mean_pace, stdev, log_stdev,
-           most_common_leg,
-           most_common_country] + available_paces
+           most_common_leg, most_common_country, years_and_legs_str] + available_paces
     csvwriter.writerow(row)
 
 out_file.close()
