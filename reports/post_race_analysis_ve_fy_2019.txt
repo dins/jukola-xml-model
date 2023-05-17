@@ -11,8 +11,8 @@ Yksilön aikavälin mediaani koko: 48.1 minuuttia
 Yksilön aikavälin mediaani koko kertaa virhe: 1.7 minuuttia
           ind_interval  ind_interval_error  ind_interval_error_size
 num_runs                                                           
-0                84.48                0.02                     1.88
-1                77.20                0.03                     2.23
+0                84.47                0.02                     1.88
+1                77.22                0.03                     2.24
 2                65.15                0.02                     1.01
 3                52.31                0.03                     1.59
 4                37.99                0.08                     2.89
@@ -26,8 +26,8 @@ num_runs
          ind_interval        ind_error        ind_interval_error       ind_error_signed       
                  mean median      mean median               mean count             mean median
 num_runs                                                                                      
-0               84.48  83.11     13.94  10.57               0.02  1122            -1.98  -4.31
-1               77.20  76.33     10.77   7.28               0.03   830            -2.27  -1.94
+0               84.47  83.01     13.93  10.57               0.02  1123            -1.99  -4.33
+1               77.22  76.33     10.78   7.29               0.03   829            -2.27  -1.94
 2               65.15  64.38      9.29   7.15               0.02   836            -3.71  -3.12
 3               52.31  50.75      8.06   5.84               0.03   692            -2.39  -1.92
 4               37.99  31.41      7.79   5.56               0.08   630            -2.14  -2.25
@@ -54,13 +54,13 @@ Juoksija hitaampi kuin viestin aikaväliennuste: 1.7 %
              mean                mean                     mean                     mean
 leg                                                                                    
 1          47.417               0.034                    0.010                    0.024
-2          72.189               0.036                    0.017                    0.019
-3          97.276               0.052                    0.036                    0.016
-4         116.702               0.056                    0.046                    0.010
+2          72.192               0.036                    0.017                    0.019
+3          97.278               0.052                    0.036                    0.016
+4         116.704               0.056                    0.046                    0.010
               real_interval real_interval_error real_interval_error_fast real_interval_error_slow
                        mean                mean                     mean                     mean
 mean_num_runs                                                                                    
-0.0                  110.22                0.06                     0.03                     0.03
+0.0                  110.23                0.06                     0.03                     0.03
 1.0                  115.31                0.05                     0.03                     0.02
 2.0                  100.95                0.03                     0.02                     0.01
 3.0                   88.62                0.04                     0.03                     0.01
