@@ -130,6 +130,7 @@ for unique_name, runs in by_unique_name.items():
 
 out_file.close()
 
+# TODO add "leg_distance" column to runs.tsv
 runs_file_cols = ["name", "year", "team_id", "team", "team_country", "pace", "leg", "num_runs"]
 (runs_out_file, runs_csvwriter) = open_output_file(f'data/runs_{shared.race_id_str()}.tsv',
                                                    runs_file_cols)
