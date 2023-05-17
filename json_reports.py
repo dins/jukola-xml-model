@@ -29,6 +29,9 @@ def read_all_json_files_from_folder_to_df():
         with open(f"{folder_name}/{file_name}", "r") as f:
             reports_dict = json.load(f)
             execution_timestamp = reports_dict.pop("execution_timestamp")["value"]
+            if execution_timestamp == "unknown":
+                logging.warning(f"Skipping {file_name} with unknown execution_timestamp")
+                continue
             race_id = reports_dict.pop("race_id")["value"]
             num_runners = reports_dict.pop("num_runners")["value"]
 
