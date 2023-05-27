@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -eu -o pipefail
 
-# time ./unknown-runners-hyperparameter-tuning.sh
+# time ./individual-estimates-hyperparameter-tuning.sh
 
 function run_tuning_notebook {
   echo $(date -u +"%F %T") "Starting tuning for ${RACE_TYPE} ${FORECAST_YEAR} ${UNKNOWN_OR_KNOWN}"
-  time poetry run jupyter nbconvert --to notebook --inplace --ExecutePreprocessor.timeout=1200 --execute unknown-runners-estimates-hyperparams.ipynb
+  time poetry run jupyter nbconvert --to notebook --inplace --ExecutePreprocessor.timeout=1200 --execute individual-estimates-hyperparams.ipynb
   echo $(date -u +"%F %T") "DONE tuning for ${RACE_TYPE} ${FORECAST_YEAR} ${UNKNOWN_OR_KNOWN}"
 }
 
