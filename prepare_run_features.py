@@ -51,14 +51,14 @@ def preprocess_features_v2(runs_df, top_countries, include_history_paces):
     features = pd.get_dummies(runs[["leg", "c", "fn_pace_class", "fn_pace_std_class"]], sparse=True)
     features["runs"] = runs["runs"]
     features["terrain_coefficient"] = runs["terrain_coefficient"]
-    features["vertical_per_km"] = runs["vertical_per_km"].fillna(0)
-    features["marking_per_km"] = runs["marking_per_km"].fillna(0)
+    features["vertical_per_km"] = runs["vertical_per_km"]
+    features["marking_per_km"] = runs["marking_per_km"]
     features["leg_distance"] = runs["leg_distance"]
 
     if include_history_paces:
         # replace "NA" string with nan and convert to float
-        features["median_pace"] = runs["median_pace"].replace("NA", 0).fillna(0).astype(float)
-        features["log_stdev"] = runs["log_stdev"].replace("NA", 0).fillna(0).astype(float)
+        features["median_pace"] = runs["median_pace"].replace("NA", np.nan).astype(float)
+        features["log_stdev"] = runs["log_stdev"].replace("NA", np.nan).astype(float)
 
         logging.info(f"median_pace and log_stdev per runs")
         shared.log_df(features[["median_pace", "log_stdev"]].groupby(features["runs"]).agg(["mean", "count"]))
