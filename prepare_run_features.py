@@ -75,13 +75,7 @@ def preprocess_features_v2(runs_df, top_countries, include_history_paces):
     missing_country_cols_df = pd.DataFrame({col: 0 for col in missing_cols}, index=features.index)
     features = pd.concat([features, missing_country_cols_df], sort=False, axis=1)
 
-    # allow linear regression to fit non-linear terms
-    # TODO remove and maybe replace with log 100
-    features.insert(0, "team_id_square", np.square(runs.team_id))
-    features.insert(0, "team_id_log10", np.log10(runs.team_id))
     features.insert(0, "team_id", runs["team_id"])
-
-    # TODO Test the effect of this
     features = features.reindex(sorted(features.columns), axis=1)
 
     logging.info(f"features: {features.info()}")
