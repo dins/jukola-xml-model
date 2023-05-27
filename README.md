@@ -33,32 +33,17 @@ RACE_TYPE=ve FORECAST_YEAR=2022 time poetry run python fetch_online_team_countri
 RACE_TYPE=ve FORECAST_YEAR=2022 time poetry run python final_running_order.py && RACE_TYPE=ju FORECAST_YEAR=2022 time poetry run python final_running_order.py  # Post race running order from results
 ```
 
-Then either run a script or start jupyter and run notebooks in browser.
+Then run a script.
 
 ### Run a single script 
 ```bash
 time ./process-recent-years.sh
 ```
 
-### start jupyter and run notebooks in browser
-Join years by runner name and team:
-
-```bash
-RACE_TYPE=ve FORECAST_YEAR=2022 time poetry run python group_csv.py && RACE_TYPE=ju FORECAST_YEAR=2022 time poetry run python group_csv.py
-RACE_TYPE=ve FORECAST_YEAR=2022 time poetry run python cluster_names.py && RACE_TYPE=ju FORECAST_YEAR=2022 time poetry run python cluster_names.py
-```
-
-
 Start jupyter:
 ```bash
 nice poetry run jupyter notebook
 ```
-
-Run notebooks in following order:
-1. Optional `unknown-runners.ipynb` requires `runs_ve.tsv` and plots and explores data
-1. `preprocess-priors-grouped.ipynb` requires `grouped_paces_ve.tsv` and produces `gbr_*_ve.sav`
-1. `2019-relay-simulation.ipynb` requires `grouped_paces_ve.tsv` and `gbr_*_ve.sav` and produces `web-lib/for_web_ve_2019.json` 
-1. `post-race-analysis.ipynb` requires `web-lib/for_web_ve_2019.json` and produces `web-lib/for_web_ve_2019.json`
 
 
 ## TODO

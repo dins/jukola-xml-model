@@ -6,10 +6,19 @@ import pandas as pd
 import joblib
 
 import shared
-from static_individual_estimates import read_persisted_dummy_column_values
 
+# time RACE_TYPE=ve FORECAST_YEAR=2022 poetry run python prepare_run_features.py
 
 # os.environ['FORECAST_YEAR'] = "2019"
+
+def read_persisted_dummy_column_values():
+    with open(f"data/top_countries_{shared.race_id_str()}.json") as json_file:
+        top_countries = json.load(json_file)
+    with open(f"data/top_first_names_{shared.race_id_str()}.json") as json_file:
+        top_first_names = json.load(json_file)
+
+    return (top_countries, top_first_names)
+
 
 def preprocess_features_v2(runs_df, top_countries, include_history_paces):
     # log column names and types
@@ -133,30 +142,6 @@ def switch_first_and_last_name(name):
     names.insert(0, names.pop())
     switched_name = " ".join(names)
     return switched_name
-
-
-def predict_without_history(features):
-    gbr = joblib.load(f'models/runs_gbr_{shared.race_id_str()}.sav')
-    gbr_q_low = joblib.load(f'models/runs_gbr_q_low_{shared.race_id_str()}.sav')
-    gbr_q_high = joblib.load(f'models/runs_gbr_q_high_{shared.race_id_str()}.sav')
-
-    gbr_preds = gbr.predict(features)
-    gbr_q_low_preds = gbr_q_low.predict(features)
-    gbr_q_high_preds = gbr_q_high.predict(features)
-
-    gbr_sd_estimate = pd.DataFrame({
-        'log_q_low': gbr_q_low_preds,
-        'predicted': np.exp(gbr_preds),
-        'log_q_high': gbr_q_high_preds,
-    })
-
-    # Probably unjustified way to estimate standard deviation
-    gbr_sd_estimate["log_std"] = (gbr_sd_estimate.log_q_high - gbr_sd_estimate.log_q_low) / 2
-
-    logging.info(gbr_sd_estimate.head(15).round(3))
-    logging.info(gbr_sd_estimate["log_std"].mean())
-    logging.info(f"gbr_sd_estimate shape: {gbr_sd_estimate.shape}")
-    return gbr_sd_estimate
 
 
 def _predict_for_unknown_runners(features, unknown_or_known):
@@ -334,11 +319,6 @@ def combine_estimates_with_running_order():
     shared.log_df(running_order["log_std"].describe(percentiles=[0.01, 0.05, .25, .5, .75, .95, .99]))
     shared.log_df(running_order[["predicted", "log_std"]].groupby(running_order["num_runs"]).agg(["mean", "count"]))
 
-    # TODO remove log_std_fixed?
-    running_order["log_std_fixed"] = running_order["log_std"]
-    # running_order["log_std_fixed"] = np.clip(running_order["log_std"], 0.1, 0.5)
-    # running_order["log_std"].values[running_order["log_std"].values < 0] = 0.1
-
     # Remove negative log_std values that should not be possible
     running_order.loc[running_order["log_std"] < np.log(1.07), "log_std"] = np.log(1.07)
     shared.log_df(running_order["log_std"].describe(percentiles=[0.01, 0.05, .25, .5, .75, .95, .99]))
@@ -358,9 +338,12 @@ def combine_estimates_with_running_order():
 
     # Use 100% of HGBR estimates for unknown and slide to runners personal historical values as num_run increase
     # unfortunately this loses terrain scaling for larger num_runs
-    running_order["final_pace_mean"] = (np.log(running_order["predicted"]) / (running_order["num_runs"] + 1)) + (running_order["pred_log_mean"] * (running_order["num_runs"] / (running_order["num_runs"] + 1)))
+    running_order["final_pace_mean"] = (np.log(running_order["predicted"]) / (running_order["num_runs"] + 1)) + (
+            running_order["pred_log_mean"] * (running_order["num_runs"] / (running_order["num_runs"] + 1)))
     extra_std_weight = 3
-    running_order["final_pace_std"] = (extra_std_weight * running_order["log_std"] / (running_order["num_runs"] + extra_std_weight)) + (running_order["pred_log_std"] * (running_order["num_runs"] / (running_order["num_runs"] + extra_std_weight)))
+    running_order["final_pace_std"] = (extra_std_weight * running_order["log_std"] / (
+            running_order["num_runs"] + extra_std_weight)) + (running_order["pred_log_std"] * (
+            running_order["num_runs"] / (running_order["num_runs"] + extra_std_weight)))
     # for num_runs 2 and 3 the std is too low, because low number of data point (runs)
     unknown_stds = running_order["num_runs"] < 4
     running_order.loc[unknown_stds, "final_pace_std"] = running_order.loc[unknown_stds, "log_std"]
@@ -412,16 +395,25 @@ def combine_estimates_with_running_order():
 
     ideal_paces = pd.read_csv(f'Jukola-terrain/ideal-paces-{shared.race_type()}.tsv', delimiter='\t')
     ideal_paces = ideal_paces[ideal_paces["year"] == shared.forecast_year()]
-    ideal_paces["leg_factor"] = defaults["default_intercept"] + defaults["default_coef"] * ideal_paces["terrain_coefficient"]
+    ideal_paces["leg_factor"] = defaults["default_intercept"] + defaults["default_coef"] * ideal_paces[
+        "terrain_coefficient"]
     shared.log_df(ideal_paces)
 
     running_order = pd.merge(running_order, ideal_paces[["leg", "leg_factor"]], how="left", on=["leg"])
     # bring in some terrain scaling for larger num_runs
-    running_order["weighted_leg_factor"] = (1 / (running_order["num_runs"] + 1)) + (running_order["leg_factor"] * (running_order["num_runs"] / (running_order["num_runs"] + 1)))
+    running_order["weighted_leg_factor"] = (1 / (running_order["num_runs"] + 1)) + (
+            running_order["leg_factor"] * (running_order["num_runs"] / (running_order["num_runs"] + 1)))
     # log scale addition equals multiplication in linear scale
     running_order["final_pace_mean"] = running_order["final_pace_mean"] + np.log(running_order["weighted_leg_factor"])
 
     running_order.to_csv(f"data/running_order_with_estimates_{shared.race_id_str()}.tsv", "\t")
 
     shared.log_df(running_order[['num_runs', 'pred_log_mean', "pred_log_std", "predicted", "log_std", "final_pace_mean",
-                       "final_pace_std", "weighted_leg_factor"]].groupby('num_runs').agg(["mean"]).round(2))
+                                 "final_pace_std", "weighted_leg_factor"]].groupby('num_runs').agg(["mean"]).round(2))
+
+
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO,
+                        format='%(asctime)s - %(name)s [%(process)d] %(funcName)s [%(levelname)s] %(message)s')
+    logging.info("Creating static individual estimates for running order")
+    combine_estimates_with_running_order()
