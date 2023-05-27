@@ -111,7 +111,8 @@ for unique_name, runs in by_unique_name.items():
         # TODO weighted mean to emphasize recent values
         # CHEAP TRICK: Use median instead of mean to filter out one time accidents,
         # the std will still carry the uncertainty caused by those
-        mean_pace = round(np.median(float_paces), 4)
+        # TODO change to median_log_pace
+        median_pace = round(np.median(float_paces), 4)
         stdev = round(np.std(float_paces), 4)
         log_stdev = round(np.std(np.log(float_paces)), 4)
         legs = map(lambda run: run["leg"], runs)
@@ -121,17 +122,21 @@ for unique_name, runs in by_unique_name.items():
         years_and_legs = map(lambda run: f'{run["year"]}.{run["leg"]}', runs)
         years_and_legs_str = " ".join(years_and_legs)
     else:
-        mean_pace = "NA"
+        median_pace = "NA"
         stdev = "NA"
 
-    row = [median_team_id, joined_teams, unique_name, len(runs), len(valid_paces), mean_pace, stdev, log_stdev,
+    for run in runs:
+        run["median_pace"] = str(median_pace)
+        run["log_stdev"] = str(log_stdev)
+
+    row = [median_team_id, joined_teams, unique_name, len(runs), len(valid_paces), median_pace, stdev, log_stdev,
            most_common_leg, most_common_country, years_and_legs_str] + available_paces
     csvwriter.writerow(row)
 
 out_file.close()
 
 # TODO add "leg_distance" column to runs.tsv
-runs_file_cols = ["name", "year", "team_id", "team", "team_country", "pace", "leg", "num_runs"]
+runs_file_cols = ["name", "year", "team_id", "team", "team_country", "pace", "leg", "num_runs", "median_pace", "log_stdev"]
 (runs_out_file, runs_csvwriter) = open_output_file(f'data/runs_{shared.race_id_str()}.tsv',
                                                    runs_file_cols)
 
@@ -140,7 +145,7 @@ for unique_name, runs in by_unique_name.items():
         pace = run["pace"]
         if pace != "NA":
             row = [unique_name, run["year"], run["team_id"], run["team"], run["team_country"], pace, run["leg"],
-                   len(runs)]
+                   len(runs), run["median_pace"], run["log_stdev"]]
             runs_csvwriter.writerow(row)
 
 runs_out_file.close()

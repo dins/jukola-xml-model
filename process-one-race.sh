@@ -19,8 +19,19 @@ else
   time poetry run jupyter nbconvert --to notebook --inplace --ExecutePreprocessor.timeout=10000 --execute preprocess-priors-hyperparameter-tuning.ipynb
   echo $(date -u +"%F %T") "hyperparameter-tuning ${RACE_TYPE} ${FORECAST_YEAR} DONE"
 fi
-time poetry run jupyter nbconvert --to notebook --inplace --ExecutePreprocessor.timeout=180 --execute preprocess-priors-grouped.ipynb
-echo $(date -u +"%F %T") "preprocess-priors ${RACE_TYPE} ${FORECAST_YEAR} DONE"
+
+#time poetry run jupyter nbconvert --to notebook --inplace --ExecutePreprocessor.timeout=180 --execute preprocess-priors-grouped.ipynb
+#echo $(date -u +"%F %T") "preprocess-priors ${RACE_TYPE} ${FORECAST_YEAR} DONE"
+
+UNKNOWN_OR_KNOWN=unknown time poetry run jupyter nbconvert --to notebook --inplace --ExecutePreprocessor.timeout=600 --execute unknown-runners-estimates.ipynb
+echo $(date -u +"%F %T") "UNKNOWN unknown-runners-estimates.ipynb ${RACE_TYPE} ${FORECAST_YEAR} DONE"
+
+UNKNOWN_OR_KNOWN=known time poetry run jupyter nbconvert --to notebook --inplace --ExecutePreprocessor.timeout=600 --execute unknown-runners-estimates.ipynb
+echo $(date -u +"%F %T") "KNOWN unknown-runners-estimates.ipynb ${RACE_TYPE} ${FORECAST_YEAR} DONE"
+
+time poetry run jupyter nbconvert --to notebook --inplace --ExecutePreprocessor.timeout=600 --execute individual-estimates.ipynb
+echo $(date -u +"%F %T") "individual-estimates.ipynb ${RACE_TYPE} ${FORECAST_YEAR} DONE"
+
 time poetry run jupyter nbconvert --to notebook --inplace --ExecutePreprocessor.timeout=1200 --execute 2019-relay-simulation.ipynb
 echo $(date -u +"%F %T") "2019-relay-simulation ${RACE_TYPE} ${FORECAST_YEAR} DONE"
 

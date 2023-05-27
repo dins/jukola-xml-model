@@ -26,9 +26,8 @@ RACE_TYPE=ve FORECAST_YEAR=2022 process_one_race &
 RACE_TYPE=ju FORECAST_YEAR=2022 process_one_race &
 
 wait
+
 echo "DONE ${RUN_TS}"
 
 time poetry run python json_reports.py
 
-#git diff --color=always --word-diff=color -U0 reports/ | grep -E "aikaväliennuste väärin|keskivirhe"
-#grep learning_rate ./models/best_params_gbr_*
