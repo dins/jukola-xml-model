@@ -52,7 +52,7 @@ def preprocess_features_v2(runs_df, top_countries, include_history_paces):
     features["runs"] = runs["runs"]
     features["terrain_coefficient"] = runs["terrain_coefficient"]
     features["vertical_per_km"] = runs["vertical_per_km"]
-    features["marking_per_km"] = runs["marking_per_km"]
+    # features["marking_per_km"] = runs["marking_per_km"]
     features["leg_distance"] = runs["leg_distance"]
 
     if include_history_paces:
