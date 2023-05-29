@@ -1,76 +1,77 @@
-Yksilöennusteen etumerkillinen keskivirhe (juoksija myöhästyi ennusteesta): 2.9 minuuttia
+Aiempien Jukoloiden määrä (keskiarvo): 4.24 (Mediaani): 4.0
+Yksilöennusteen etumerkillinen keskivirhe (juoksija myöhästyi ennusteesta): 3.0 minuuttia
 Yksilöennusteen keskivirhe: 9.7 minuuttia
 Yksilöennusteen mediaanivirhe: 6.3 minuuttia
 Virheen suhde loppuaikaan: 10.9 %
-Yksilön aikaväliennuste väärin: 3.9 %
-Yksilö nopeampi kuin aikaväliennuste: 0.9 %
-Yksilö hitaampi kuin aikaväliennuste: 3.0 %
-Yksilön aikavälin keskikoko: 53.6 minuuttia
-Yksilön aikavälin keskikoko kertaa virhe: 2.1 minuuttia
-Yksilön aikavälin mediaani koko: 49.6 minuuttia
-Yksilön aikavälin mediaani koko kertaa virhe: 1.9 minuuttia
+Yksilön aikaväliennuste väärin: 4.7 %
+Yksilö nopeampi kuin aikaväliennuste: 1.0 %
+Yksilö hitaampi kuin aikaväliennuste: 3.7 %
+Yksilön aikavälin keskikoko: 52.0 minuuttia
+Yksilön aikavälin keskikoko kertaa virhe: 2.5 minuuttia
+Yksilön aikavälin mediaani koko: 48.2 minuuttia
+Yksilön aikavälin mediaani koko kertaa virhe: 2.3 minuuttia
           ind_interval  ind_interval_error  ind_interval_error_size
 num_runs                                                           
-0                72.67                0.11                     7.79
-1                73.84                0.01                     0.68
-2                61.39                0.02                     1.51
-3                56.65                0.03                     1.79
-4                44.19                0.04                     1.91
-5                43.56                0.03                     1.51
-6                40.85                0.04                     1.74
-7                41.15                0.02                     0.86
-8                39.15                0.04                     1.39
-9                37.08                0.02                     0.87
-10               38.74                0.04                     1.67
-11               46.62                0.00                     0.00
-12               19.75                0.00                     0.00
+0                71.68                0.13                     9.03
+1                73.35                0.01                     0.84
+2                57.52                0.03                     1.94
+3                52.12                0.05                     2.68
+4                42.72                0.05                     2.22
+5                42.21                0.04                     1.88
+6                39.61                0.04                     1.69
+7                40.31                0.02                     0.84
+8                38.38                0.04                     1.51
+9                36.36                0.04                     1.43
+10               37.75                0.04                     1.63
+11               46.02                0.00                     0.00
+12               19.74                0.00                     0.00
          ind_interval        ind_error        ind_interval_error       ind_error_signed       
                  mean median      mean median               mean count             mean median
 num_runs                                                                                      
-0               72.67  72.95     19.43  11.99               0.11   373            13.18   6.94
-1               73.84  73.04      9.56   6.76               0.01   436             3.61   1.31
-2               61.39  59.53      8.87   6.67               0.02   326            -0.34  -2.02
-3               56.65  56.40      9.20   6.32               0.03   253             1.33  -0.48
-4               44.19  42.11      8.82   6.16               0.04   231            -0.41  -1.26
-5               43.56  40.09      8.68   5.80               0.03   202             0.15  -1.32
-6               40.85  37.39      7.06   4.95               0.04   211             0.12  -0.93
-7               41.15  38.72      7.17   5.63               0.02   191             1.18  -0.02
-8               39.15  35.63      7.31   5.44               0.04   254             1.95   0.24
-9               37.08  34.38      6.41   4.72               0.02   255             1.80   0.82
-10              38.74  36.34      7.63   5.03               0.04   139             2.99   0.62
-11              46.62  43.88      3.86   2.78               0.00     9             1.28  -0.75
-12              19.75  19.75      1.45   1.45               0.00     1            -1.45  -1.45
-Viestiennusteen keskivirhe: 16.5 minuuttia
-Viestiennusteen virheen mediaani: 10.4 minuuttia
+0               71.68  72.26     19.39  11.08               0.13   373            13.84   7.27
+1               73.35  72.07      9.60   6.61               0.01   436             3.89   1.38
+2               57.52  55.87      8.84   6.60               0.03   326            -0.21  -1.83
+3               52.12  50.84      9.18   6.40               0.05   253             1.42  -0.38
+4               42.72  39.98      8.84   6.19               0.05   231            -0.40  -1.36
+5               42.21  38.80      8.70   5.78               0.04   202             0.18  -1.29
+6               39.61  37.26      7.07   5.02               0.04   211             0.15  -0.93
+7               40.31  37.38      7.18   5.77               0.02   191             1.20   0.10
+8               38.38  34.55      7.32   5.47               0.04   254             1.98   0.32
+9               36.36  34.83      6.41   4.84               0.04   255             1.84   0.75
+10              37.75  35.28      7.64   5.09               0.04   139             2.99   0.78
+11              46.02  44.02      3.90   2.76               0.00     9             1.33  -0.86
+12              19.74  19.74      1.43   1.43               0.00     1            -1.43  -1.43
+Viestiennusteen keskivirhe: 16.4 minuuttia
+Viestiennusteen virheen mediaani: 10.3 minuuttia
     relay_error             
            mean median count
 leg                         
-1           8.7    7.0   747
-2          14.0    9.9   731
-3          19.6   13.4   712
-4          24.4   15.6   691
+1           8.6    6.9   747
+2          13.9    9.5   731
+3          19.6   13.2   712
+4          24.4   15.8   691
 Viestin aikaväliennuste väärin: 5.1 %
-Juoksija nopeampi kuin viestin aikaväliennuste: 1.9 %
-Juoksija hitaampi kuin viestin aikaväliennuste: 3.2 %
+Juoksija nopeampi kuin viestin aikaväliennuste: 2.0 %
+Juoksija hitaampi kuin viestin aikaväliennuste: 3.1 %
     real_interval real_interval_error real_interval_error_fast real_interval_error_slow
              mean                mean                     mean                     mean
 leg                                                                                    
-1          50.867               0.036                    0.023                    0.013
-2          67.310               0.062                    0.026                    0.036
-3          92.880               0.056                    0.015                    0.041
-4         111.901               0.051                    0.013                    0.038
+1          50.243               0.036                    0.021                    0.015
+2          65.808               0.067                    0.030                    0.037
+3          91.165               0.058                    0.018                    0.039
+4         108.723               0.045                    0.012                    0.033
               real_interval real_interval_error real_interval_error_fast real_interval_error_slow
                        mean                mean                     mean                     mean
 mean_num_runs                                                                                    
-0.0                   97.30                0.16                     0.00                     0.16
-1.0                   98.17                0.06                     0.00                     0.05
-2.0                   93.37                0.03                     0.02                     0.01
-3.0                   94.85                0.05                     0.02                     0.03
-4.0                   82.08                0.04                     0.02                     0.02
-5.0                   77.79                0.04                     0.02                     0.02
-6.0                   70.43                0.05                     0.04                     0.02
-7.0                   63.34                0.05                     0.04                     0.02
-8.0                   51.99                0.03                     0.02                     0.01
-9.0                   44.29                0.02                     0.00                     0.02
-10.0                  42.94                0.00                     0.00                     0.00
-11.0                  43.36                0.00                     0.00                     0.00
+0.0                   96.28                0.15                     0.00                     0.15
+1.0                   97.08                0.06                     0.00                     0.05
+2.0                   90.23                0.03                     0.02                     0.01
+3.0                   91.12                0.05                     0.02                     0.03
+4.0                   80.60                0.05                     0.02                     0.02
+5.0                   75.96                0.04                     0.02                     0.02
+6.0                   69.30                0.06                     0.04                     0.02
+7.0                   62.19                0.05                     0.04                     0.02
+8.0                   51.36                0.03                     0.02                     0.01
+9.0                   43.81                0.02                     0.00                     0.02
+10.0                  42.25                0.00                     0.00                     0.00
+11.0                  44.02                0.00                     0.00                     0.00

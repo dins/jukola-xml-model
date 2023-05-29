@@ -1,3 +1,4 @@
+Aiempien Jukoloiden määrä (keskiarvo): 4.13 (Mediaani): 4.0
 Yksilöennusteen etumerkillinen keskivirhe (juoksija myöhästyi ennusteesta): -1.1 minuuttia
 Yksilöennusteen keskivirhe: 8.1 minuuttia
 Yksilöennusteen mediaanivirhe: 5.7 minuuttia
