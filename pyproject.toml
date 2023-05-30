@@ -14,6 +14,7 @@ jupyter = "^1.0.0"
 jupyter-contrib-nbextensions = "^0.7.0"
 statsmodels = "^0.13.5"
 scikit-optimize = "^0.9.0"
+xmltodict = "^0.13.0"
 
 [tool.poetry.dev-dependencies]
 
