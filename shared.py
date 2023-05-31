@@ -87,7 +87,7 @@ distances = {
         2020: [7.3, 5.4, 9.1, 8.5],
         2021: [7.3, 5.4, 9.1, 8.5],
         2022: [7.5, 8.0, 6.1, 8.7],
-        2023: [6.7, 5.5, 6.6, 7.7]
+        2023: [6.7, 5.3, 6.6, 7.7]
     },
     "ju": {
         1992: [12.2, 12.7, 14.4, 8.4, 8.3, 10.4, 13.7],
@@ -121,7 +121,7 @@ distances = {
         2020: [12.9, 12.9, 16.6, 9.1, 8.9, 11.0, 16.4],
         2021: [12.9, 12.9, 16.6, 9.1, 8.9, 11.0, 16.4],
         2022: [13.9, 11.7, 14.9, 8.7, 9.2, 14.6, 16.8],
-        2023: [12.8, 12.8, 14.4, 8.2, 9.5, 9.3, 15.2]
+        2023: [12.8, 12.9, 14.4, 8.2, 9.5, 9.3, 15.1]
     }
 }
 
@@ -137,14 +137,16 @@ start_timestamp = {
         2018: pd.Timestamp(year=2018, month=6, day=16, hour=14, tz="Europe/Helsinki"),
         2019: pd.Timestamp(year=2019, month=6, day=15, hour=14, tz="Europe/Helsinki"),
         2021: pd.Timestamp(year=2021, month=8, day=21, hour=13, minute=45, tz="Europe/Helsinki"),
-        2022: pd.Timestamp(year=2022, month=6, day=18, hour=14, tz="Europe/Helsinki")
+        2022: pd.Timestamp(year=2022, month=6, day=18, hour=14, tz="Europe/Helsinki"),
+        2023: pd.Timestamp(year=2023, month=6, day=17, hour=14, tz="Europe/Helsinki")
     },
     "ju": {
         2017: pd.Timestamp(year=2018, month=6, day=17, hour=23, tz="Europe/Helsinki"),
         2018: pd.Timestamp(year=2018, month=6, day=16, hour=23, tz="Europe/Helsinki"),
         2019: pd.Timestamp(year=2019, month=6, day=15, hour=23, tz="Europe/Helsinki"),
         2021: pd.Timestamp(year=2021, month=8, day=21, hour=23, tz="Europe/Helsinki"),
-        2022: pd.Timestamp(year=2022, month=6, day=18, hour=23, tz="Europe/Helsinki")
+        2022: pd.Timestamp(year=2022, month=6, day=18, hour=23, tz="Europe/Helsinki"),
+        2023: pd.Timestamp(year=2023, month=6, day=17, hour=23, tz="Europe/Helsinki")
     }
 }
 
@@ -154,14 +156,16 @@ changeover_closing = {
         2018: pd.Timestamp(year=2018, month=6, day=16, hour=18, minute=30, tz="Europe/Helsinki"),
         2019: pd.Timestamp(year=2019, month=6, day=15, hour=18, minute=30, tz="Europe/Helsinki"),
         2021: pd.Timestamp(year=2021, month=8, day=21, hour=18, minute=15, tz="Europe/Helsinki"),
-        2022: pd.Timestamp(year=2022, month=6, day=18, hour=18, minute=30, tz="Europe/Helsinki")
+        2022: pd.Timestamp(year=2022, month=6, day=18, hour=18, minute=30, tz="Europe/Helsinki"),
+        2023: pd.Timestamp(year=2023, month=6, day=17, hour=18, minute=30, tz="Europe/Helsinki")
     },
     "ju": {
         2017: pd.Timestamp(year=2018, month=6, day=18, hour=8, minute=45, tz="Europe/Helsinki"),
         2018: pd.Timestamp(year=2018, month=6, day=17, hour=8, minute=45, tz="Europe/Helsinki"),
         2019: pd.Timestamp(year=2019, month=6, day=16, hour=8, minute=45, tz="Europe/Helsinki"),
         2021: pd.Timestamp(year=2021, month=8, day=22, hour=8, minute=45, tz="Europe/Helsinki"),
-        2022: pd.Timestamp(year=2022, month=6, day=19, hour=8, minute=45, tz="Europe/Helsinki")
+        2022: pd.Timestamp(year=2022, month=6, day=19, hour=8, minute=45, tz="Europe/Helsinki"),
+        2023: pd.Timestamp(year=2023, month=6, day=18, hour=8, minute=45, tz="Europe/Helsinki")
     }
 }
 
@@ -185,6 +189,10 @@ dark_period = {
     2022: {
         "start": pd.Timestamp(year=2022, month=6, day=18, hour=23, minute=7, tz="Europe/Helsinki"),
         "end": pd.Timestamp(year=2022, month=6, day=19, hour=3, minute=59, tz="Europe/Helsinki")
+    },
+    2023: {
+        "start": pd.Timestamp(year=2023, month=6, day=17, hour=22, minute=48, tz="Europe/Helsinki"),
+        "end": pd.Timestamp(year=2023, month=6, day=18, hour=3, minute=48, tz="Europe/Helsinki")
     }
 }
 
