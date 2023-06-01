@@ -27,6 +27,9 @@ RACE_TYPE=ju FORECAST_YEAR=2022 process_one_race &
 
 wait
 
+BEFORE_RACE="true" RACE_TYPE=ve FORECAST_YEAR=2023 process_one_race
+BEFORE_RACE="true" RACE_TYPE=ju FORECAST_YEAR=2023 process_one_race
+
 echo "DONE ${RUN_TS}"
 
 time poetry run python json_reports.py

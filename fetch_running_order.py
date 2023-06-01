@@ -10,9 +10,10 @@ from lxml import html
 import normalize_names
 import shared
 
-# time poetry run python fetch_running_order.py 2022 && wc data/running_order_final_ju_fy_2022.tsv
+# time poetry run python fetch_running_order.py 2023 && wc data/running_order_final_ju_fy_2023.tsv
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s [%(process)d] %(funcName)s [%(levelname)s] %(message)s')
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(name)s [%(process)d] %(funcName)s [%(levelname)s] %(message)s')
 
 
 # Fetches running order from registration site. It will become outdated on the race day.
@@ -56,13 +57,13 @@ def fetch_running_order(year, ve_or_ju):
                 if name is not None and name.strip() != "" and name != " " and leg is not None:
                     leg = int(leg.strip())
                     name = normalize_names.normalize_name(name)
-                    # logging.info(current_team_id + " " + current_team_name + " " + str(leg) + " '" + name + "'")
+                    # logging.info("Adding: " + current_team_id + " " + current_team_name + " " + str(leg) + " '" + name + "'")
                     output_rows.append(
                         [current_team_id, current_team_name, current_team_base_name, current_team_country, leg,
                          leg_dist(leg), name])
         return output_rows
 
-    #out_file_name = f'data/running_order_j{year}_{ve_or_ju}.tsv'
+    # out_file_name = f'data/running_order_j{year}_{ve_or_ju}.tsv'
     out_file_name = f"data/running_order_final_{ve_or_ju}_fy_{year}.tsv"
     csv_file = open(out_file_name, 'w')
 
@@ -86,8 +87,20 @@ def fetch_running_order(year, ve_or_ju):
     team_countries.to_csv(tc_file, sep="\t", index=False)
     logging.info("Wrote " + tc_file)
 
+    return out_file_name
 
-year = int(sys.argv[1])
 
-fetch_running_order(year, "ve")
-fetch_running_order(year, "ju")
+def _summarize(running_order_file):
+    df = pd.read_csv(running_order_file, delimiter="\t")
+    summary = df.agg({"team_id": ["count", "nunique"], "team_country": ["count", "nunique"]})
+    shared.log_df(summary)
+
+
+if __name__ == "__main__":
+    year = int(sys.argv[1])
+
+    ve_file = fetch_running_order(year, "ve")
+    ju_file = fetch_running_order(year, "ju")
+
+    _summarize(ve_file)
+    _summarize(ju_file)

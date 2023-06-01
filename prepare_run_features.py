@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import joblib
 
+import log_utils
 import shared
 
 
@@ -15,16 +16,14 @@ import shared
 def read_persisted_dummy_column_values():
     with open(f"data/top_countries_{shared.race_id_str()}.json") as json_file:
         top_countries = json.load(json_file)
-    with open(f"data/top_first_names_{shared.race_id_str()}.json") as json_file:
-        top_first_names = json.load(json_file)
 
-    return (top_countries, top_first_names)
+    return top_countries
 
 
 def preprocess_features_v2(runs_df, top_countries, include_history_paces):
     # log column names and types
     logging.info("runs_df")
-    logging.info(runs_df.info())
+    log_utils.log_dataframe_info(runs_df)
     # convert some int columns to labels
     runs = runs_df.assign(leg=runs_df.leg.astype(str))
     # cliping 0 to 1 is a hack for when predicting for unknown runners
@@ -39,7 +38,7 @@ def preprocess_features_v2(runs_df, top_countries, include_history_paces):
     # First name based pace category
     runs["first_name"] = runs.name.str.split(" ", expand=True).iloc[:, 0]
     name_pace_classes = pd.read_csv(f"data/name_pace_classes_{shared.race_id_str()}.tsv", delimiter="\t")
-    logging.info(name_pace_classes.info())
+    log_utils.log_dataframe_info(name_pace_classes)
     runs = runs.join(name_pace_classes.set_index('first_name'), on="first_name")
     runs["fn_pace_class"] = runs["fn_pace_class"].astype(str)
     runs["fn_pace_std_class"] = runs["fn_pace_std_class"].astype(str)
@@ -71,7 +70,11 @@ def preprocess_features_v2(runs_df, top_countries, include_history_paces):
 
     pace_class_cols = [f"fn_pace_class_{float(i)}" for i in range(10)]
     missing_cols.extend([col for col in pace_class_cols if not col in features.columns])
-    logging.info(f"missing_cols: {missing_cols}")
+    logging.info(f"missing_cols after fn_pace_class_ check: {missing_cols}")
+
+    pace_std_class_cols = [f"fn_pace_std_class_{float(i)}" for i in range(4)]
+    missing_cols.extend([col for col in pace_std_class_cols if not col in features.columns])
+    logging.info(f"missing_cols after fn_pace_std_class_ check: {missing_cols}")
 
     missing_country_cols_df = pd.DataFrame({col: 0 for col in missing_cols}, index=features.index)
     features = pd.concat([features, missing_country_cols_df], sort=False, axis=1)
@@ -79,15 +82,13 @@ def preprocess_features_v2(runs_df, top_countries, include_history_paces):
     features.insert(0, "team_id", runs["team_id"])
     features = features.reindex(sorted(features.columns), axis=1)
 
-    logging.info(f"features: {features.info()}")
-    logging.info(f"features columns {features.columns}")
+    log_utils.log_dataframe_info(features)
+    logging.info(f"features columns {len(features.columns)} {features.columns}")
 
     return features
 
 
 def prepare_run_features(include_history_paces):
-    year = shared.forecast_year()
-
     ideals = pd.read_csv(f'Jukola-terrain/ideal-paces-{shared.race_type()}.tsv', delimiter='\t')
     ideals["marking_per_km"] = ideals["marking"] / ideals["leg_distance"]
     logging.info(f"Ideals:\n{ideals.head(5).round(3)}")
@@ -118,6 +119,7 @@ def prepare_run_features(include_history_paces):
     y = runs["log_pace"].values
     x = features.values
     logging.info(f"Shapes y: {y.shape}, x: {x.shape}")
+    _write_features_report(features, include_history_paces, "training")
     return x, y, features
 
 
@@ -140,6 +142,8 @@ def switch_first_and_last_name(name):
 
 
 def _predict_for_unknown_runners(features, unknown_or_known):
+    logging.info(f"{unknown_or_known.upper()} runners, features: {features.shape}")
+    log_utils.log_dataframe_info(features)
     hgbr = joblib.load(f'models/{unknown_or_known}_runs_hgbr_{shared.race_id_str()}.sav')
     hgbr_q_low = joblib.load(f'models/{unknown_or_known}_runs_hgbr_q_low_{shared.race_id_str()}.sav')
     hgbr_q_high = joblib.load(f'models/{unknown_or_known}_runs_hgbr_q_high_{shared.race_id_str()}.sav')
@@ -178,6 +182,11 @@ def _choose_final_estimates_from_various_models(running_order_with_history):
     running_order = running_order_with_history[['team_id', 'team', 'team_base_name', 'team_country', 'leg', 'leg_dist',
                                                 'name', 'orig_name',
                                                 'num_runs', 'pred_log_mean', 'pred_log_std']]
+    # List of runners with na team_id
+    missing_team_ids = running_order[running_order["team_id"].isna()]
+    shared.log_df(missing_team_ids)
+    assert len(missing_team_ids) == 0, "Missing team ids"
+
     ideals = pd.read_csv(f'Jukola-terrain/ideal-paces-{shared.race_type()}.tsv', delimiter='\t')
     ideals["marking_per_km"] = ideals["marking"] / ideals["leg_distance"]
     logging.info(f"Ideals:\n{ideals.head(5).round(3)}")
@@ -187,7 +196,7 @@ def _choose_final_estimates_from_various_models(running_order_with_history):
                              ideals[["year", "leg", "leg_distance", "terrain_coefficient", "vertical_per_km",
                                      "marking_per_km"]],
                              how="left", on=["year", "leg"])
-    (top_countries, top_first_names) = read_persisted_dummy_column_values()
+    top_countries = read_persisted_dummy_column_values()
     running_order["median_pace"] = np.exp(running_order["pred_log_mean"])
     running_order["log_stdev"] = running_order["pred_log_std"]
 
@@ -196,6 +205,9 @@ def _choose_final_estimates_from_various_models(running_order_with_history):
     unknown_runners_features = preprocess_features_v2(running_order, top_countries, False)
     known_runners_features = preprocess_features_v2(running_order, top_countries, True)
     running_order["num_runs"] = running_order["num_runs"] - 1
+
+    _write_features_report(unknown_runners_features, False, "prediction")
+    _write_features_report(known_runners_features, True, "prediction")
 
     hgbr_unknown_runners_est = _predict_for_unknown_runners(unknown_runners_features, "unknown")
     hgbr_known_runners_est = _predict_for_unknown_runners(known_runners_features, "known")
@@ -243,7 +255,7 @@ def _choose_final_estimates_from_various_models(running_order_with_history):
     shared.log_df(
         running_order[["final_pace_mean", "final_pace_std"]].groupby(running_order["num_runs"]).agg(["mean", "count"]))
 
-    logging.info(running_order.info())
+    log_utils.log_dataframe_info(running_order)
     logging.info(f"running_order sample:\n{running_order.sample(5)}")
 
     # remove extremes from unknown runners predictions
@@ -278,7 +290,20 @@ def _choose_final_estimates_from_various_models(running_order_with_history):
     # log scale addition equals multiplication in linear scale
     running_order["final_pace_mean"] = running_order["final_pace_mean"] + np.log(running_order["weighted_leg_factor"])
 
+    # List of runners with na team_id
+    missing_team_ids = running_order[running_order["team_id"].isna()]
+    shared.log_df(missing_team_ids)
+    assert len(missing_team_ids) == 0, "Missing team ids"
+
     return running_order
+
+
+def _write_features_report(features: pd.DataFrame, include_history: bool, train_or_predict: str) -> None:
+    known_or_unknown = "UNKNOWN" if not include_history else "KNOWN"
+    cols_str = log_utils.column_names_and_types_to_str(features)
+    shared.write_simple_text_report([cols_str, log_utils.dataframe_info_to_str(features)],
+                                    f'features/hgbr-{train_or_predict}-{known_or_unknown}-{shared.race_id_str()}.txt')
+
 
 
 def _find_history_values_for_running_order_names():
