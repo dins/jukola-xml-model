@@ -465,12 +465,12 @@
   var ve_or_ju = searchParams.get('race')
 
   var resultsQueryParamsStr = ""
-  var use2018LiveResultsWithRaceTime = searchParams.get('use2018LiveResultsWithRaceTime')
-  if (use2018LiveResultsWithRaceTime) {
-    if (use2018LiveResultsWithRaceTime.length != 8) {
-      throw Error("Unrecognized use2018LiveResultsWithRaceTime.")
+  var timetravelRaceTime = searchParams.get('timetravelRaceTime')
+  if (timetravelRaceTime) {
+    if (timetravelRaceTime.length != 8) {
+      throw Error("Unrecognized timetravelRaceTime.")
     }
-    resultsQueryParamsStr = "?use2018LiveResultsWithRaceTime=" + use2018LiveResultsWithRaceTime
+    resultsQueryParamsStr = "?timetravelRaceTime=" + timetravelRaceTime
   }
 
   var teamId = parseInt(searchParams.get('team'))
