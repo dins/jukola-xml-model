@@ -16,14 +16,14 @@
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-141811127-1"></script>
     <script>
-      window.dataLayer = window.dataLayer || [];
+        window.dataLayer = window.dataLayer || [];
 
-      function gtag() {
-        dataLayer.push(arguments);
-      }
+        function gtag() {
+            dataLayer.push(arguments);
+        }
 
-      gtag('js', new Date());
-      gtag('config', 'UA-141811127-1');
+        gtag('js', new Date());
+        gtag('config', 'UA-141811127-1');
     </script>
     <script src="web-lib/jstat.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"
@@ -170,368 +170,381 @@
 
 <script>
 
-  var raceStart = {
-    ve: new Date(Date.parse('2022-06-18T14:00:00+03:00')), // parse returns something else than Date
-    ju: new Date(Date.parse('2022-06-18T23:00:00+03:00'))
-  }
-
-  var changeoverClosing = {
-    ve: new Date(Date.parse('2022-06-18T18:30:00+03:00')), // parse returns something else than Date
-    ju: new Date(Date.parse('2022-06-19T08:45:00+03:00'))
-  }
-
-  function raceMinutesToDate(minutesSinceRaceStart, ve_or_ju, teamsLatestOnlineTimestamp) {
-    var raceSatartTime = raceStart[ve_or_ju]
-    if (teamsLatestOnlineTimestamp) {
-      raceSatartTime = new Date(teamsLatestOnlineTimestamp)
-    }
-    // create new to not modify the original
-    return new Date(raceSatartTime).setMinutes(raceSatartTime.getMinutes() + minutesSinceRaceStart)
-  }
-
-  function produceDataPoints(logMeans, logStds, ve_or_ju, teamsLatestOnlineTimestamp) {
-    var indexes = Array.from(Array(2000).keys())
-    var wholeRange = _.map(indexes, function (i) {
-      var min = i * 2
-      var propability = jStat.lognormal.pdf(min, logMeans, logStds)
-
-      var finishTime = raceMinutesToDate(min, ve_or_ju, teamsLatestOnlineTimestamp)
-      return {x: finishTime, y: propability}
-    })
-
-    // Remove points where propability is too low for printing
-    var points = _.filter(wholeRange, function (point) {
-      return point.y > 0.00001
-    });
-    var probsOnly = points.map(function (point) {
-      return point.y
-    })
-    var maxValue = jStat.max(probsOnly);
-    console.log("maxValue", maxValue)
-
-    return points.map(function (point) {
-      return {x: point.x, y: (point.y / maxValue) * 0.91}
-    })
-  }
-
-  function timestampToDate(utcTimestamp) {
-    return new Date(utcTimestamp)
-  }
-
-  function formatTime(utcTimestamp) {
-    function pad(number) {
-      if (number < 10) {
-        return '0' + number;
-      }
-      return number;
+    var raceStart = {
+        ve: new Date(Date.parse('2022-06-18T14:00:00+03:00')), // parse returns something else than Date
+        ju: new Date(Date.parse('2022-06-18T23:00:00+03:00'))
     }
 
-    var date = timestampToDate(utcTimestamp);
-    var millisInMinute = 1000 * 60;
-    var roundedToEvenMinutes = new Date(Math.round(date.getTime() / millisInMinute) * millisInMinute)
-    return pad(roundedToEvenMinutes.getHours()) + ":" + pad(roundedToEvenMinutes.getMinutes())
-  }
-
-  function formatPercent(floatPropability) {
-    return (floatPropability * 100).toFixed(0) + '%'
-  }
-
-  function formatInteger(floatValue) {
-    return floatValue.toFixed(0)
-  }
-
-  function addRunnerToTable(runner) {
-    var rowClass = ""
-    var staticIntervalText = formatTime(runner.fin_time_start95) + " - " + formatTime(runner.fin_time_end95);
-    var onlineIntervalText = "";
-    if (runner.onlineFinishTimestampLow95) {
-      onlineIntervalText = formatTime(runner.onlineFinishTimestampLow95) + " - " + formatTime(runner.onlineFinishTimestampHigh95);
+    var changeoverClosing = {
+        ve: new Date(Date.parse('2022-06-18T18:30:00+03:00')), // parse returns something else than Date
+        ju: new Date(Date.parse('2022-06-19T08:45:00+03:00'))
     }
 
-    var staticPersonalDurationIntervalText = formatInteger(runner.personal_start95) + "min - " + formatInteger(runner.personal_end95) + "min";
-
-    var staticPointEstimateText = formatTime(runner.fin_time_median);
-    var onlinePointEstimateText = "";
-    if (runner.onlineFinishTimestampMedian) {
-      onlinePointEstimateText = formatTime(runner.onlineFinishTimestampMedian);
-      rowClass = "unfinished"
-    }
-
-    var staticPointEstimateDurationText = formatInteger(Math.exp(runner.ind_log_mean) * runner.legDistance) + "min";
-
-    var finishTime = ""
-    var finishLegDuration = ""
-    if (runner.lastControlType === "Finish") {
-      finishTime = formatTime(runner.lastControlTimestamp)
-      finishLegDuration = "" + formatInteger(runner.durationInMinutes) + "min"
-      rowClass = "finished"
-    }
-    var latestControlText = ""
-    var currentRunnerClass = ""
-    if (runner.lastControlType === "Intermediary") {
-      latestControlText = runner.lastControlDistance + "km " + formatTime(runner.lastControlTimestamp)
-      currentRunnerClass = " currentRunner"
-    }
-
-    $("#estimate-summary tbody").append(
-      "<tr class='" + rowClass + currentRunnerClass + "'>" +
-      "<th scope=\"row\">" + runner.leg + "</th>" +
-      "<td>"
-      + "<div class='name'>" + runner.name + "</div>"
-      + "<span class='latestControl'>"
-      + "<div>Viimeisin väliaika:</div>"
-      + "<div class='timeAndDistance'>" + latestControlText + "</div>"
-      + "</span></td>"
-      + "<td class=estimate>"
-      + "<div class='static interval relay'>" + staticIntervalText + "</div>"
-      + "<div class='static interval duration'>" + staticPersonalDurationIntervalText + "</div>"
-      + "<div class='online interval relay'>" + onlineIntervalText + "</div>"
-      + "</td>"
-      + "<td class=estimate>"
-      + "<div class='static pointEstimate relay'>" + staticPointEstimateText + "</div>"
-      + "<div class='static pointEstimate duration'>" + staticPointEstimateDurationText + "</div>"
-      + "<div class='online pointEstimate relay'>" + onlinePointEstimateText + "</div>"
-      + "</td>"
-      + "<td class=finish-time>"
-      + "<div class='online finishTime relay'>" + finishTime + "</div>"
-      + "<div class='online finishTime duration'>" + finishLegDuration + "</div>"
-      + "</td><td class=estimate>" + formatPercent(runner.inMassStart || runner.mass_start)
-      + "</td><td class=estimate>" + formatPercent(runner.darkDuringLeg || runner.dark_during_leg)
-      + "</td></tr>")
-  }
-
-  function showTeam(teamId, teamRunners, ve_or_ju) {
-    console.log("teamId", teamId)
-    console.log("teamRunners", teamRunners)
-
-    $("h1").text("Vaihtoaikaennuste " + teamId + " " + teamRunners[0].team)
-    $("#estimate-summary tbody").empty()
-    $("#estimate-summary").show()
-    _.each(teamRunners, addRunnerToTable)
-
-    var colors = {
-      blue: "rgb(54, 162, 235)",
-      green: "rgb(75, 192, 192)",
-      grey: "rgb(201, 203, 207)",
-      orange: "rgb(255, 159, 64)",
-      purple: "rgb(153, 102, 255)",
-      red: "rgb(255, 99, 132)",
-      yellow: "rgb(255, 205, 86)"
-    }
-    var colorNames = Object.keys(colors)
-    var finishedRunners = _.filter(teamRunners, function (runner) {
-      return runner.lastControlType === "Finish"
-    })
-
-    var latestOnlineTimestamps = _.filter(teamRunners, function (runner) {
-      return !!runner.lastControlTimestamp
-    }).sort(function (runner) {
-      return runner.lastControlTimestamp
-    }).reverse()
-
-    console.log("latestOnlineTimestamps", latestOnlineTimestamps)
-
-    var teamDatasets = _.map(teamRunners, function (runner) {
-      var color = colors[colorNames[runner.leg - 1]]
-      var borderColor = color
-      var logMinsToFinish = runner.logMeanTimeLeft || runner.fin_sum_log_mean
-      var logMinsStdToFinish = runner.logsStdevTimeLeft || runner.fin_sum_log_std
-      var dataPoints = produceDataPoints(logMinsToFinish, logMinsStdToFinish, ve_or_ju, runner.teamsLatestOnlineTimestamp)
-      if (runner.lastControlType === "Finish") {
-        borderColor = "whitesmoke"
-      }
-      return {
-        type: 'line',
-        label: runner.leg + " " + runner.name,
-        backgroundColor: color,
-        borderColor: borderColor,
-        data: dataPoints,
-        fill: false,
-        pointRadius: 1
-      }
-    })
-    var staticDatasets = []
-    var finishTimes = _.map(finishedRunners, function (runner) {
-      var color = colors[colorNames[runner.leg - 1]]
-      var realFinish = runner.lastControlTimestamp
-      return {
-        id: 'vline_' + runner.leg,
-        type: 'line',
-        mode: 'vertical',
-        scaleID: 'x-axis-0',
-        value: realFinish,
-        borderColor: "grey",
-        borderWidth: 2,
-        label: {
-          backgroundColor: color,
-          content: formatTime(realFinish),
-          enabled: true
+    function raceMinutesToDate(minutesSinceRaceStart, ve_or_ju, teamsLatestOnlineTimestamp) {
+        var raceSatartTime = raceStart[ve_or_ju]
+        if (teamsLatestOnlineTimestamp) {
+            raceSatartTime = new Date(teamsLatestOnlineTimestamp)
         }
-      }
-    })
-
-    var massStart = {
-      id: 'vline_mass',
-      type: 'line',
-      mode: 'vertical',
-      scaleID: 'x-axis-0',
-      value: changeoverClosing[ve_or_ju],
-      borderColor: "grey",
-      borderWidth: 2,
-      label: {
-        backgroundColor: "grey",
-        content: "Vaihto sulkeutuu: " + formatTime(changeoverClosing[ve_or_ju]),
-        enabled: true,
-        yAdjust: 30
-      }
+        // create new to not modify the original
+        return new Date(raceSatartTime).setMinutes(raceSatartTime.getMinutes() + minutesSinceRaceStart)
     }
-    var latestOnlineIntermediary = {}
-    if (latestOnlineTimestamps && latestOnlineTimestamps[0] && latestOnlineTimestamps[0].lastControlType !== "Finish") {
-      var latestRunner = latestOnlineTimestamps[0]
-      var color = colors[colorNames[latestRunner.leg - 1]]
-      latestOnlineIntermediary = {
-        id: 'vline_latest_intermediary',
-        type: 'line',
-        mode: 'vertical',
-        scaleID: 'x-axis-0',
-        value: latestRunner.lastControlTimestamp,
-        borderColor: color,
-        borderWidth: 2,
-        label: {
-          backgroundColor: color,
-          content: latestRunner.lastControlDistance + "km " + formatTime(latestRunner.lastControlTimestamp),
-          enabled: true,
-          yAdjust: -30
+
+    function produceDataPoints(logMeans, logStds, ve_or_ju, teamsLatestOnlineTimestamp) {
+        var indexes = Array.from(Array(2000).keys())
+        var wholeRange = _.map(indexes, function (i) {
+            var min = i * 2
+            var propability = jStat.lognormal.pdf(min, logMeans, logStds)
+
+            var finishTime = raceMinutesToDate(min, ve_or_ju, teamsLatestOnlineTimestamp)
+            return {x: finishTime, y: propability}
+        })
+
+        // Remove points where propability is too low for printing
+        var points = _.filter(wholeRange, function (point) {
+            return point.y > 0.00001
+        });
+        var probsOnly = points.map(function (point) {
+            return point.y
+        })
+        var maxValue = jStat.max(probsOnly);
+        console.log("maxValue", maxValue)
+
+        return points.map(function (point) {
+            return {x: point.x, y: (point.y / maxValue) * 0.91}
+        })
+    }
+
+    function timestampToDate(utcTimestamp) {
+        return new Date(utcTimestamp)
+    }
+
+    function formatTime(utcTimestamp) {
+        function pad(number) {
+            if (number < 10) {
+                return '0' + number;
+            }
+            return number;
         }
-      }
+
+        var date = timestampToDate(utcTimestamp);
+        var millisInMinute = 1000 * 60;
+        var roundedToEvenMinutes = new Date(Math.round(date.getTime() / millisInMinute) * millisInMinute)
+        return pad(roundedToEvenMinutes.getHours()) + ":" + pad(roundedToEvenMinutes.getMinutes())
     }
 
-    var extraAnnotations = [latestOnlineIntermediary, massStart]
-    var chartOptions = {
-      responsive: true,
-      title: {
-        display: true,
-        text: teamId + " " + teamRunners[0].team
-      },
-      tooltips: {
-        enabled: false,
-        mode: 'index',
-        intersect: false,
-      },
-      hover: {
-        mode: 'nearest',
-        intersect: true
-      },
-      scales: {
-        xAxes: [{
-          type: 'time',
-          time: {
-            unit: 'minute',
-            displayFormats: {
-              minute: 'HH:mm'
+    function formatPercent(floatPropability) {
+        return (floatPropability * 100).toFixed(0) + '%'
+    }
+
+    function formatInteger(floatValue) {
+        return floatValue.toFixed(0)
+    }
+
+    function addRunnerToTable(runner) {
+        var rowClass = ""
+        var staticIntervalText = formatTime(runner.fin_time_start95) + " - " + formatTime(runner.fin_time_end95);
+        var onlineIntervalText = "";
+        if (runner.onlineFinishTimestampLow95) {
+            onlineIntervalText = formatTime(runner.onlineFinishTimestampLow95) + " - " + formatTime(runner.onlineFinishTimestampHigh95);
+        }
+
+        var staticPersonalDurationIntervalText = formatInteger(runner.personal_start95) + "min - " + formatInteger(runner.personal_end95) + "min";
+
+        var staticPointEstimateText = formatTime(runner.fin_time_median);
+        var onlinePointEstimateText = "";
+        if (runner.onlineFinishTimestampMedian) {
+            onlinePointEstimateText = formatTime(runner.onlineFinishTimestampMedian);
+            rowClass = "unfinished"
+        }
+
+        var staticPointEstimateDurationText = formatInteger(Math.exp(runner.ind_log_mean) * runner.legDistance) + "min";
+
+        var finishTime = ""
+        var finishLegDuration = ""
+        if (runner.lastControlType === "Finish") {
+            finishTime = formatTime(runner.lastControlTimestamp)
+            finishLegDuration = "" + formatInteger(runner.durationInMinutes) + "min"
+            rowClass = "finished"
+        }
+        var latestControlText = ""
+        var currentRunnerClass = ""
+        if (runner.lastControlType === "Intermediary") {
+            latestControlText = runner.lastControlDistance + "km " + formatTime(runner.lastControlTimestamp)
+            currentRunnerClass = " currentRunner"
+        }
+
+        $("#estimate-summary tbody").append(
+            "<tr class='" + rowClass + currentRunnerClass + "'>" +
+            "<th scope=\"row\">" + runner.leg + "</th>" +
+            "<td>"
+            + "<div class='name'>" + runner.name + "</div>"
+            + "<span class='latestControl'>"
+            + "<div>Viimeisin väliaika:</div>"
+            + "<div class='timeAndDistance'>" + latestControlText + "</div>"
+            + "</span></td>"
+            + "<td class=estimate>"
+            + "<div class='static interval relay'>" + staticIntervalText + "</div>"
+            + "<div class='static interval duration'>" + staticPersonalDurationIntervalText + "</div>"
+            + "<div class='online interval relay'>" + onlineIntervalText + "</div>"
+            + "</td>"
+            + "<td class=estimate>"
+            + "<div class='static pointEstimate relay'>" + staticPointEstimateText + "</div>"
+            + "<div class='static pointEstimate duration'>" + staticPointEstimateDurationText + "</div>"
+            + "<div class='online pointEstimate relay'>" + onlinePointEstimateText + "</div>"
+            + "</td>"
+            + "<td class=finish-time>"
+            + "<div class='online finishTime relay'>" + finishTime + "</div>"
+            + "<div class='online finishTime duration'>" + finishLegDuration + "</div>"
+            + "</td><td class=estimate>" + formatPercent(runner.inMassStart || runner.mass_start)
+            + "</td><td class=estimate>" + formatPercent(runner.darkDuringLeg || runner.dark_during_leg)
+            + "</td></tr>")
+    }
+
+    function showTeam(teamId, teamRunners, ve_or_ju) {
+        console.log("teamId", teamId)
+        console.log("teamRunners", teamRunners)
+
+        $("h1").text("Vaihtoaikaennuste " + teamId + " " + teamRunners[0].team)
+        $("#estimate-summary tbody").empty()
+        $("#estimate-summary").show()
+        _.each(teamRunners, addRunnerToTable)
+
+        var colors = {
+            blue: "rgb(54, 162, 235)",
+            green: "rgb(75, 192, 192)",
+            grey: "rgb(201, 203, 207)",
+            orange: "rgb(255, 159, 64)",
+            purple: "rgb(153, 102, 255)",
+            red: "rgb(255, 99, 132)",
+            yellow: "rgb(255, 205, 86)"
+        }
+        var colorNames = Object.keys(colors)
+        var finishedRunners = _.filter(teamRunners, function (runner) {
+            return runner.lastControlType === "Finish"
+        })
+
+        var latestOnlineTimestamps = _.filter(teamRunners, function (runner) {
+            return !!runner.lastControlTimestamp
+        }).sort(function (runner) {
+            return runner.lastControlTimestamp
+        }).reverse()
+
+        console.log("latestOnlineTimestamps", latestOnlineTimestamps)
+
+        var teamDatasets = _.map(teamRunners, function (runner) {
+            var color = colors[colorNames[runner.leg - 1]]
+            var borderColor = color
+            var logMinsToFinish = runner.logMeanTimeLeft || runner.fin_sum_log_mean
+            var logMinsStdToFinish = runner.logsStdevTimeLeft || runner.fin_sum_log_std
+            var dataPoints = produceDataPoints(logMinsToFinish, logMinsStdToFinish, ve_or_ju, runner.teamsLatestOnlineTimestamp)
+            if (runner.lastControlType === "Finish") {
+                borderColor = "whitesmoke"
+            }
+            return {
+                type: 'line',
+                label: runner.leg + " " + runner.name,
+                backgroundColor: color,
+                borderColor: borderColor,
+                data: dataPoints,
+                fill: false,
+                pointRadius: 1
+            }
+        })
+        var staticDatasets = []
+        var finishTimes = _.map(finishedRunners, function (runner) {
+            var color = colors[colorNames[runner.leg - 1]]
+            var realFinish = runner.lastControlTimestamp
+            return {
+                id: 'vline_' + runner.leg,
+                type: 'line',
+                mode: 'vertical',
+                scaleID: 'x-axis-0',
+                value: realFinish,
+                borderColor: "grey",
+                borderWidth: 2,
+                label: {
+                    backgroundColor: color,
+                    content: formatTime(realFinish),
+                    enabled: true
+                }
+            }
+        })
+
+        var massStart = {
+            id: 'vline_mass',
+            type: 'line',
+            mode: 'vertical',
+            scaleID: 'x-axis-0',
+            value: changeoverClosing[ve_or_ju],
+            borderColor: "grey",
+            borderWidth: 2,
+            label: {
+                backgroundColor: "grey",
+                content: "Vaihto sulkeutuu: " + formatTime(changeoverClosing[ve_or_ju]),
+                enabled: true,
+                yAdjust: 30
+            }
+        }
+        var latestOnlineIntermediary = {}
+        if (latestOnlineTimestamps && latestOnlineTimestamps[0] && latestOnlineTimestamps[0].lastControlType !== "Finish") {
+            var latestRunner = latestOnlineTimestamps[0]
+            var color = colors[colorNames[latestRunner.leg - 1]]
+            latestOnlineIntermediary = {
+                id: 'vline_latest_intermediary',
+                type: 'line',
+                mode: 'vertical',
+                scaleID: 'x-axis-0',
+                value: latestRunner.lastControlTimestamp,
+                borderColor: color,
+                borderWidth: 2,
+                label: {
+                    backgroundColor: color,
+                    content: latestRunner.lastControlDistance + "km " + formatTime(latestRunner.lastControlTimestamp),
+                    enabled: true,
+                    yAdjust: -30
+                }
+            }
+        }
+
+        var extraAnnotations = [latestOnlineIntermediary, massStart]
+        var chartOptions = {
+            responsive: true,
+            title: {
+                display: true,
+                text: teamId + " " + teamRunners[0].team
             },
-            min: raceStart[ve_or_ju]
-          },
-          display: true,
-          scaleLabel: {
-            display: true,
-            labelString: 'Kellonaika'
-          }
-        }],
-        yAxes: [{
-          display: true,
-          scaleLabel: {
-            display: true,
-            labelString: 'Maaliintulon todennäköisyys'
-          }
-        }]
-      },
-      annotation: {
-        annotations: finishTimes.concat(extraAnnotations)
-      }
+            tooltips: {
+                enabled: false,
+                mode: 'index',
+                intersect: false,
+            },
+            hover: {
+                mode: 'nearest',
+                intersect: true
+            },
+            scales: {
+                xAxes: [{
+                    type: 'time',
+                    time: {
+                        unit: 'minute',
+                        displayFormats: {
+                            minute: 'HH:mm'
+                        },
+                        min: raceStart[ve_or_ju]
+                    },
+                    display: true,
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Kellonaika'
+                    }
+                }],
+                yAxes: [{
+                    display: true,
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Maaliintulon todennäköisyys'
+                    }
+                }]
+            },
+            annotation: {
+                annotations: finishTimes.concat(extraAnnotations)
+            }
+        }
+        //Chart.defaults.line.spanGaps = true;
+        var myLineChart = new Chart("chartjs-plot", {
+            type: 'line',
+            data: {
+                datasets: teamDatasets.concat(staticDatasets)
+            },
+            options: chartOptions
+        });
+
     }
-    //Chart.defaults.line.spanGaps = true;
-    var myLineChart = new Chart("chartjs-plot", {
-      type: 'line',
-      data: {
-        datasets: teamDatasets.concat(staticDatasets)
-      },
-      options: chartOptions
-    });
 
-  }
+    var searchParams = new URLSearchParams(window.location.search)
+    var ve_or_ju = searchParams.get('race')
 
-  var searchParams = new URLSearchParams(window.location.search)
-  var ve_or_ju = searchParams.get('race')
-
-  var resultsQueryParamsStr = ""
-  var timetravelRaceTime = searchParams.get('timetravelRaceTime')
-  if (timetravelRaceTime) {
-    if (timetravelRaceTime.length != 8) {
-      throw Error("Unrecognized timetravelRaceTime.")
+    var resultsQueryParamsStr = ""
+    var timeTravelRaceTime = searchParams.get('timeTravelRaceTime')
+    if (timeTravelRaceTime) {
+        if (timeTravelRaceTime.length != 8) {
+            throw Error("Unrecognized timeTravelRaceTime.")
+        }
+        resultsQueryParamsStr = "?timeTravelRaceTime=" + timeTravelRaceTime
     }
-    resultsQueryParamsStr = "?timetravelRaceTime=" + timetravelRaceTime
-  }
 
-  var teamId = parseInt(searchParams.get('team'))
-
-  function fetchAndShowTeamEstimates(teamId, raceType) {
-    var url = "https://075x6c4ra2.execute-api.eu-west-1.amazonaws.com/dev/" + raceType + "/" + teamId + resultsQueryParamsStr;
-    $.getJSON(url, function (runners) {
-      showTeam(teamId, runners, raceType)
-    });
-  }
-
-  if (teamId > 0 && (ve_or_ju == "ve" || ve_or_ju == "ju")) {
-    fetchAndShowTeamEstimates(teamId, ve_or_ju);
-  }
-
-  function replaceUrlParam(url, paramName, paramValue) {
-    if (paramValue == null) {
-      paramValue = '';
+    const currentYear = new Date().getFullYear()
+    var selectedYear = currentYear
+    var timeTravelYear = parseInt(searchParams.get('timeTravelYear'))
+    console.log("timeTravelYear", timeTravelYear)
+    if (timeTravelYear >= 2021) {
+        selectedYear = timeTravelYear
+        if (resultsQueryParamsStr.length > 0) {
+            resultsQueryParamsStr += "&"
+        } else {
+            resultsQueryParamsStr += "?"
+        }
+        resultsQueryParamsStr += "timeTravelYear=" + timeTravelYear
     }
-    var pattern = new RegExp('\\b(' + paramName + '=).*?(&|#|$)');
-    if (url.search(pattern) >= 0) {
-      return url.replace(pattern, '$1' + paramValue + '$2');
+    var teamId = parseInt(searchParams.get('team'))
+
+    function fetchAndShowTeamEstimates(teamId, raceType) {
+        var url = "https://075x6c4ra2.execute-api.eu-west-1.amazonaws.com/dev/" + raceType + "/" + teamId + resultsQueryParamsStr;
+        $.getJSON(url, function (runners) {
+            showTeam(teamId, runners, raceType)
+        });
     }
-    url = url.replace(/[?#]$/, '');
-    return url + (url.indexOf('?') > 0 ? '&' : '?') + paramName + '=' + paramValue;
-  }
 
-  function addRunnerOption(runner, runnerRaceType, requestedRaceType) {
-    const selectedStr = teamId === runner.team_id && requestedRaceType === runnerRaceType ? "selected" : ""
-    const raceStr = runnerRaceType === "ju" ? "Jukola" : "Venlat"
-    $("#search-box").append(
-      '<option ' + selectedStr + ' data-race-type="' + runnerRaceType
-      + '" data-team-id=' + runner.team_id + ' data-subtext="' + runner.name + ', #' + runner.leg + '">' + raceStr + ' ' + runner.team_id + ' ' + runner.team + '</option>'
-    )
-  }
+    if (teamId > 0 && (ve_or_ju == "ve" || ve_or_ju == "ju")) {
+        fetchAndShowTeamEstimates(teamId, ve_or_ju);
+    }
 
-  var juRunnersUrl = "https://dins.github.io/jukola-xml-model/web-lib/for_web_ju_fy_2022.json";
-  var veRunnersUrl = "https://dins.github.io/jukola-xml-model/web-lib/for_web_ve_fy_2022.json";
+    function replaceUrlParam(url, paramName, paramValue) {
+        if (paramValue == null) {
+            paramValue = '';
+        }
+        var pattern = new RegExp('\\b(' + paramName + '=).*?(&|#|$)');
+        if (url.search(pattern) >= 0) {
+            return url.replace(pattern, '$1' + paramValue + '$2');
+        }
+        url = url.replace(/[?#]$/, '');
+        return url + (url.indexOf('?') > 0 ? '&' : '?') + paramName + '=' + paramValue;
+    }
 
-  $.getJSON(veRunnersUrl, function (runners) {
-    _.each(runners, function (runner) {
-      addRunnerOption(runner, "ve", ve_or_ju);
+    function addRunnerOption(runner, runnerRaceType, requestedRaceType) {
+        const selectedStr = teamId === runner.team_id && requestedRaceType === runnerRaceType ? "selected" : ""
+        const raceStr = runnerRaceType === "ju" ? "Jukola" : "Venlat"
+        $("#search-box").append(
+            '<option ' + selectedStr + ' data-race-type="' + runnerRaceType
+            + '" data-team-id=' + runner.team_id + ' data-subtext="' + runner.name + ', #' + runner.leg + '">' + raceStr + ' ' + runner.team_id + ' ' + runner.team + '</option>'
+        )
+    }
+
+    var juRunnersUrl = "https://dins.github.io/jukola-xml-model/web-lib/for_web_ju_fy_" + selectedYear + ".json";
+    var veRunnersUrl = "https://dins.github.io/jukola-xml-model/web-lib/for_web_ve_fy_" + selectedYear + ".json";
+
+    $.getJSON(veRunnersUrl, function (runners) {
+        _.each(runners, function (runner) {
+            addRunnerOption(runner, "ve", ve_or_ju);
+        });
+
+        $.getJSON(juRunnersUrl, function (runners) {
+            _.each(runners, function (runner) {
+                addRunnerOption(runner, "ju", ve_or_ju);
+            });
+            $('#search-box').show();
+            $('#search-box').selectpicker();
+            $('#search-box').on('changed.bs.select', function (e, clickedIndex, isSelected, previousValue) {
+                var selectedOption = $("#search-box option").get(clickedIndex);
+                const selectedTeamId = $(selectedOption).data("team-id")
+                const selectedRaceType = $(selectedOption).data("race-type")
+                const currentUrl = window.location.href
+                var newUrl = replaceUrlParam(currentUrl, "team", selectedTeamId)
+                newUrl = replaceUrlParam(newUrl, "race", selectedRaceType)
+                window.location = newUrl
+            });
+        });
     });
-
-    $.getJSON(juRunnersUrl, function (runners) {
-      _.each(runners, function (runner) {
-        addRunnerOption(runner, "ju", ve_or_ju);
-      });
-      $('#search-box').show();
-      $('#search-box').selectpicker();
-      $('#search-box').on('changed.bs.select', function (e, clickedIndex, isSelected, previousValue) {
-        var selectedOption = $("#search-box option").get(clickedIndex);
-        const selectedTeamId = $(selectedOption).data("team-id")
-        const selectedRaceType = $(selectedOption).data("race-type")
-        const currentUrl = window.location.href
-        var newUrl = replaceUrlParam(currentUrl, "team", selectedTeamId)
-        newUrl = replaceUrlParam(newUrl, "race", selectedRaceType)
-        window.location = newUrl
-      });
-    });
-  });
 
 
 </script>
