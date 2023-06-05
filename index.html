@@ -481,7 +481,7 @@
         });
     }
 
-    if (teamId > 0 && (ve_or_ju == "ve" || ve_or_ju == "ju")) {
+    if (teamId > 0 && (ve_or_ju === "ve" || ve_or_ju === "ju")) {
         fetchAndShowTeamEstimates(teamId, ve_or_ju);
     }
 
@@ -502,7 +502,7 @@
         const raceStr = runnerRaceType === "ju" ? "Jukola" : "Venlat"
         $("#search-box").append(
             '<option ' + selectedStr + ' data-race-type="' + runnerRaceType
-            + '" data-team-id=' + runner.team_id + ' data-subtext="' + runner.name + ', #' + runner.leg + '">' + raceStr + ' ' + runner.team_id + ' ' + runner.team + '</option>'
+            + '" data-team-id=' + runner.team_id + ' data-subtext="' + ' Osuus ' + runner.leg + ', ' + runner.name  + '">' + raceStr + ' ' + runner.team_id + ' ' + runner.team + '</option>'
         )
     }
 
