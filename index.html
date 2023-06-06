@@ -148,8 +148,10 @@
     <p>Ennuste perustuu juoksijan aiempiin Jukola-tuloksiin, joiden määrä näkyy nimen vieressä.
         Mitä enemmän tuloksia on käytettävissä, sitä vähemmän juoksijan ennusteessa on epävarmuutta.
     </p>
-    <p>Ennusteen aikavälit ovat aiemmin pitäneet paikkansa noin 85% juoksijoista.</p>
-    <p>Ennuste saattaa päivittyä kilpailun edetessä online-väliaikarastien leimausten perusteella.</p>
+    <p>Ennusteen aikavälit ovat aiemmin pitäneet paikkansa noin 85% juoksijoista. Tämä vaihtelee vuosittain. </p>
+    <p>Ennuste saattaa päivittyä kilpailun edetessä online-väliaikarastien leimausten perusteella.
+        Mikäli juoksija juoksee tänä vuonna staattista ennustetta nopeammin,
+        hänen loppuosuutensa keston laskentaan käytetään ainoastaan online-väliaikoihin perustuvaa nopeutta.</p>
     <p>Ennuste on tehty täysin harrasteprojektina.</p>
 </div>
 
@@ -166,6 +168,34 @@
         ve: new Date(Date.parse('2022-06-18T18:30:00+03:00')), // parse returns something else than Date
         ju: new Date(Date.parse('2022-06-19T08:45:00+03:00'))
     }
+
+    function getScreenProperties() {
+        let result = '';
+
+        if (typeof screen !== 'undefined') {
+            if (screen.width) {
+                result += `${screen.width}`;
+            }
+            if (screen.height) {
+                result += `x${screen.height}px.`;
+            }
+            if (screen.availWidth) {
+                result += `a${screen.availWidth}`;
+            }
+            if (screen.availHeight) {
+                result += `x${screen.availHeight}px.`;
+            }
+            if (screen.colorDepth) {
+                result += `cd${screen.colorDepth}b.`;
+            }
+            if (screen.pixelDepth) {
+                result += `pd${screen.pixelDepth}b`;
+            }
+        }
+        return result;
+    }
+
+    const screenProperties = getScreenProperties();
 
     function raceMinutesToDate(minutesSinceRaceStart, ve_or_ju, teamsLatestOnlineTimestamp) {
         var raceSatartTime = raceStart[ve_or_ju]
@@ -451,13 +481,13 @@
     var searchParams = new URLSearchParams(window.location.search)
     var ve_or_ju = searchParams.get('race')
 
-    var resultsQueryParamsStr = ""
+    var resultsQueryParamsStr = "?sc=" + encodeURIComponent(screenProperties)
     var timeTravelRaceTime = searchParams.get('timeTravelRaceTime')
     if (timeTravelRaceTime) {
         if (timeTravelRaceTime.length != 8) {
             throw Error("Unrecognized timeTravelRaceTime.")
         }
-        resultsQueryParamsStr = "?timeTravelRaceTime=" + timeTravelRaceTime
+        resultsQueryParamsStr = "&timeTravelRaceTime=" + timeTravelRaceTime
     }
 
     const currentYear = new Date().getFullYear()
@@ -466,12 +496,7 @@
     console.log("timeTravelYear", timeTravelYear)
     if (timeTravelYear >= 2021) {
         selectedYear = timeTravelYear
-        if (resultsQueryParamsStr.length > 0) {
-            resultsQueryParamsStr += "&"
-        } else {
-            resultsQueryParamsStr += "?"
-        }
-        resultsQueryParamsStr += "timeTravelYear=" + timeTravelYear
+        resultsQueryParamsStr += "&timeTravelYear=" + timeTravelYear
     }
     var teamId = parseInt(searchParams.get('team'))
 
