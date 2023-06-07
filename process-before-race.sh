@@ -17,7 +17,9 @@ function process_one_race {
 }
 
 RO_LOG_PATH="logs/running-order-${FORECAST_YEAR}-${RUN_TS}.log"
-poetry run python fetch_running_order.py 2023  &> ${RO_LOG_PATH} && tail -n 10 ${RO_LOG_PATH} && wc data/running_order_final_ju_fy_${FORECAST_YEAR}.tsv
+poetry run python fetch_running_order.py 2023  &> ${RO_LOG_PATH}
+tail -n 10 ${RO_LOG_PATH}
+wc data/running_order_final_ju_fy_${FORECAST_YEAR}.tsv
 echo $(date -u +"%F %T") "DONE ${RO_LOG_PATH} in $SECONDS secs"
 
 
