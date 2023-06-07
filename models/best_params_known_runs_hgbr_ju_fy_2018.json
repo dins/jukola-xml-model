@@ -1,1 +1,1 @@
-{"max_depth": 5, "max_iter": 729, "learning_rate": 0.03933975515366527, "l2_regularization": 0.08835274583422913}
+{"max_depth": 6, "max_iter": 1200, "learning_rate": 0.0430083912880722, "l2_regularization": 0.039193023025773994}
