@@ -487,7 +487,7 @@
         if (timeTravelRaceTime.length != 8) {
             throw Error("Unrecognized timeTravelRaceTime.")
         }
-        resultsQueryParamsStr = "&timeTravelRaceTime=" + timeTravelRaceTime
+        resultsQueryParamsStr += "&timeTravelRaceTime=" + timeTravelRaceTime
     }
 
     const currentYear = new Date().getFullYear()
