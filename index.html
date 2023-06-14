@@ -72,9 +72,25 @@
             border-radius: 10px;
             padding: 10px;
             background-color: forestgreen;
+            text-align: center;
         }
 
         .latestControl .timeAndDistance {
+            font-weight: bold;
+        }
+
+        .nextControl {
+            display: block;
+            color: forestgreen;
+            text-align: center;
+            font-size: small;
+            border-radius: 10px;
+            border: 1px solid forestgreen;
+            padding: 10px;
+            margin-top: 10px;
+        }
+
+        .nextControl .timeAndDistance {
             font-weight: bold;
         }
 
@@ -290,6 +306,17 @@
             currentRunnerClass = " currentRunner"
         }
 
+        function nextControlsHtml(runner) {
+            if (!runner.nextControlEstimates) {
+                return ""
+            }
+            let timesHtml = runner.nextControlEstimates.map(function (nextControl) {
+                text = nextControl.distance + "km " + formatTime(nextControl.timestampMedian)
+                return "<div class='timeAndDistance'>" + text + "</div>"
+            }).join("")
+            return "<span class='nextControl'><div>Ennustetut väliajat:</div>" + timesHtml + "</span>"
+        }
+
         $("#estimate-summary tbody").append(
             "<tr class='" + rowClass + currentRunnerClass + "'>" +
             "<th scope=\"row\">" + runner.leg + "</th>" +
@@ -298,7 +325,9 @@
             + "<span class='latestControl'>"
             + "<div>Viimeisin väliaika:</div>"
             + "<div class='timeAndDistance'>" + latestControlText + "</div>"
-            + "</span></td>"
+            + "</span>"
+            + nextControlsHtml(runner)
+            + "</td>"
             + "<td class=estimate>"
             + "<div class='static interval relay'>" + staticIntervalText + "</div>"
             + "<div class='static interval duration'>" + staticPersonalDurationIntervalText + "</div>"
