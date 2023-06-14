@@ -1,5 +1,5 @@
 c_DEN Sparse[bool, False]
-c_ESP int64
+c_ESP Sparse[bool, False]
 c_EST Sparse[bool, False]
 c_FIN Sparse[bool, False]
 c_GBR Sparse[bool, False]
@@ -41,52 +41,52 @@ team_id int64
 terrain_coefficient float64
 vertical_per_km float64
 <class 'pandas.core.frame.DataFrame'>
-RangeIndex: 2805 entries, 0 to 2804
+RangeIndex: 3242 entries, 0 to 3241
 Data columns (total 42 columns):
  #   Column                 Non-Null Count  Dtype              
 ---  ------                 --------------  -----              
- 0   c_DEN                  2805 non-null   Sparse[bool, False]
- 1   c_ESP                  2805 non-null   int64              
- 2   c_EST                  2805 non-null   Sparse[bool, False]
- 3   c_FIN                  2805 non-null   Sparse[bool, False]
- 4   c_GBR                  2805 non-null   Sparse[bool, False]
- 5   c_GER                  2805 non-null   int64              
- 6   c_LAT                  2805 non-null   Sparse[bool, False]
- 7   c_LTU                  2805 non-null   Sparse[bool, False]
- 8   c_NOR                  2805 non-null   Sparse[bool, False]
- 9   c_OTHER                2805 non-null   Sparse[bool, False]
- 10  c_POL                  2805 non-null   int64              
- 11  c_RUS                  2805 non-null   int64              
- 12  c_SUI                  2805 non-null   Sparse[bool, False]
- 13  c_SWE                  2805 non-null   Sparse[bool, False]
- 14  c_UKR                  2805 non-null   int64              
- 15  fn_pace_class_0.0      2805 non-null   Sparse[bool, False]
- 16  fn_pace_class_1.0      2805 non-null   Sparse[bool, False]
- 17  fn_pace_class_2.0      2805 non-null   Sparse[bool, False]
- 18  fn_pace_class_3.0      2805 non-null   Sparse[bool, False]
- 19  fn_pace_class_4.0      2805 non-null   Sparse[bool, False]
- 20  fn_pace_class_5.0      2805 non-null   Sparse[bool, False]
- 21  fn_pace_class_6.0      2805 non-null   Sparse[bool, False]
- 22  fn_pace_class_7.0      2805 non-null   Sparse[bool, False]
- 23  fn_pace_class_8.0      2805 non-null   Sparse[bool, False]
- 24  fn_pace_class_9.0      2805 non-null   Sparse[bool, False]
- 25  fn_pace_class_nan      2805 non-null   Sparse[bool, False]
- 26  fn_pace_std_class_0.0  2805 non-null   Sparse[bool, False]
- 27  fn_pace_std_class_1.0  2805 non-null   Sparse[bool, False]
- 28  fn_pace_std_class_2.0  2805 non-null   Sparse[bool, False]
- 29  fn_pace_std_class_3.0  2805 non-null   Sparse[bool, False]
- 30  fn_pace_std_class_nan  2805 non-null   Sparse[bool, False]
- 31  leg_1                  2805 non-null   Sparse[bool, False]
- 32  leg_2                  2805 non-null   Sparse[bool, False]
- 33  leg_3                  2805 non-null   Sparse[bool, False]
- 34  leg_4                  2805 non-null   Sparse[bool, False]
- 35  leg_distance           2805 non-null   float64            
- 36  log_stdev              2805 non-null   float64            
- 37  median_pace            2805 non-null   float64            
- 38  runs                   2805 non-null   int64              
- 39  team_id                2805 non-null   int64              
- 40  terrain_coefficient    2805 non-null   float64            
- 41  vertical_per_km        2805 non-null   float64            
-dtypes: Sparse[bool, False](30), float64(5), int64(7)
-memory usage: 317.9 KB
+ 0   c_DEN                  3242 non-null   Sparse[bool, False]
+ 1   c_ESP                  3242 non-null   Sparse[bool, False]
+ 2   c_EST                  3242 non-null   Sparse[bool, False]
+ 3   c_FIN                  3242 non-null   Sparse[bool, False]
+ 4   c_GBR                  3242 non-null   Sparse[bool, False]
+ 5   c_GER                  3242 non-null   int64              
+ 6   c_LAT                  3242 non-null   Sparse[bool, False]
+ 7   c_LTU                  3242 non-null   Sparse[bool, False]
+ 8   c_NOR                  3242 non-null   Sparse[bool, False]
+ 9   c_OTHER                3242 non-null   Sparse[bool, False]
+ 10  c_POL                  3242 non-null   int64              
+ 11  c_RUS                  3242 non-null   int64              
+ 12  c_SUI                  3242 non-null   Sparse[bool, False]
+ 13  c_SWE                  3242 non-null   Sparse[bool, False]
+ 14  c_UKR                  3242 non-null   int64              
+ 15  fn_pace_class_0.0      3242 non-null   Sparse[bool, False]
+ 16  fn_pace_class_1.0      3242 non-null   Sparse[bool, False]
+ 17  fn_pace_class_2.0      3242 non-null   Sparse[bool, False]
+ 18  fn_pace_class_3.0      3242 non-null   Sparse[bool, False]
+ 19  fn_pace_class_4.0      3242 non-null   Sparse[bool, False]
+ 20  fn_pace_class_5.0      3242 non-null   Sparse[bool, False]
+ 21  fn_pace_class_6.0      3242 non-null   Sparse[bool, False]
+ 22  fn_pace_class_7.0      3242 non-null   Sparse[bool, False]
+ 23  fn_pace_class_8.0      3242 non-null   Sparse[bool, False]
+ 24  fn_pace_class_9.0      3242 non-null   Sparse[bool, False]
+ 25  fn_pace_class_nan      3242 non-null   Sparse[bool, False]
+ 26  fn_pace_std_class_0.0  3242 non-null   Sparse[bool, False]
+ 27  fn_pace_std_class_1.0  3242 non-null   Sparse[bool, False]
+ 28  fn_pace_std_class_2.0  3242 non-null   Sparse[bool, False]
+ 29  fn_pace_std_class_3.0  3242 non-null   Sparse[bool, False]
+ 30  fn_pace_std_class_nan  3242 non-null   Sparse[bool, False]
+ 31  leg_1                  3242 non-null   Sparse[bool, False]
+ 32  leg_2                  3242 non-null   Sparse[bool, False]
+ 33  leg_3                  3242 non-null   Sparse[bool, False]
+ 34  leg_4                  3242 non-null   Sparse[bool, False]
+ 35  leg_distance           3242 non-null   float64            
+ 36  log_stdev              3242 non-null   float64            
+ 37  median_pace            3242 non-null   float64            
+ 38  runs                   3242 non-null   int64              
+ 39  team_id                3242 non-null   int64              
+ 40  terrain_coefficient    3242 non-null   float64            
+ 41  vertical_per_km        3242 non-null   float64            
+dtypes: Sparse[bool, False](31), float64(5), int64(6)
+memory usage: 342.1 KB
 
