@@ -90,10 +90,6 @@
             margin-top: 10px;
         }
 
-        .nextControl .timeAndDistance {
-            font-weight: bold;
-        }
-
         #estimate-summary .static {
             color: grey;
         }
@@ -307,14 +303,14 @@
         }
 
         function nextControlsHtml(runner) {
-            if (!runner.nextControlEstimates) {
+            if (!runner.nextControlEstimates || runner.nextControlEstimates.length === 0) {
                 return ""
             }
             let timesHtml = runner.nextControlEstimates.map(function (nextControl) {
                 text = nextControl.distance + "km " + formatTime(nextControl.timestampMedian)
                 return "<div class='timeAndDistance'>" + text + "</div>"
             }).join("")
-            return "<span class='nextControl'><div>Ennustetut väliajat:</div>" + timesHtml + "</span>"
+            return "<span class='nextControl'><div>Seuraavat väliajat:</div>" + timesHtml + "</span>"
         }
 
         $("#estimate-summary tbody").append(
