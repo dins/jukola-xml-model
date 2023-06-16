@@ -59,7 +59,7 @@ def read_all_json_files_from_folder_to_df():
 
     # Should we distinguish ve and ju here?
     key_values_df = all_df[all_df["desc"].isin(
-        ["Viestin aikaväliennuste väärin", "Yksilöennusteen keskivirhe", "Yksilön aikaväliennuste väärin"])]
+        ["Viestin aikaväliennuste väärin", "Yksilöennusteen keskivirhe", "Yksilön aikaväliennuste väärin", "Aiempien Jukoloiden määrä (keskiarvo)"])]
 
     latest_kvs = key_values_df[key_values_df["execution_timestamp"] == key_values_df["execution_timestamp"].max()]
     shared.log_df(latest_kvs.pivot(index="race_id", columns="name", values="value").round(3))

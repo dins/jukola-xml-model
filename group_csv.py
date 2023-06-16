@@ -10,7 +10,7 @@ import normalize_names
 import shared
 
 
-# RACE_TYPE=ve FORECAST_YEAR=2022 time poetry run python group_csv.py && head data/grouped_paces_ve.tsv
+# RACE_TYPE=ju FORECAST_YEAR=2023 time poetry run python group_csv.py && head data/grouped_paces_ve.tsv
 
 
 def _connect_teams_by_emit(runs):
@@ -40,7 +40,9 @@ def _connect_teams_by_emit(runs):
     for team, connected_teams in teams_connected_by_emit.items():
         connected_teams_sets.add(frozenset(_get_connected_teams(team, connected_teams)))
 
+    # remove unnecessary subsets that are contained in some other
     connected_teams_sets = [connections for connections in connected_teams_sets if len(connections) > 1]
+    connected_teams_sets = [s for s in connected_teams_sets if not any(s.issubset(o) for o in connected_teams_sets if s is not o)]
 
     return connected_teams_sets
 

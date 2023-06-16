@@ -81,7 +81,7 @@ distances = {
         2014: [5.1, 5.0, 6.7, 7.4],
         2015: [8.0, 6.0, 6.2, 8.8],
         2016: [7.1, 6.7, 6.0, 9.1],
-        2017: [6.7, 6.6, 5.8, 8.0],
+        2017: [6.8, 6.8, 6.1, 8.3],
         2018: [6.2, 6.2, 5.4, 7.9],
         2019: [6.0, 5.7, 7.3, 7.9],
         2020: [7.3, 5.4, 9.1, 8.5],
@@ -115,7 +115,7 @@ distances = {
         2014: [10.1, 11.5, 10.2, 7.6, 7.7, 10.7, 14.0],
         2015: [13.8, 12.3, 15.8, 8.1, 8.6, 12.6, 14.6],
         2016: [10.7, 12.8, 14.1, 8.6, 8.7, 12.4, 16.5],
-        2017: [12.8, 14.3, 12.3, 7.7, 7.8, 11.1, 13.8],
+        2017: [12.8, 14.3, 12.4, 7.7, 8.0, 11.0, 13.9],
         2018: [11.0, 11.9, 12.7, 8.8, 8.7, 10.8, 15.1],
         2019: [10.9, 10.5, 13.2, 7.3, 7.8, 11.1, 12.9],
         2020: [12.9, 12.9, 16.6, 9.1, 8.9, 11.0, 16.4],
@@ -133,7 +133,7 @@ def leg_distance(ve_or_ju, year, leg):
 
 start_timestamp = {
     "ve": {
-        2017: pd.Timestamp(year=2018, month=6, day=17, hour=14, tz="Europe/Helsinki"),
+        2017: pd.Timestamp(year=2017, month=6, day=17, hour=14, tz="Europe/Helsinki"),
         2018: pd.Timestamp(year=2018, month=6, day=16, hour=14, tz="Europe/Helsinki"),
         2019: pd.Timestamp(year=2019, month=6, day=15, hour=14, tz="Europe/Helsinki"),
         2021: pd.Timestamp(year=2021, month=8, day=21, hour=13, minute=45, tz="Europe/Helsinki"),
@@ -141,7 +141,7 @@ start_timestamp = {
         2023: pd.Timestamp(year=2023, month=6, day=17, hour=14, tz="Europe/Helsinki")
     },
     "ju": {
-        2017: pd.Timestamp(year=2018, month=6, day=17, hour=23, tz="Europe/Helsinki"),
+        2017: pd.Timestamp(year=2017, month=6, day=17, hour=23, tz="Europe/Helsinki"),
         2018: pd.Timestamp(year=2018, month=6, day=16, hour=23, tz="Europe/Helsinki"),
         2019: pd.Timestamp(year=2019, month=6, day=15, hour=23, tz="Europe/Helsinki"),
         2021: pd.Timestamp(year=2021, month=8, day=21, hour=23, tz="Europe/Helsinki"),
@@ -152,7 +152,7 @@ start_timestamp = {
 
 changeover_closing = {
     "ve": {
-        2017: pd.Timestamp(year=2018, month=6, day=17, hour=18, minute=30, tz="Europe/Helsinki"),
+        2017: pd.Timestamp(year=2017, month=6, day=17, hour=18, minute=30, tz="Europe/Helsinki"),
         2018: pd.Timestamp(year=2018, month=6, day=16, hour=18, minute=30, tz="Europe/Helsinki"),
         2019: pd.Timestamp(year=2019, month=6, day=15, hour=18, minute=30, tz="Europe/Helsinki"),
         2021: pd.Timestamp(year=2021, month=8, day=21, hour=18, minute=15, tz="Europe/Helsinki"),
@@ -160,7 +160,7 @@ changeover_closing = {
         2023: pd.Timestamp(year=2023, month=6, day=17, hour=18, minute=30, tz="Europe/Helsinki")
     },
     "ju": {
-        2017: pd.Timestamp(year=2018, month=6, day=18, hour=8, minute=45, tz="Europe/Helsinki"),
+        2017: pd.Timestamp(year=2017, month=6, day=18, hour=8, minute=45, tz="Europe/Helsinki"),
         2018: pd.Timestamp(year=2018, month=6, day=17, hour=8, minute=45, tz="Europe/Helsinki"),
         2019: pd.Timestamp(year=2019, month=6, day=16, hour=8, minute=45, tz="Europe/Helsinki"),
         2021: pd.Timestamp(year=2021, month=8, day=22, hour=8, minute=45, tz="Europe/Helsinki"),
