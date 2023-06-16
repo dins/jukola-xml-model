@@ -318,12 +318,16 @@
             let timesHtml = runner.nextControlEstimates.map(function (nextControl) {
                 let lateClass = ""
                 let delayMinsText = ""
+                let controlEstimateTime = timestampToDate(nextControl.timestampMedian)
+
+                console.log("nextControl.timestampMedian", typeof controlEstimateTime)
                 if (nextControl.first && runner.runnerIsLateFromNextControl) {
                     lateClass = "runnerIsLate"
-                    delayMins = Math.round(runner.runnerIsLateMillis / 1000 / 60)
+                    controlEstimateTime = new Date(controlEstimateTime.getTime() - runner.runnerIsLateMillis)
+                    let delayMins = Math.round(runner.runnerIsLateMillis / 1000 / 60)
                     delayMinsText = " (+" + delayMins + "min)"
                 }
-                text = nextControl.distance + "km <span class='time'>" + formatTime(nextControl.timestampMedian) + delayMinsText + "</span>"
+                text = nextControl.distance + "km <span class='time'>" + formatTime(controlEstimateTime) + delayMinsText + "</span>"
                 return "<div class='timeAndDistance " + lateClass + "'>" + text + "</div>"
             }).join("")
             return "<span class='nextControl'><div>Seuraavat väliajat:</div>" + timesHtml + "</span>"
