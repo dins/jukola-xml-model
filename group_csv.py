@@ -33,16 +33,33 @@ def _connect_teams_by_emit(runs):
         found_connections.add(team)
         for connection in teams_connected_by_emit[team]:
             if connection not in found_connections:
-                found_connections.update(_get_connected_teams(connection))
+                found_connections.update(_get_connected_teams(connection, found_connections))
         return found_connections
 
     connected_teams_sets = set()
     for team, connected_teams in teams_connected_by_emit.items():
         connected_teams_sets.add(frozenset(_get_connected_teams(team, connected_teams)))
 
+    # TODO this is overly complex
+    connected_teams_sets = [set(fs) for fs in connected_teams_sets]
+    new_connected_teams_sets = []
+    for connected_teams_set in connected_teams_sets:
+        new_connected_teams_set = set()
+        new_connected_teams_set.update(connected_teams_set)
+        for team in connected_teams_set:
+            other_sets = [o for o in connected_teams_sets if team in o and o is not connected_teams_set]
+            for other_set in other_sets:
+                new_connected_teams_set.update(other_set)
+        new_connected_teams_sets.append(new_connected_teams_set)
+
+    # remove duplicate sets
+    connected_teams_sets = set([frozenset(s) for s in new_connected_teams_sets])
+
     # remove unnecessary subsets that are contained in some other
     connected_teams_sets = [connections for connections in connected_teams_sets if len(connections) > 1]
+    # remove overlapping subsets
     connected_teams_sets = [s for s in connected_teams_sets if not any(s.issubset(o) for o in connected_teams_sets if s is not o)]
+
 
     return connected_teams_sets
 
