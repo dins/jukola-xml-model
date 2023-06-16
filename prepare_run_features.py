@@ -322,13 +322,14 @@ def _find_history_values_for_running_order_names():
     shared.log_df(history)
     history["num_runs"] = history["num_valid_times"]
     history = history.assign(name_without_colon=history['name'].str.split(":").str[0])
+
     switched_names = [switch_first_and_last_name(name) for name in history["name_without_colon"].values]
     history = history.assign(switched_name=switched_names)
     history["duplicate_name"] = history["name_without_colon"].duplicated(keep=False)
     history["name_contains_colon"] = history['name'].str.contains(":", regex=False)
+
     shared.log_df(
-        history[history["name_contains_colon"]][
-            ["name", "duplicate_name", "switched_name", "name_without_colon", "teams"]])
+        history[history["name_contains_colon"]][["name", "duplicate_name", "switched_name", "name_without_colon", "teams"]])
     # No history defaults
     running_order["pred_log_mean"] = 0
     running_order["pred_log_std"] = 0
@@ -352,11 +353,23 @@ def _find_history_values_for_running_order_names():
         "num_valid_times_switched"]
     # Multiple teams
     multi_team_history = history[history["name_contains_colon"]]
-    # teams column contain only a single team name if runs are splitted to multiple teams (one history row per team)
-    running_order_with_history = pd.merge(running_order_with_history, multi_team_history,
+    #logging.info(f"multi_team_history Mouhu")
+    #logging.info(multi_team_history[multi_team_history["name"].str.contains("ouhu")][["name", "teams", "duplicate_name", "name_without_colon"]].to_dict(orient="records"))
+    multi_team_history_expanded = multi_team_history.assign(multi_team=multi_team_history['teams'].str.split(';')).explode('multi_team')
+    logging.info(f"multi_team_history_expanded {multi_team_history_expanded.info()}")
+    logging.info(f"multi_team_history_expanded new rows {len(multi_team_history_expanded) - len(multi_team_history)}")
+    #logging.info(multi_team_history_expanded[multi_team_history_expanded["name"].str.contains("ouhu")][["name", "teams", "multi_team", "name_without_colon"]].to_dict(orient="records"))
+
+    # teams column contain only a single team name if runs are split to multiple teams (one history row per team)
+    running_order_with_history = pd.merge(running_order_with_history, multi_team_history_expanded,
                                           how="left", left_on=["name", "team_base_name_upper"],
-                                          right_on=["name_without_colon", "teams"],
+                                          right_on=["name_without_colon", "multi_team"],
                                           suffixes=("", "_multi_team"), )
+    #logging.info(f"running_order_with_history Mouhu")
+    #shared.log_df(running_order_with_history[running_order_with_history["name"].str.contains("ouhu")][["name", "duplicate_name", "name_without_colon"]])
+    #logging.info(running_order_with_history[running_order_with_history["name"].str.contains("ouhu")][["name", "duplicate_name", "name_without_colon"]].to_dict(orient="records"))
+
+
     multi_team = running_order_with_history["predicted_log_pace_mean_multi_team"].notna()
     logging.info(f"multi_team ratio: {multi_team.mean()}")
     logging.info(f"multi_team count: {multi_team.sum()}")
