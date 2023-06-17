@@ -97,6 +97,14 @@
             color: coral;
         }
 
+        .runnerIsLateColor {
+            color: coral;
+        }
+
+        #estimate-summary .mass-start-runner {
+            background-color: #F8F8F8;
+        }
+
         #estimate-summary .static {
             color: grey;
         }
@@ -171,7 +179,10 @@
     <p>Ennuste saattaa päivittyä kilpailun edetessä online-väliaikarastien leimausten perusteella.
         Mikäli juoksija juoksee tänä vuonna staattista ennustetta nopeammin,
         hänen loppuosuutensa keston laskentaan käytetään ainoastaan online-väliaikoihin perustuvaa nopeutta.</p>
-    <p>Ennuste on tehty täysin harrasteprojektina.</p>
+    <p>Kilpailun edetessä ja online rastien sijaintien selvitessä, pyritään ennustamaan myös tulevien leimausten aikoja.
+        Jos juoksija on myöhässä ennustetusta leimauksesta, näytetään tämä <span class='runnerIsLateColor'>oranssilla</span> värillä ja ennuste "myöhäistää" tuleviakin aikoja. </p>
+    <p>Jos yhteislähdön todennäköisyys on osuudelle yli 50%, näytetään yhteislähtöön perustuvat kellonajat.</p>
+    <p>Ennuste on tehty täysin harrasteprojektina ja kilpailunaikainen toimivuus nähdään aina vasta kisapäivänä.</p>
 </div>
 
 <canvas id="chartjs-plot" width="1000" height="800"></canvas>
@@ -186,6 +197,34 @@
     var changeoverClosing = {
         ve: new Date(Date.parse('2022-06-18T18:30:00+03:00')), // parse returns something else than Date
         ju: new Date(Date.parse('2022-06-19T08:45:00+03:00'))
+    }
+
+    const changeoverClosingMap = {
+        "ve": {
+            2019: new Date("2019-06-15T18:30:00+0300"),
+            2021: new Date("2021-08-21T18:15:00+0300"),
+            2022: new Date("2022-06-18T18:30:00+0300"),
+            2023: new Date("2023-06-17T18:30:00+0300"),
+            2099: new Date("2023-06-14T18:30:00+0300")
+        },
+        "ju": {
+            2019: new Date("2019-06-16T08:45:00+0300"),
+            2021: new Date("2021-08-22T08:45:00+0300"),
+            2022: new Date("2022-06-19T08:45:00+0300"),
+            2023: new Date("2023-06-18T08:45:00+0300")
+        }
+    }
+
+    function massStartTimestamp(raceYear, ve_or_ju, leg) {
+        let changeoverClosingDate = changeoverClosingMap[ve_or_ju][raceYear];
+        if(ve_or_ju === 've') {
+            return new Date(changeoverClosingDate.getTime() + 15 * 60 * 1000);
+        }
+        if(leg === 7) {
+            return new Date(changeoverClosingDate.getTime() + 15 * 60 * 1000);
+        }
+        return new Date(changeoverClosingDate.getTime() + 45 * 60 * 1000);
+
     }
 
     function getScreenProperties() {
@@ -276,24 +315,61 @@
         return floatValue.toFixed(0)
     }
 
-    function addRunnerToTable(runner) {
+    function addRunnerToTable(runner, ve_or_ju, selectedYear) {
+        console.log("addRunnerToTable", ve_or_ju, selectedYear)
         var rowClass = ""
-        var staticIntervalText = formatTime(runner.fin_time_start95) + " - " + formatTime(runner.fin_time_end95);
+        var massStartClass = ""
+        const onlineMassStart = runner.inMassStart
+        const staticMassStart = runner.mass_start
+
+        const massStartProbability = onlineMassStart || staticMassStart
+        if (massStartProbability > 0.5) {
+            massStartClass = " mass-start-runner "
+        }
+
+
+        let personal_duration = Math.exp(runner.ind_log_mean) * runner.legDistance;
+        var fin_time_median = timestampToDate(runner.fin_time_median)
+        var fin_time_start95 = timestampToDate(runner.fin_time_start95)
+        var fin_time_end95 = timestampToDate(runner.fin_time_end95)
+
+        const massStart = massStartTimestamp(selectedYear, ve_or_ju, runner.leg)
+        console.log("massStart", massStart)
+
+        if (staticMassStart > 0.5) {
+            fin_time_median = new Date(massStart.getTime() + personal_duration * 60 * 1000)
+            fin_time_start95 = new Date(massStart.getTime() + runner.personal_start95 * 60 * 1000)
+            fin_time_end95 = new Date(massStart.getTime() + runner.personal_end95 * 60 * 1000)
+        }
+
+        var staticIntervalText = formatTime(fin_time_start95) + " - " + formatTime(fin_time_end95);
+        const staticPointEstimateText = formatTime(fin_time_median);
+
         var onlineIntervalText = "";
         if (runner.onlineFinishTimestampLow95) {
-            onlineIntervalText = formatTime(runner.onlineFinishTimestampLow95) + " - " + formatTime(runner.onlineFinishTimestampHigh95);
+            let onlineFinishTimestampLow95 = runner.onlineFinishTimestampLow95
+            let onlineFinishTimestampHigh95 = runner.onlineFinishTimestampHigh95
+            if (onlineMassStart && onlineMassStart > 0.5) {
+                onlineFinishTimestampLow95 = new Date(massStart.getTime() + runner.personal_start95 * 60 * 1000)
+                onlineFinishTimestampHigh95 = new Date(massStart.getTime() + runner.personal_end95 * 60 * 1000)
+            }
+            onlineIntervalText = formatTime(onlineFinishTimestampLow95) + " - " + formatTime(onlineFinishTimestampHigh95);
         }
 
         var staticPersonalDurationIntervalText = formatInteger(runner.personal_start95) + "min - " + formatInteger(runner.personal_end95) + "min";
 
-        var staticPointEstimateText = formatTime(runner.fin_time_median);
         var onlinePointEstimateText = "";
         if (runner.onlineFinishTimestampMedian) {
-            onlinePointEstimateText = formatTime(runner.onlineFinishTimestampMedian);
             rowClass = "unfinished"
+            let onlineFinishTimestampMedian = runner.onlineFinishTimestampMedian
+            if (onlineMassStart && onlineMassStart > 0.5) {
+                onlineFinishTimestampMedian = new Date(massStart.getTime() + personal_duration * 60 * 1000)
+            }
+            onlinePointEstimateText = formatTime(onlineFinishTimestampMedian);
         }
 
-        var staticPointEstimateDurationText = formatInteger(Math.exp(runner.ind_log_mean) * runner.legDistance) + "min";
+
+        var staticPointEstimateDurationText = formatInteger(personal_duration) + "min";
 
         var finishTime = ""
         var finishLegDuration = ""
@@ -320,7 +396,6 @@
                 let delayMinsText = ""
                 let controlEstimateTime = timestampToDate(nextControl.timestampMedian)
 
-                console.log("nextControl.timestampMedian", typeof controlEstimateTime)
                 if (nextControl.first && runner.runnerIsLateFromNextControl) {
                     lateClass = "runnerIsLate"
                     controlEstimateTime = new Date(controlEstimateTime.getTime() - runner.runnerIsLateMillis)
@@ -330,11 +405,17 @@
                 text = nextControl.distance + "km <span class='time'>" + formatTime(controlEstimateTime) + delayMinsText + "</span>"
                 return "<div class='timeAndDistance " + lateClass + "'>" + text + "</div>"
             }).join("")
-            return "<span class='nextControl'><div>Seuraavat väliajat:</div>" + timesHtml + "</span>"
+            return "<span class='nextControl'><div>Ennustetut väliajat:</div>" + timesHtml + "</span>"
         }
 
+        // TODO fix online simulation, now its too far from static values to show
+        let onlineMassStartHtml = ""
+        // if (onlineMassStart) {
+        //    onlineMassStartHtml = "<div class='online'>" + formatPercent(onlineMassStart) + "</div>"
+        //}
+
         $("#estimate-summary tbody").append(
-            "<tr class='" + rowClass + currentRunnerClass + "'>" +
+            "<tr class='" + rowClass + currentRunnerClass + massStartClass +  "'>" +
             "<th scope=\"row\">" + runner.leg + "</th>" +
             "<td>"
             + "<div class='name'>" + runner.name + " <span class='historyYears fw-normal badge rounded-pill text-bg-light'>" + runner.num_runs + "</span></div>"
@@ -357,19 +438,22 @@
             + "<td class=finish-time>"
             + "<div class='online finishTime relay'>" + finishTime + "</div>"
             + "<div class='online finishTime duration'>" + finishLegDuration + "</div>"
-            + "</td><td class=estimate>" + formatPercent(runner.inMassStart || runner.mass_start)
+            + "</td><td class=estimate><div class=''>" + formatPercent(massStartProbability) + "</div>"
+            + onlineMassStartHtml
             + "</td><td class=estimate>" + formatPercent(runner.darkDuringLeg || runner.dark_during_leg)
             + "</td></tr>")
     }
 
-    function showTeam(teamId, teamRunners, ve_or_ju) {
+    function showTeam(teamId, teamRunners, ve_or_ju, selectedYear) {
         console.log("teamId", teamId)
         console.log("teamRunners", teamRunners)
 
         $("h1").text("Vaihtoaikaennuste " + teamId + " " + teamRunners[0].team)
         $("#estimate-summary tbody").empty()
         $("#estimate-summary").show()
-        _.each(teamRunners, addRunnerToTable)
+        _.each(teamRunners, function (runner) {
+            addRunnerToTable(runner, ve_or_ju, selectedYear);
+        });
 
         var colors = {
             blue: "rgb(54, 162, 235)",
@@ -548,7 +632,7 @@
     function fetchAndShowTeamEstimates(teamId, raceType) {
         var url = "https://075x6c4ra2.execute-api.eu-west-1.amazonaws.com/dev/" + raceType + "/" + teamId + resultsQueryParamsStr;
         $.getJSON(url, function (runners) {
-            showTeam(teamId, runners, raceType)
+            showTeam(teamId, runners, raceType, selectedYear)
         });
     }
 
