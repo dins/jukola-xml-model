@@ -16,7 +16,7 @@ time for year in $(seq 1992 2019); do echo "YEAR $year"; time wget -P data https
 ```
 Next manually replace `&` characters with `&amp;` (but not `&amp;` with `&&amp;`) in all xml files.
 
-Right after the race fetch results from "online" site: `time wget -P data https://online.jukola.com/tulokset/results_j2022_ve.xml`
+Right after the race fetch results from "online" site: ` time curl "https://online.jukola.com/tulokset/results_j2023_ve.xml" > data/results_j2023_ve.xml`
 
 Convert xml to csv:
 

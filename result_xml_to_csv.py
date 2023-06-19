@@ -9,7 +9,7 @@ import xml.etree.ElementTree as ET
 
 import numpy as np
 
-# time poetry run python result_xml_to_csv.py 2017 ve
+# time poetry run python result_xml_to_csv.py 2023 ve
 
 # time for year in $(seq 2012 2018); do echo "YEAR $year"; time poetry run python result_xml_to_csv.py $year ve && head data/results_with_dist_j${year}_ve.tsv; done
 
