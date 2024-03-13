@@ -10,8 +10,9 @@ import normalize_names
 import shared
 
 
-# RACE_TYPE=ju FORECAST_YEAR=2023 time poetry run python group_csv.py && head data/grouped_paces_ve.tsv
-
+# RACE_TYPE=ju FORECAST_YEAR=2023 time poetry run python group_csv.py
+# To get all years use next year:
+# RACE_TYPE=ju FORECAST_YEAR=2024 time poetry run python group_csv.py
 
 def _connect_teams_by_emit(runs):
     runs_by_team = defaultdict(list)
@@ -74,6 +75,7 @@ def open_output_file(out_file_name, column_names):
 
 def _write_individual_runs_file(grouped_runs_by_unique_name):
     # TODO add "leg_distance" column to runs.tsv
+    # TODO add "log_median" column ?
     runs_file_cols = ["name", "year", "team_id", "team", "team_country", "pace", "leg", "num_runs", "median_pace",
                       "log_stdev"]
     (runs_out_file, runs_csvwriter) = open_output_file(f'data/runs_{shared.race_id_str()}.tsv',
@@ -142,8 +144,6 @@ def _write_grouped_paces_file(grouped_runs_by_unique_name):
 def _group_raw_runs_to_runners(raw_runs_by_name):
     by_unique_name = {}
     for name, raw_runs in raw_runs_by_name.items():
-        run_years = list(map(lambda run: run["year"], raw_runs))
-        unique_years = set(run_years)
 
         qualified_runs = [run for run in raw_runs if run["pace"] != "NA"]
 

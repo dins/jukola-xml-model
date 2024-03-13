@@ -51,62 +51,62 @@ team_id int64
 terrain_coefficient float64
 vertical_per_km float64
 <class 'pandas.core.frame.DataFrame'>
-RangeIndex: 102289 entries, 0 to 102288
+RangeIndex: 113118 entries, 0 to 113117
 Data columns (total 52 columns):
  #   Column                 Non-Null Count   Dtype              
 ---  ------                 --------------   -----              
- 0   c_AUT                  102289 non-null  Sparse[bool, False]
- 1   c_BEL                  102289 non-null  Sparse[bool, False]
- 2   c_BLR                  102289 non-null  Sparse[bool, False]
- 3   c_CZE                  102289 non-null  Sparse[bool, False]
- 4   c_DEN                  102289 non-null  Sparse[bool, False]
- 5   c_ESP                  102289 non-null  Sparse[bool, False]
- 6   c_EST                  102289 non-null  Sparse[bool, False]
- 7   c_FIN                  102289 non-null  Sparse[bool, False]
- 8   c_FRA                  102289 non-null  Sparse[bool, False]
- 9   c_GBR                  102289 non-null  Sparse[bool, False]
- 10  c_GER                  102289 non-null  Sparse[bool, False]
- 11  c_HUN                  102289 non-null  Sparse[bool, False]
- 12  c_IRL                  102289 non-null  Sparse[bool, False]
- 13  c_ITA                  102289 non-null  Sparse[bool, False]
- 14  c_LAT                  102289 non-null  Sparse[bool, False]
- 15  c_LTU                  102289 non-null  Sparse[bool, False]
- 16  c_NOR                  102289 non-null  Sparse[bool, False]
- 17  c_OTHER                102289 non-null  Sparse[bool, False]
- 18  c_POL                  102289 non-null  Sparse[bool, False]
- 19  c_RUS                  102289 non-null  Sparse[bool, False]
- 20  c_SUI                  102289 non-null  Sparse[bool, False]
- 21  c_SWE                  102289 non-null  Sparse[bool, False]
- 22  c_UKR                  102289 non-null  Sparse[bool, False]
- 23  c_USA                  102289 non-null  Sparse[bool, False]
- 24  fn_pace_class_0.0      102289 non-null  Sparse[bool, False]
- 25  fn_pace_class_1.0      102289 non-null  Sparse[bool, False]
- 26  fn_pace_class_2.0      102289 non-null  Sparse[bool, False]
- 27  fn_pace_class_3.0      102289 non-null  Sparse[bool, False]
- 28  fn_pace_class_4.0      102289 non-null  Sparse[bool, False]
- 29  fn_pace_class_5.0      102289 non-null  Sparse[bool, False]
- 30  fn_pace_class_6.0      102289 non-null  Sparse[bool, False]
- 31  fn_pace_class_7.0      102289 non-null  Sparse[bool, False]
- 32  fn_pace_class_8.0      102289 non-null  Sparse[bool, False]
- 33  fn_pace_class_9.0      102289 non-null  Sparse[bool, False]
- 34  fn_pace_class_nan      102289 non-null  Sparse[bool, False]
- 35  fn_pace_std_class_0.0  102289 non-null  Sparse[bool, False]
- 36  fn_pace_std_class_1.0  102289 non-null  Sparse[bool, False]
- 37  fn_pace_std_class_2.0  102289 non-null  Sparse[bool, False]
- 38  fn_pace_std_class_3.0  102289 non-null  Sparse[bool, False]
- 39  fn_pace_std_class_nan  102289 non-null  Sparse[bool, False]
- 40  leg_1                  102289 non-null  Sparse[bool, False]
- 41  leg_2                  102289 non-null  Sparse[bool, False]
- 42  leg_3                  102289 non-null  Sparse[bool, False]
- 43  leg_4                  102289 non-null  Sparse[bool, False]
- 44  leg_5                  102289 non-null  Sparse[bool, False]
- 45  leg_6                  102289 non-null  Sparse[bool, False]
- 46  leg_7                  102289 non-null  Sparse[bool, False]
- 47  leg_distance           102289 non-null  float64            
- 48  runs                   102289 non-null  int64              
- 49  team_id                102289 non-null  int64              
- 50  terrain_coefficient    102289 non-null  float64            
- 51  vertical_per_km        60856 non-null   float64            
+ 0   c_AUT                  113118 non-null  Sparse[bool, False]
+ 1   c_BEL                  113118 non-null  Sparse[bool, False]
+ 2   c_BLR                  113118 non-null  Sparse[bool, False]
+ 3   c_CZE                  113118 non-null  Sparse[bool, False]
+ 4   c_DEN                  113118 non-null  Sparse[bool, False]
+ 5   c_ESP                  113118 non-null  Sparse[bool, False]
+ 6   c_EST                  113118 non-null  Sparse[bool, False]
+ 7   c_FIN                  113118 non-null  Sparse[bool, False]
+ 8   c_FRA                  113118 non-null  Sparse[bool, False]
+ 9   c_GBR                  113118 non-null  Sparse[bool, False]
+ 10  c_GER                  113118 non-null  Sparse[bool, False]
+ 11  c_HUN                  113118 non-null  Sparse[bool, False]
+ 12  c_IRL                  113118 non-null  Sparse[bool, False]
+ 13  c_ITA                  113118 non-null  Sparse[bool, False]
+ 14  c_LAT                  113118 non-null  Sparse[bool, False]
+ 15  c_LTU                  113118 non-null  Sparse[bool, False]
+ 16  c_NOR                  113118 non-null  Sparse[bool, False]
+ 17  c_OTHER                113118 non-null  Sparse[bool, False]
+ 18  c_POL                  113118 non-null  Sparse[bool, False]
+ 19  c_RUS                  113118 non-null  Sparse[bool, False]
+ 20  c_SUI                  113118 non-null  Sparse[bool, False]
+ 21  c_SWE                  113118 non-null  Sparse[bool, False]
+ 22  c_UKR                  113118 non-null  Sparse[bool, False]
+ 23  c_USA                  113118 non-null  Sparse[bool, False]
+ 24  fn_pace_class_0.0      113118 non-null  Sparse[bool, False]
+ 25  fn_pace_class_1.0      113118 non-null  Sparse[bool, False]
+ 26  fn_pace_class_2.0      113118 non-null  Sparse[bool, False]
+ 27  fn_pace_class_3.0      113118 non-null  Sparse[bool, False]
+ 28  fn_pace_class_4.0      113118 non-null  Sparse[bool, False]
+ 29  fn_pace_class_5.0      113118 non-null  Sparse[bool, False]
+ 30  fn_pace_class_6.0      113118 non-null  Sparse[bool, False]
+ 31  fn_pace_class_7.0      113118 non-null  Sparse[bool, False]
+ 32  fn_pace_class_8.0      113118 non-null  Sparse[bool, False]
+ 33  fn_pace_class_9.0      113118 non-null  Sparse[bool, False]
+ 34  fn_pace_class_nan      113118 non-null  Sparse[bool, False]
+ 35  fn_pace_std_class_0.0  113118 non-null  Sparse[bool, False]
+ 36  fn_pace_std_class_1.0  113118 non-null  Sparse[bool, False]
+ 37  fn_pace_std_class_2.0  113118 non-null  Sparse[bool, False]
+ 38  fn_pace_std_class_3.0  113118 non-null  Sparse[bool, False]
+ 39  fn_pace_std_class_nan  113118 non-null  Sparse[bool, False]
+ 40  leg_1                  113118 non-null  Sparse[bool, False]
+ 41  leg_2                  113118 non-null  Sparse[bool, False]
+ 42  leg_3                  113118 non-null  Sparse[bool, False]
+ 43  leg_4                  113118 non-null  Sparse[bool, False]
+ 44  leg_5                  113118 non-null  Sparse[bool, False]
+ 45  leg_6                  113118 non-null  Sparse[bool, False]
+ 46  leg_7                  113118 non-null  Sparse[bool, False]
+ 47  leg_distance           113118 non-null  float64            
+ 48  runs                   113118 non-null  int64              
+ 49  team_id                113118 non-null  int64              
+ 50  terrain_coefficient    113118 non-null  float64            
+ 51  vertical_per_km        71685 non-null   float64            
 dtypes: Sparse[bool, False](47), float64(3), int64(2)
-memory usage: 5.9 MB
+memory usage: 6.5 MB
 

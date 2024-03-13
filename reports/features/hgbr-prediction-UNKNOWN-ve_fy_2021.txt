@@ -22,7 +22,7 @@ fn_pace_class_5.0 Sparse[bool, False]
 fn_pace_class_6.0 Sparse[bool, False]
 fn_pace_class_7.0 Sparse[bool, False]
 fn_pace_class_8.0 Sparse[bool, False]
-fn_pace_class_9.0 int64
+fn_pace_class_9.0 Sparse[bool, False]
 fn_pace_class_nan Sparse[bool, False]
 fn_pace_std_class_0.0 Sparse[bool, False]
 fn_pace_std_class_1.0 Sparse[bool, False]
@@ -67,7 +67,7 @@ Data columns (total 40 columns):
  21  fn_pace_class_6.0      3271 non-null   Sparse[bool, False]
  22  fn_pace_class_7.0      3271 non-null   Sparse[bool, False]
  23  fn_pace_class_8.0      3271 non-null   Sparse[bool, False]
- 24  fn_pace_class_9.0      3271 non-null   int64              
+ 24  fn_pace_class_9.0      3271 non-null   Sparse[bool, False]
  25  fn_pace_class_nan      3271 non-null   Sparse[bool, False]
  26  fn_pace_std_class_0.0  3271 non-null   Sparse[bool, False]
  27  fn_pace_std_class_1.0  3271 non-null   Sparse[bool, False]
@@ -83,6 +83,6 @@ Data columns (total 40 columns):
  37  team_id                3271 non-null   int64              
  38  terrain_coefficient    3271 non-null   float64            
  39  vertical_per_km        3271 non-null   float64            
-dtypes: Sparse[bool, False](28), float64(3), int64(9)
-memory usage: 370.7 KB
+dtypes: Sparse[bool, False](29), float64(3), int64(8)
+memory usage: 345.1 KB
 
