@@ -10,9 +10,9 @@ import normalize_names
 import shared
 
 
-# RACE_TYPE=ju FORECAST_YEAR=2023 time poetry run python group_csv.py
+# time RACE_TYPE=ju FORECAST_YEAR=2023 poetry run python group_csv.py
 # To get all years use next year:
-# RACE_TYPE=ju FORECAST_YEAR=2024 time poetry run python group_csv.py
+# time RACE_TYPE=ju FORECAST_YEAR=2024 poetry run python group_csv.py
 
 def _connect_teams_by_emit(runs):
     runs_by_team = defaultdict(list)
