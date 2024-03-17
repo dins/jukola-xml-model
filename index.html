@@ -619,8 +619,13 @@
         resultsQueryParamsStr += "&timeTravelRaceTime=" + timeTravelRaceTime
     }
 
-    const currentYear = new Date().getFullYear()
+    const currentMonth = new Date().getMonth();
+    var currentYear = new Date().getFullYear();
     var selectedYear = currentYear
+    if (currentMonth <= 5) {
+        // Use previous year before June
+        selectedYear = selectedYear - 1
+    }
     var timeTravelYear = parseInt(searchParams.get('timeTravelYear'))
     console.log("timeTravelYear", timeTravelYear)
     if (timeTravelYear >= 2021) {
