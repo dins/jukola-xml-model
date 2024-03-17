@@ -9,7 +9,7 @@ import pandas as pd
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s [%(process)d] %(funcName)s [%(levelname)s] %(message)s')
 
-num_pace_years = 10
+num_pace_years = 12
 pace_columns = [f"pace_{i}" for i in range(1, num_pace_years + 1)]
 
 np.random.seed(2019)
