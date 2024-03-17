@@ -35,7 +35,11 @@ def fetch_running_order(year, ve_or_ju):
         # tree = html.fromstring(page.content.decode('ISO-8859-1').encode("utf-8").strip())
         tree = html.fromstring(page.content.strip())
         rows = tree.xpath('//*[@id="site_main"]/table/tr')
+        logging.info(f'Got {len(rows)} rows')
+
+
         output_rows = []
+
         current_team_id = ""
         current_team_base_name = ""
         current_team_name = ""

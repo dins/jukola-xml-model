@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euf -o pipefail
 
-# time FORECAST_YEAR=2023 ./process-before-race.sh
+# time FORECAST_YEAR=2024 ./process-before-race.sh
 
 RUN_TS="br-$(date -u '+%Y%m%d_%H%M%S')"
 SECONDS=0
@@ -17,12 +17,12 @@ function process_one_race {
 }
 
 RO_LOG_PATH="logs/running-order-${FORECAST_YEAR}-${RUN_TS}.log"
-poetry run python fetch_running_order.py 2023  &> ${RO_LOG_PATH}
+poetry run python fetch_running_order.py 2024  &> ${RO_LOG_PATH}
 tail -n 10 ${RO_LOG_PATH}
 
 ORO_LOG_PATH="logs/running-order-online-${FORECAST_YEAR}-${RUN_TS}.log"
 echo $(date -u +"%F %T") "Starting ${ORO_LOG_PATH}"
-poetry run python process_online_running_order.py 2023  &> ${ORO_LOG_PATH}
+poetry run python process_online_running_order.py 2024  &> ${ORO_LOG_PATH}
 tail -n 10 ${ORO_LOG_PATH}
 
 cp "data/online_running_order_ve_fy_${FORECAST_YEAR}.tsv" "data/running_order_final_ve_fy_${FORECAST_YEAR}.tsv"
