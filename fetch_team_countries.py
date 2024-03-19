@@ -37,10 +37,10 @@ def fetch_team_country(year, ve_or_ju):
 
     csvwriter.writerow(header)
 
-    # url = f"https://results.jukola.com/tulokset/fi/j{year}_{ve_or_ju}/{ve_or_ju}/kilpailijat/?eka=kaikki"
+    url = f"https://results.jukola.com/tulokset/fi/j{year}_{ve_or_ju}/{ve_or_ju}/kilpailijat/?eka=kaikki"
     # url = f"https://registration.jukola.com/?kieli=en&kisa=j{year}&view=1&sarja={ve_or_ju}&jarj=kilpnro&jj=1"
     #        https://registration.jukola.com/?kieli=fi&kisa=j2022&view=1&sarja=ve&jarj=kilpnro&jj=1
-    url = f"https://registration.jukola.com/?kieli=fi&kisa=j{year}&view=1&sarja={ve_or_ju}&jarj=kilpnro"
+    #url = f"https://registration.jukola.com/?kieli=fi&kisa=j{year}&view=1&sarja={ve_or_ju}&jarj=kilpnro"
     output_rows = fetch_order(url)
     for row in output_rows:
         csvwriter.writerow(row)

@@ -20,9 +20,9 @@ fn_pace_class_2.0 Sparse[bool, False]
 fn_pace_class_3.0 Sparse[bool, False]
 fn_pace_class_4.0 Sparse[bool, False]
 fn_pace_class_5.0 Sparse[bool, False]
-fn_pace_class_6.0 Sparse[bool, False]
+fn_pace_class_6.0 int64
 fn_pace_class_7.0 Sparse[bool, False]
-fn_pace_class_8.0 int64
+fn_pace_class_8.0 Sparse[bool, False]
 fn_pace_class_9.0 Sparse[bool, False]
 fn_pace_class_nan Sparse[bool, False]
 fn_pace_std_class_0.0 Sparse[bool, False]
@@ -68,9 +68,9 @@ Data columns (total 43 columns):
  19  fn_pace_class_3.0      1 non-null      Sparse[bool, False]
  20  fn_pace_class_4.0      1 non-null      Sparse[bool, False]
  21  fn_pace_class_5.0      1 non-null      Sparse[bool, False]
- 22  fn_pace_class_6.0      1 non-null      Sparse[bool, False]
+ 22  fn_pace_class_6.0      3271 non-null   int64              
  23  fn_pace_class_7.0      1 non-null      Sparse[bool, False]
- 24  fn_pace_class_8.0      3271 non-null   int64              
+ 24  fn_pace_class_8.0      1 non-null      Sparse[bool, False]
  25  fn_pace_class_9.0      1 non-null      Sparse[bool, False]
  26  fn_pace_class_nan      1 non-null      Sparse[bool, False]
  27  fn_pace_std_class_0.0  1 non-null      Sparse[bool, False]
