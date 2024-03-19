@@ -16572,3 +16572,231 @@ ve_fy_2023	6212	relay_interval_prediction_wrong	0.171225937183384	Viestin aikav�
 ve_fy_2023	6212	runner_faster_than_relay_time_prediction	0.0008443093549476528	Juoksija nopeampi kuin viestin aikaväliennuste	20240319_073248
 ve_fy_2023	6212	runner_slower_than_post_interval_prediction	0.17038162782843633	Juoksija hitaampi kuin viestin aikaväliennuste	20240319_073248
 ve_fy_2023	6212	signed_average_error_of_individual_forecast_ie_runner_was_late_minutes	12.020294679494352	Yksilöennusteen etumerkillinen keskivirhe (juoksija myöhästyi ennusteesta)	20240319_073248
+ju_fy_2017	11193	average_error_of_individual_prediction_minutes	11.741385079311103	Yksilöennusteen keskivirhe	20240319_164945
+ju_fy_2017	11193	average_error_of_relay_prediction_minutes	28.27410884071468	Viestiennusteen keskivirhe	20240319_164945
+ju_fy_2017	11193	average_size_of_an_individual_interval_minutes	82.02635183656609	Yksilön aikavälin keskikoko	20240319_164945
+ju_fy_2017	11193	individual_faster_than_interval_prediction	0.005490196078431373	Yksilö nopeampi kuin aikaväliennuste	20240319_164945
+ju_fy_2017	11193	individual_interval_prediction_is_wrong	0.018137254901960786	Yksilön aikaväliennuste väärin	20240319_164945
+ju_fy_2017	11193	individual_slower_than_interval_forecast	0.012647058823529412	Yksilö hitaampi kuin aikaväliennuste	20240319_164945
+ju_fy_2017	11193	mean_ind_interval_error_size	1.4877328519377184	Yksilön aikavälin keskikoko kertaa virhe	20240319_164945
+ju_fy_2017	11193	median_error_of_individual_prediction_minutes	7.928224846738651	Yksilöennusteen mediaanivirhe	20240319_164945
+ju_fy_2017	11193	median_ind_interval	73.54533207124999	Yksilön aikavälin mediaani koko	20240319_164945
+ju_fy_2017	11193	median_ind_interval_times_error_size	1.3339104346256125	Yksilön aikavälin mediaani koko kertaa virhe	20240319_164945
+ju_fy_2017	11193	median_relay_prediction_error_minutes	20.04784762889001	Viestiennusteen virheen mediaani	20240319_164945
+ju_fy_2017	11193	num_runs_mean	7.240294117647059	Aiempien Jukoloiden määrä (keskiarvo)	20240319_164945
+ju_fy_2017	11193	num_runs_median	7.0	Aiempien Jukoloiden määrä (median)	20240319_164945
+ju_fy_2017	11193	post_analysis_start_time	1710867664.869824	Time of starting to run post race analysis	20240319_164945
+ju_fy_2017	11193	ratio_of_error_to_final_time	0.0987368155643345	Virheen suhde loppuaikaan	20240319_164945
+ju_fy_2017	11193	relay_interval_prediction_wrong	0.0196078431372549	Viestin aikaväliennuste väärin	20240319_164945
+ju_fy_2017	11193	runner_faster_than_relay_time_prediction	0.013725490196078431	Juoksija nopeampi kuin viestin aikaväliennuste	20240319_164945
+ju_fy_2017	11193	runner_slower_than_post_interval_prediction	0.0058823529411764705	Juoksija hitaampi kuin viestin aikaväliennuste	20240319_164945
+ju_fy_2017	11193	signed_average_error_of_individual_forecast_ie_runner_was_late_minutes	-1.635639037055406	Yksilöennusteen etumerkillinen keskivirhe (juoksija myöhästyi ennusteesta)	20240319_164945
+ju_fy_2018	13286	average_error_of_individual_prediction_minutes	12.712332178418466	Yksilöennusteen keskivirhe	20240319_164945
+ju_fy_2018	13286	average_error_of_relay_prediction_minutes	27.731857821464146	Viestiennusteen keskivirhe	20240319_164945
+ju_fy_2018	13286	average_size_of_an_individual_interval_minutes	86.67983531010535	Yksilön aikavälin keskikoko	20240319_164945
+ju_fy_2018	13286	individual_faster_than_interval_prediction	0.0025995125913891143	Yksilö nopeampi kuin aikaväliennuste	20240319_164945
+ju_fy_2018	13286	individual_interval_prediction_is_wrong	0.0231519090170593	Yksilön aikaväliennuste väärin	20240319_164945
+ju_fy_2018	13286	individual_slower_than_interval_forecast	0.020552396425670187	Yksilö hitaampi kuin aikaväliennuste	20240319_164945
+ju_fy_2018	13286	mean_ind_interval_error_size	2.006803660713243	Yksilön aikavälin keskikoko kertaa virhe	20240319_164945
+ju_fy_2018	13286	median_error_of_individual_prediction_minutes	8.335104133840666	Yksilöennusteen mediaanivirhe	20240319_164945
+ju_fy_2018	13286	median_ind_interval	76.73522817195001	Yksilön aikavälin mediaani koko	20240319_164945
+ju_fy_2018	13286	median_ind_interval_times_error_size	1.7765670210402724	Yksilön aikavälin mediaani koko kertaa virhe	20240319_164945
+ju_fy_2018	13286	median_relay_prediction_error_minutes	17.41811066258599	Viestiennusteen virheen mediaani	20240319_164945
+ju_fy_2018	13286	num_runs_mean	6.639967506092607	Aiempien Jukoloiden määrä (keskiarvo)	20240319_164945
+ju_fy_2018	13286	num_runs_median	6.0	Aiempien Jukoloiden määrä (median)	20240319_164945
+ju_fy_2018	13286	post_analysis_start_time	1710867733.188	Time of starting to run post race analysis	20240319_164945
+ju_fy_2018	13286	ratio_of_error_to_final_time	0.10059059101769484	Virheen suhde loppuaikaan	20240319_164945
+ju_fy_2018	13286	relay_interval_prediction_wrong	0.022177091795288383	Viestin aikaväliennuste väärin	20240319_164945
+ju_fy_2018	13286	runner_faster_than_relay_time_prediction	0.005280259951259139	Juoksija nopeampi kuin viestin aikaväliennuste	20240319_164945
+ju_fy_2018	13286	runner_slower_than_post_interval_prediction	0.016896831844029243	Juoksija hitaampi kuin viestin aikaväliennuste	20240319_164945
+ju_fy_2018	13286	signed_average_error_of_individual_forecast_ie_runner_was_late_minutes	2.532398179176882	Yksilöennusteen etumerkillinen keskivirhe (juoksija myöhästyi ennusteesta)	20240319_164945
+ju_fy_2019	13825	average_error_of_individual_prediction_minutes	13.617327218707999	Yksilöennusteen keskivirhe	20240319_164945
+ju_fy_2019	13825	average_error_of_relay_prediction_minutes	30.369015283950564	Viestiennusteen keskivirhe	20240319_164945
+ju_fy_2019	13825	average_size_of_an_individual_interval_minutes	92.80641103318362	Yksilön aikavälin keskikoko	20240319_164945
+ju_fy_2019	13825	individual_faster_than_interval_prediction	0.002692216327500198	Yksilö nopeampi kuin aikaväliennuste	20240319_164945
+ju_fy_2019	13825	individual_interval_prediction_is_wrong	0.024863409612795945	Yksilön aikaväliennuste väärin	20240319_164945
+ju_fy_2019	13825	individual_slower_than_interval_forecast	0.022171193285295748	Yksilö hitaampi kuin aikaväliennuste	20240319_164945
+ju_fy_2019	13825	mean_ind_interval_error_size	2.3074838122115495	Yksilön aikavälin keskikoko kertaa virhe	20240319_164945
+ju_fy_2019	13825	median_error_of_individual_prediction_minutes	8.75588643133527	Yksilöennusteen mediaanivirhe	20240319_164945
+ju_fy_2019	13825	median_ind_interval	81.37123844889999	Yksilön aikavälin mediaani koko	20240319_164945
+ju_fy_2019	13825	median_ind_interval_times_error_size	2.023166432255491	Yksilön aikavälin mediaani koko kertaa virhe	20240319_164945
+ju_fy_2019	13825	median_relay_prediction_error_minutes	18.044595408452437	Viestiennusteen virheen mediaani	20240319_164945
+ju_fy_2019	13825	num_runs_mean	6.185446195264866	Aiempien Jukoloiden määrä (keskiarvo)	20240319_164945
+ju_fy_2019	13825	num_runs_median	5.0	Aiempien Jukoloiden määrä (median)	20240319_164945
+ju_fy_2019	13825	post_analysis_start_time	1710867611.498718	Time of starting to run post race analysis	20240319_164945
+ju_fy_2019	13825	ratio_of_error_to_final_time	0.10915066890971392	Virheen suhde loppuaikaan	20240319_164945
+ju_fy_2019	13825	relay_interval_prediction_wrong	0.024388312613825323	Viestin aikaväliennuste väärin	20240319_164945
+ju_fy_2019	13825	runner_faster_than_relay_time_prediction	0.010293768311030169	Juoksija nopeampi kuin viestin aikaväliennuste	20240319_164945
+ju_fy_2019	13825	runner_slower_than_post_interval_prediction	0.014094544302795154	Juoksija hitaampi kuin viestin aikaväliennuste	20240319_164945
+ju_fy_2019	13825	signed_average_error_of_individual_forecast_ie_runner_was_late_minutes	1.6921463298341506	Yksilöennusteen etumerkillinen keskivirhe (juoksija myöhästyi ennusteesta)	20240319_164945
+ju_fy_2021	8694	average_error_of_individual_prediction_minutes	15.411531218940514	Yksilöennusteen keskivirhe	20240319_164945
+ju_fy_2021	8694	average_error_of_relay_prediction_minutes	32.07680454088625	Viestiennusteen keskivirhe	20240319_164945
+ju_fy_2021	8694	average_size_of_an_individual_interval_minutes	84.55767367903067	Yksilön aikavälin keskikoko	20240319_164945
+ju_fy_2021	8694	individual_faster_than_interval_prediction	0.01020408163265306	Yksilö nopeampi kuin aikaväliennuste	20240319_164945
+ju_fy_2021	8694	individual_interval_prediction_is_wrong	0.04098927706675891	Yksilön aikaväliennuste väärin	20240319_164945
+ju_fy_2021	8694	individual_slower_than_interval_forecast	0.030785195434105846	Yksilö hitaampi kuin aikaväliennuste	20240319_164945
+ju_fy_2021	8694	mean_ind_interval_error_size	3.4659579145503754	Yksilön aikavälin keskikoko kertaa virhe	20240319_164945
+ju_fy_2021	8694	median_error_of_individual_prediction_minutes	10.365004292425738	Yksilöennusteen mediaanivirhe	20240319_164945
+ju_fy_2021	8694	median_ind_interval	77.74814589524999	Yksilön aikavälin mediaani koko	20240319_164945
+ju_fy_2021	8694	median_ind_interval_times_error_size	3.186840293527196	Yksilön aikavälin mediaani koko kertaa virhe	20240319_164945
+ju_fy_2021	8694	median_relay_prediction_error_minutes	21.09218187784007	Viestiennusteen virheen mediaani	20240319_164945
+ju_fy_2021	8694	num_runs_mean	7.187305430646835	Aiempien Jukoloiden määrä (keskiarvo)	20240319_164945
+ju_fy_2021	8694	num_runs_median	6.0	Aiempien Jukoloiden määrä (median)	20240319_164945
+ju_fy_2021	8694	post_analysis_start_time	1710868100.731772	Time of starting to run post race analysis	20240319_164945
+ju_fy_2021	8694	ratio_of_error_to_final_time	0.11784735844812247	Virheen suhde loppuaikaan	20240319_164945
+ju_fy_2021	8694	relay_interval_prediction_wrong	0.04271878242822553	Viestin aikaväliennuste väärin	20240319_164945
+ju_fy_2021	8694	runner_faster_than_relay_time_prediction	0.01608439986163957	Juoksija nopeampi kuin viestin aikaväliennuste	20240319_164945
+ju_fy_2021	8694	runner_slower_than_post_interval_prediction	0.026634382566585957	Juoksija hitaampi kuin viestin aikaväliennuste	20240319_164945
+ju_fy_2021	8694	signed_average_error_of_individual_forecast_ie_runner_was_late_minutes	1.32034641350532	Yksilöennusteen etumerkillinen keskivirhe (juoksija myöhästyi ennusteesta)	20240319_164945
+ju_fy_2022	11144	average_error_of_individual_prediction_minutes	14.949379111673206	Yksilöennusteen keskivirhe	20240319_164945
+ju_fy_2022	11144	average_error_of_relay_prediction_minutes	34.46764458777568	Viestiennusteen keskivirhe	20240319_164945
+ju_fy_2022	11144	average_size_of_an_individual_interval_minutes	92.99865533935208	Yksilön aikavälin keskikoko	20240319_164945
+ju_fy_2022	11144	individual_faster_than_interval_prediction	0.005928651742819176	Yksilö nopeampi kuin aikaväliennuste	20240319_164945
+ju_fy_2022	11144	individual_interval_prediction_is_wrong	0.027292241643667586	Yksilön aikaväliennuste väärin	20240319_164945
+ju_fy_2022	11144	individual_slower_than_interval_forecast	0.021363589900848412	Yksilö hitaampi kuin aikaväliennuste	20240319_164945
+ju_fy_2022	11144	mean_ind_interval_error_size	2.538141774057754	Yksilön aikavälin keskikoko kertaa virhe	20240319_164945
+ju_fy_2022	11144	median_error_of_individual_prediction_minutes	10.013417800631515	Yksilöennusteen mediaanivirhe	20240319_164945
+ju_fy_2022	11144	median_ind_interval	82.8400476027	Yksilön aikavälin mediaani koko	20240319_164945
+ju_fy_2022	11144	median_ind_interval_times_error_size	2.260890596945814	Yksilön aikavälin mediaani koko kertaa virhe	20240319_164945
+ju_fy_2022	11144	median_relay_prediction_error_minutes	21.98156937165254	Viestiennusteen virheen mediaani	20240319_164945
+ju_fy_2022	11144	num_runs_mean	6.1091689665746705	Aiempien Jukoloiden määrä (keskiarvo)	20240319_164945
+ju_fy_2022	11144	num_runs_median	5.0	Aiempien Jukoloiden määrä (median)	20240319_164945
+ju_fy_2022	11144	post_analysis_start_time	1710868180.039457	Time of starting to run post race analysis	20240319_164945
+ju_fy_2022	11144	ratio_of_error_to_final_time	0.11088401077534903	Virheen suhde loppuaikaan	20240319_164945
+ju_fy_2022	11144	relay_interval_prediction_wrong	0.05315342941837882	Viestin aikaväliennuste väärin	20240319_164945
+ju_fy_2022	11144	runner_faster_than_relay_time_prediction	0.02524787897372994	Juoksija nopeampi kuin viestin aikaväliennuste	20240319_164945
+ju_fy_2022	11144	runner_slower_than_post_interval_prediction	0.02790555044464888	Juoksija hitaampi kuin viestin aikaväliennuste	20240319_164945
+ju_fy_2022	11144	signed_average_error_of_individual_forecast_ie_runner_was_late_minutes	3.2539334825956665	Yksilöennusteen etumerkillinen keskivirhe (juoksija myöhästyi ennusteesta)	20240319_164945
+ju_fy_2023	11879	average_error_of_individual_prediction_minutes	20.69589605512007	Yksilöennusteen keskivirhe	20240319_164945
+ju_fy_2023	11879	average_error_of_relay_prediction_minutes	67.35830861456635	Viestiennusteen keskivirhe	20240319_164945
+ju_fy_2023	11879	average_size_of_an_individual_interval_minutes	93.02442975993434	Yksilön aikavälin keskikoko	20240319_164945
+ju_fy_2023	11879	individual_faster_than_interval_prediction	0.001015697137580794	Yksilö nopeampi kuin aikaväliennuste	20240319_164945
+ju_fy_2023	11879	individual_interval_prediction_is_wrong	0.08550323176361957	Yksilön aikaväliennuste väärin	20240319_164945
+ju_fy_2023	11879	individual_slower_than_interval_forecast	0.08448753462603878	Yksilö hitaampi kuin aikaväliennuste	20240319_164945
+ju_fy_2023	11879	mean_ind_interval_error_size	7.953889377442215	Yksilön aikavälin keskikoko kertaa virhe	20240319_164945
+ju_fy_2023	11879	median_error_of_individual_prediction_minutes	14.815935911223903	Yksilöennusteen mediaanivirhe	20240319_164945
+ju_fy_2023	11879	median_ind_interval	83.94445190845002	Yksilön aikavälin mediaani koko	20240319_164945
+ju_fy_2023	11879	median_ind_interval_times_error_size	7.177521926798219	Yksilön aikavälin mediaani koko kertaa virhe	20240319_164945
+ju_fy_2023	11879	median_relay_prediction_error_minutes	49.13706138943388	Viestiennusteen virheen mediaani	20240319_164945
+ju_fy_2023	11879	num_runs_mean	5.530747922437673	Aiempien Jukoloiden määrä (keskiarvo)	20240319_164945
+ju_fy_2023	11879	num_runs_median	4.0	Aiempien Jukoloiden määrä (median)	20240319_164945
+ju_fy_2023	11879	post_analysis_start_time	1710867156.330058	Time of starting to run post race analysis	20240319_164945
+ju_fy_2023	11879	ratio_of_error_to_final_time	0.13906039747373272	Virheen suhde loppuaikaan	20240319_164945
+ju_fy_2023	11879	relay_interval_prediction_wrong	0.2195752539242844	Viestin aikaväliennuste väärin	20240319_164945
+ju_fy_2023	11879	runner_faster_than_relay_time_prediction	0.0	Juoksija nopeampi kuin viestin aikaväliennuste	20240319_164945
+ju_fy_2023	11879	runner_slower_than_post_interval_prediction	0.2195752539242844	Juoksija hitaampi kuin viestin aikaväliennuste	20240319_164945
+ju_fy_2023	11879	signed_average_error_of_individual_forecast_ie_runner_was_late_minutes	16.54403031903352	Yksilöennusteen etumerkillinen keskivirhe (juoksija myöhästyi ennusteesta)	20240319_164945
+ve_fy_2017	5248	average_error_of_individual_prediction_minutes	9.72249300376195	Yksilöennusteen keskivirhe	20240319_164945
+ve_fy_2017	5248	average_error_of_relay_prediction_minutes	18.929110259936976	Viestiennusteen keskivirhe	20240319_164945
+ve_fy_2017	5248	average_size_of_an_individual_interval_minutes	54.53512327470233	Yksilön aikavälin keskikoko	20240319_164945
+ve_fy_2017	5248	individual_faster_than_interval_prediction	0.0006174109899156205	Yksilö nopeampi kuin aikaväliennuste	20240319_164945
+ve_fy_2017	5248	individual_interval_prediction_is_wrong	0.04486519860053509	Yksilön aikaväliennuste väärin	20240319_164945
+ve_fy_2017	5248	individual_slower_than_interval_forecast	0.04424778761061947	Yksilö hitaampi kuin aikaväliennuste	20240319_164945
+ve_fy_2017	5248	mean_ind_interval_error_size	2.4467291364241834	Yksilön aikavälin keskikoko kertaa virhe	20240319_164945
+ve_fy_2017	5248	median_error_of_individual_prediction_minutes	6.74652685585415	Yksilöennusteen mediaanivirhe	20240319_164945
+ve_fy_2017	5248	median_ind_interval	47.893933832	Yksilön aikavälin mediaani koko	20240319_164945
+ve_fy_2017	5248	median_ind_interval_times_error_size	2.1487708531335667	Yksilön aikavälin mediaani koko kertaa virhe	20240319_164945
+ve_fy_2017	5248	median_relay_prediction_error_minutes	13.138416621946305	Viestiennusteen virheen mediaani	20240319_164945
+ve_fy_2017	5248	num_runs_mean	6.426425190368389	Aiempien Jukoloiden määrä (keskiarvo)	20240319_164945
+ve_fy_2017	5248	num_runs_median	6.0	Aiempien Jukoloiden määrä (median)	20240319_164945
+ve_fy_2017	5248	post_analysis_start_time	1710867642.632401	Time of starting to run post race analysis	20240319_164945
+ve_fy_2017	5248	ratio_of_error_to_final_time	0.1069444464895903	Virheen suhde loppuaikaan	20240319_164945
+ve_fy_2017	5248	relay_interval_prediction_wrong	0.06688619057419222	Viestin aikaväliennuste väärin	20240319_164945
+ve_fy_2017	5248	runner_faster_than_relay_time_prediction	0.0008232146532208273	Juoksija nopeampi kuin viestin aikaväliennuste	20240319_164945
+ve_fy_2017	5248	runner_slower_than_post_interval_prediction	0.06606297592097139	Juoksija hitaampi kuin viestin aikaväliennuste	20240319_164945
+ve_fy_2017	5248	signed_average_error_of_individual_forecast_ie_runner_was_late_minutes	7.052987946082551	Yksilöennusteen etumerkillinen keskivirhe (juoksija myöhästyi ennusteesta)	20240319_164945
+ve_fy_2018	6500	average_error_of_individual_prediction_minutes	8.296149579272193	Yksilöennusteen keskivirhe	20240319_164945
+ve_fy_2018	6500	average_error_of_relay_prediction_minutes	16.158167380017225	Viestiennusteen keskivirhe	20240319_164945
+ve_fy_2018	6500	average_size_of_an_individual_interval_minutes	57.2259831087837	Yksilön aikavälin keskikoko	20240319_164945
+ve_fy_2018	6500	individual_faster_than_interval_prediction	0.009721322099805573	Yksilö nopeampi kuin aikaväliennuste	20240319_164945
+ve_fy_2018	6500	individual_interval_prediction_is_wrong	0.017174335709656513	Yksilön aikaväliennuste väärin	20240319_164945
+ve_fy_2018	6500	individual_slower_than_interval_forecast	0.007453013609850939	Yksilö hitaampi kuin aikaväliennuste	20240319_164945
+ve_fy_2018	6500	mean_ind_interval_error_size	0.9828182452253844	Yksilön aikavälin keskikoko kertaa virhe	20240319_164945
+ve_fy_2018	6500	median_error_of_individual_prediction_minutes	6.096249028936352	Yksilöennusteen mediaanivirhe	20240319_164945
+ve_fy_2018	6500	median_ind_interval	51.5117620262	Yksilön aikavälin mediaani koko	20240319_164945
+ve_fy_2018	6500	median_ind_interval_times_error_size	0.884680294033895	Yksilön aikavälin mediaani koko kertaa virhe	20240319_164945
+ve_fy_2018	6500	median_relay_prediction_error_minutes	11.97159545110651	Viestiennusteen virheen mediaani	20240319_164945
+ve_fy_2018	6500	num_runs_mean	5.674659753726507	Aiempien Jukoloiden määrä (keskiarvo)	20240319_164945
+ve_fy_2018	6500	num_runs_median	5.0	Aiempien Jukoloiden määrä (median)	20240319_164945
+ve_fy_2018	6500	post_analysis_start_time	1710867570.9622772	Time of starting to run post race analysis	20240319_164945
+ve_fy_2018	6500	ratio_of_error_to_final_time	0.11425985214573796	Virheen suhde loppuaikaan	20240319_164945
+ve_fy_2018	6500	relay_interval_prediction_wrong	0.03661697990926766	Viestin aikaväliennuste väärin	20240319_164945
+ve_fy_2018	6500	runner_faster_than_relay_time_prediction	0.028353856124432922	Juoksija nopeampi kuin viestin aikaväliennuste	20240319_164945
+ve_fy_2018	6500	runner_slower_than_post_interval_prediction	0.008263123784834738	Juoksija hitaampi kuin viestin aikaväliennuste	20240319_164945
+ve_fy_2018	6500	signed_average_error_of_individual_forecast_ie_runner_was_late_minutes	-2.1047970440007884	Yksilöennusteen etumerkillinen keskivirhe (juoksija myöhästyi ennusteesta)	20240319_164945
+ve_fy_2019	6888	average_error_of_individual_prediction_minutes	9.413337771429752	Yksilöennusteen keskivirhe	20240319_164945
+ve_fy_2019	6888	average_error_of_relay_prediction_minutes	18.51177402549794	Viestiennusteen keskivirhe	20240319_164945
+ve_fy_2019	6888	average_size_of_an_individual_interval_minutes	61.10520104489547	Yksilön aikavälin keskikoko	20240319_164945
+ve_fy_2019	6888	individual_faster_than_interval_prediction	0.007884761182714178	Yksilö nopeampi kuin aikaväliennuste	20240319_164945
+ve_fy_2019	6888	individual_interval_prediction_is_wrong	0.01698256254738438	Yksilön aikaväliennuste väärin	20240319_164945
+ve_fy_2019	6888	individual_slower_than_interval_forecast	0.009097801364670205	Yksilö hitaampi kuin aikaväliennuste	20240319_164945
+ve_fy_2019	6888	mean_ind_interval_error_size	1.0377228987154348	Yksilön aikavälin keskikoko kertaa virhe	20240319_164945
+ve_fy_2019	6888	median_error_of_individual_prediction_minutes	6.752697961087264	Yksilöennusteen mediaanivirhe	20240319_164945
+ve_fy_2019	6888	median_ind_interval	55.4374008128	Yksilön aikavälin mediaani koko	20240319_164945
+ve_fy_2019	6888	median_ind_interval_times_error_size	0.9414691267677937	Yksilön aikavälin mediaani koko kertaa virhe	20240319_164945
+ve_fy_2019	6888	median_relay_prediction_error_minutes	12.58966243458184	Viestiennusteen virheen mediaani	20240319_164945
+ve_fy_2019	6888	num_runs_mean	5.179378316906748	Aiempien Jukoloiden määrä (keskiarvo)	20240319_164945
+ve_fy_2019	6888	num_runs_median	4.0	Aiempien Jukoloiden määrä (median)	20240319_164945
+ve_fy_2019	6888	post_analysis_start_time	1710867674.8076138	Time of starting to run post race analysis	20240319_164945
+ve_fy_2019	6888	ratio_of_error_to_final_time	0.12207179269080876	Virheen suhde loppuaikaan	20240319_164945
+ve_fy_2019	6888	relay_interval_prediction_wrong	0.043517816527672476	Viestin aikaväliennuste väärin	20240319_164945
+ve_fy_2019	6888	runner_faster_than_relay_time_prediction	0.035026535253980286	Juoksija nopeampi kuin viestin aikaväliennuste	20240319_164945
+ve_fy_2019	6888	runner_slower_than_post_interval_prediction	0.00849128127369219	Juoksija hitaampi kuin viestin aikaväliennuste	20240319_164945
+ve_fy_2019	6888	signed_average_error_of_individual_forecast_ie_runner_was_late_minutes	-4.487203003776027	Yksilöennusteen etumerkillinen keskivirhe (juoksija myöhästyi ennusteesta)	20240319_164945
+ve_fy_2021	4036	average_error_of_individual_prediction_minutes	9.453658593421379	Yksilöennusteen keskivirhe	20240319_164945
+ve_fy_2021	4036	average_error_of_relay_prediction_minutes	16.140760046878125	Viestiennusteen keskivirhe	20240319_164945
+ve_fy_2021	4036	average_size_of_an_individual_interval_minutes	54.38212056937532	Yksilön aikavälin keskikoko	20240319_164945
+ve_fy_2021	4036	individual_faster_than_interval_prediction	0.009024644220756682	Yksilö nopeampi kuin aikaväliennuste	20240319_164945
+ve_fy_2021	4036	individual_interval_prediction_is_wrong	0.03436306837903506	Yksilön aikaväliennuste väärin	20240319_164945
+ve_fy_2021	4036	individual_slower_than_interval_forecast	0.025338424158278375	Yksilö hitaampi kuin aikaväliennuste	20240319_164945
+ve_fy_2021	4036	mean_ind_interval_error_size	1.8687365277223729	Yksilön aikavälin keskikoko kertaa virhe	20240319_164945
+ve_fy_2021	4036	median_error_of_individual_prediction_minutes	6.4203981575210705	Yksilöennusteen mediaanivirhe	20240319_164945
+ve_fy_2021	4036	median_ind_interval	49.816394603800006	Yksilön aikavälin mediaani koko	20240319_164945
+ve_fy_2021	4036	median_ind_interval_times_error_size	1.7118441741673727	Yksilön aikavälin mediaani koko kertaa virhe	20240319_164945
+ve_fy_2021	4036	median_relay_prediction_error_minutes	10.96161354632136	Viestiennusteen virheen mediaani	20240319_164945
+ve_fy_2021	4036	num_runs_mean	5.893439777854912	Aiempien Jukoloiden määrä (keskiarvo)	20240319_164945
+ve_fy_2021	4036	num_runs_median	5.0	Aiempien Jukoloiden määrä (median)	20240319_164945
+ve_fy_2021	4036	post_analysis_start_time	1710868095.109278	Time of starting to run post race analysis	20240319_164945
+ve_fy_2021	4036	ratio_of_error_to_final_time	0.10853485755175471	Virheen suhde loppuaikaan	20240319_164945
+ve_fy_2021	4036	relay_interval_prediction_wrong	0.040263797292606734	Viestin aikaväliennuste väärin	20240319_164945
+ve_fy_2021	4036	runner_faster_than_relay_time_prediction	0.019784796945505032	Juoksija nopeampi kuin viestin aikaväliennuste	20240319_164945
+ve_fy_2021	4036	runner_slower_than_post_interval_prediction	0.020479000347101702	Juoksija hitaampi kuin viestin aikaväliennuste	20240319_164945
+ve_fy_2021	4036	signed_average_error_of_individual_forecast_ie_runner_was_late_minutes	1.5472596297155397	Yksilöennusteen etumerkillinen keskivirhe (juoksija myöhästyi ennusteesta)	20240319_164945
+ve_fy_2022	5724	average_error_of_individual_prediction_minutes	11.611324200238663	Yksilöennusteen keskivirhe	20240319_164945
+ve_fy_2022	5724	average_error_of_relay_prediction_minutes	20.187844826241847	Viestiennusteen keskivirhe	20240319_164945
+ve_fy_2022	5724	average_size_of_an_individual_interval_minutes	59.664502820285286	Yksilön aikavälin keskikoko	20240319_164945
+ve_fy_2022	5724	individual_faster_than_interval_prediction	0.0005757052389176742	Yksilö nopeampi kuin aikaväliennuste	20240319_164945
+ve_fy_2022	5724	individual_interval_prediction_is_wrong	0.05008635578583765	Yksilön aikaväliennuste väärin	20240319_164945
+ve_fy_2022	5724	individual_slower_than_interval_forecast	0.04951065054691998	Yksilö hitaampi kuin aikaväliennuste	20240319_164945
+ve_fy_2022	5724	mean_ind_interval_error_size	2.988377516041923	Yksilön aikavälin keskikoko kertaa virhe	20240319_164945
+ve_fy_2022	5724	median_error_of_individual_prediction_minutes	7.901309239439641	Yksilöennusteen mediaanivirhe	20240319_164945
+ve_fy_2022	5724	median_ind_interval	54.2718458937	Yksilön aikavälin mediaani koko	20240319_164945
+ve_fy_2022	5724	median_ind_interval_times_error_size	2.71827898258601	Yksilön aikavälin mediaani koko kertaa virhe	20240319_164945
+ve_fy_2022	5724	median_relay_prediction_error_minutes	11.039645912641049	Viestiennusteen virheen mediaani	20240319_164945
+ve_fy_2022	5724	num_runs_mean	5.158127038956055	Aiempien Jukoloiden määrä (keskiarvo)	20240319_164945
+ve_fy_2022	5724	num_runs_median	4.0	Aiempien Jukoloiden määrä (median)	20240319_164945
+ve_fy_2022	5724	post_analysis_start_time	1710867994.167714	Time of starting to run post race analysis	20240319_164945
+ve_fy_2022	5724	ratio_of_error_to_final_time	0.11749464356854208	Virheen suhde loppuaikaan	20240319_164945
+ve_fy_2022	5724	relay_interval_prediction_wrong	0.060257148340049894	Viestin aikaväliennuste väärin	20240319_164945
+ve_fy_2022	5724	runner_faster_than_relay_time_prediction	0.0013433122241412398	Juoksija nopeampi kuin viestin aikaväliennuste	20240319_164945
+ve_fy_2022	5724	runner_slower_than_post_interval_prediction	0.058913836115908655	Juoksija hitaampi kuin viestin aikaväliennuste	20240319_164945
+ve_fy_2022	5724	signed_average_error_of_individual_forecast_ie_runner_was_late_minutes	7.994295934549772	Yksilöennusteen etumerkillinen keskivirhe (juoksija myöhästyi ennusteesta)	20240319_164945
+ve_fy_2023	6212	average_error_of_individual_prediction_minutes	14.399583163109018	Yksilöennusteen keskivirhe	20240319_164945
+ve_fy_2023	6212	average_error_of_relay_prediction_minutes	29.480382143632173	Viestiennusteen keskivirhe	20240319_164945
+ve_fy_2023	6212	average_size_of_an_individual_interval_minutes	59.721719152605424	Yksilön aikavälin keskikoko	20240319_164945
+ve_fy_2023	6212	individual_faster_than_interval_prediction	0.00033772374197906115	Yksilö nopeampi kuin aikaväliennuste	20240319_164945
+ve_fy_2023	6212	individual_interval_prediction_is_wrong	0.10182370820668693	Yksilön aikaväliennuste väärin	20240319_164945
+ve_fy_2023	6212	individual_slower_than_interval_forecast	0.10148598446470787	Yksilö hitaampi kuin aikaväliennuste	20240319_164945
+ve_fy_2023	6212	mean_ind_interval_error_size	6.081086904596601	Yksilön aikavälin keskikoko kertaa virhe	20240319_164945
+ve_fy_2023	6212	median_error_of_individual_prediction_minutes	11.186088756944006	Yksilöennusteen mediaanivirhe	20240319_164945
+ve_fy_2023	6212	median_ind_interval	54.8742756036	Yksilön aikavälin mediaani koko	20240319_164945
+ve_fy_2023	6212	median_ind_interval_times_error_size	5.587502227114285	Yksilön aikavälin mediaani koko kertaa virhe	20240319_164945
+ve_fy_2023	6212	median_relay_prediction_error_minutes	20.502845561394984	Viestiennusteen virheen mediaani	20240319_164945
+ve_fy_2023	6212	num_runs_mean	4.4993245525160415	Aiempien Jukoloiden määrä (keskiarvo)	20240319_164945
+ve_fy_2023	6212	num_runs_median	3.0	Aiempien Jukoloiden määrä (median)	20240319_164945
+ve_fy_2023	6212	post_analysis_start_time	1710867141.97935	Time of starting to run post race analysis	20240319_164945
+ve_fy_2023	6212	ratio_of_error_to_final_time	0.14978781458973994	Virheen suhde loppuaikaan	20240319_164945
+ve_fy_2023	6212	relay_interval_prediction_wrong	0.16818642350557245	Viestin aikaväliennuste väärin	20240319_164945
+ve_fy_2023	6212	runner_faster_than_relay_time_prediction	0.0005065856129685917	Juoksija nopeampi kuin viestin aikaväliennuste	20240319_164945
+ve_fy_2023	6212	runner_slower_than_post_interval_prediction	0.16767983789260385	Juoksija hitaampi kuin viestin aikaväliennuste	20240319_164945
+ve_fy_2023	6212	signed_average_error_of_individual_forecast_ie_runner_was_late_minutes	12.311447455602643	Yksilöennusteen etumerkillinen keskivirhe (juoksija myöhästyi ennusteesta)	20240319_164945
