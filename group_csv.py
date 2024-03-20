@@ -13,7 +13,6 @@ import shared
 # time RACE_TYPE=ju FORECAST_YEAR=2023 poetry run python group_csv.py
 # To get all years use next year:
 # time RACE_TYPE=ju FORECAST_YEAR=2024 poetry run python group_csv.py
-
 def _connect_teams_by_emit(runs):
     runs_by_team = defaultdict(list)
     for run in runs:
@@ -59,8 +58,8 @@ def _connect_teams_by_emit(runs):
     # remove unnecessary subsets that are contained in some other
     connected_teams_sets = [connections for connections in connected_teams_sets if len(connections) > 1]
     # remove overlapping subsets
-    connected_teams_sets = [s for s in connected_teams_sets if not any(s.issubset(o) for o in connected_teams_sets if s is not o)]
-
+    connected_teams_sets = [s for s in connected_teams_sets if
+                            not any(s.issubset(o) for o in connected_teams_sets if s is not o)]
 
     return connected_teams_sets
 

@@ -19,6 +19,9 @@ ideal_paces = pd.read_csv(f'Jukola-terrain/ideal-paces-{race_type}.tsv', delimit
 
 logging.info(f"{ideal_paces.head().round(3)}")
 
+logging.info(f"{ideal_paces.info()}")
+logging.info(f"{ideal_paces.nunique()}")
+
 runs = pd.read_csv(f'data/runs_{shared.race_id_str()}.tsv', delimiter='\t')
 runs["log_pace"] = np.log(runs["pace"])
 runs = runs.query("num_runs > 1")
