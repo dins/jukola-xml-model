@@ -20,7 +20,7 @@ UNKNOWN_OR_KNOWN=known time poetry run jupyter nbconvert --to notebook --inplace
 echo $(date -u +"%F %T") "KNOWN individual-estimates.ipynb ${RACE_TYPE} ${FORECAST_YEAR} DONE"
 
 time poetry run python prepare_run_features.py
-echo $(date -u +"%F %T") "combine_estimates_with_running_order ${RACE_TYPE} ${FORECAST_YEAR} DONE"
+echo $(date -u +"%F %T") "prepare_run_features.py ${RACE_TYPE} ${FORECAST_YEAR} DONE"
 
 time poetry run jupyter nbconvert --to notebook --inplace --ExecutePreprocessor.timeout=1200 --execute 2019-relay-simulation.ipynb
 echo $(date -u +"%F %T") "2019-relay-simulation ${RACE_TYPE} ${FORECAST_YEAR} DONE"
