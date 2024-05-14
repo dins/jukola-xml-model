@@ -198,8 +198,8 @@ def _get_raw_runs_by_runner_name(ve_or_ju):
             for row in csvreader:
                 team_id = int(row[0])
                 team_base_name = row[3].upper()
-                name = row[8].lower()
-                name = normalize_names.normalize_name(name)
+                raw_name = row[8].lower()
+                normalized_name = normalize_names.normalize_name(raw_name)
                 leg = int(row[5])
                 emit_str = row[6]
                 leg_time_str = row[7]
@@ -208,15 +208,16 @@ def _get_raw_runs_by_runner_name(ve_or_ju):
                     leg_pace = "NA"
                 else:
                     leg_distance = shared.leg_distance(ve_or_ju, int(year), leg)
+                    # TODO whats the sense in rounding?
                     leg_pace = round((int(leg_time_str) / 60) / leg_distance, 3)
 
-                if len(name) <= 5:
+                if len(normalized_name) <= 5:
                     if leg_pace != "NA":
                         print(
-                            f"Ignoring too short name '{name}' with leg_pace {leg_pace} from {year}/{ve_or_ju} {team_id}/{leg}")
+                            f"Ignoring too short name '{normalized_name}' with leg_pace {leg_pace} from {year}/{ve_or_ju} {team_id}/{leg}")
                 else:
                     run = {}
-                    run["name"] = name
+                    run["name"] = normalized_name
                     run["team_id"] = team_id
                     run["team"] = team_base_name
                     run["team_country"] = "NA"
@@ -226,7 +227,7 @@ def _get_raw_runs_by_runner_name(ve_or_ju):
                     run["pace"] = leg_pace
                     run["emit"] = emit_str
                     run["leg"] = leg
-                    by_name[name].append(run)
+                    by_name[normalized_name].append(run)
             csvfile.close()
     return by_name
 
