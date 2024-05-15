@@ -1,3 +1,4 @@
+Juoksuja ennusteessa: 6732, tuloksissa: 6888, analyysissä: 6595
 Aiempien Jukoloiden määrä (keskiarvo): 5.47 (Mediaani): 4.0
 Yksilöennusteen etumerkillinen keskivirhe (juoksija myöhästyi ennusteesta): -4.1 minuuttia
 Yksilöennusteen keskivirhe: 9.3 minuuttia
