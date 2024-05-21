@@ -7,7 +7,7 @@ from datetime import datetime
 import numpy as np
 import pandas as pd
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s [%(process)d] %(funcName)s [%(levelname)s] %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s')
 
 num_pace_years = 18
 pace_columns = [f"pace_{i}" for i in range(1, num_pace_years + 1)]

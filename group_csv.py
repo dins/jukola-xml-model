@@ -246,6 +246,6 @@ def _group_runs_to_runners():
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO,
-                        format='%(asctime)s - %(name)s [%(process)d] %(funcName)s [%(levelname)s] %(message)s')
+                        format='%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s')
     logging.info("Grouping history results from different years by runner name")
     _group_runs_to_runners()

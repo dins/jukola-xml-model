@@ -5,7 +5,7 @@ import pandas as pd
 import shared
 # time poetry run python count_names.py
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s [%(process)d] %(funcName)s [%(levelname)s] %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s')
 
 
 def _append_names(year, ve_or_ju, all_names):

@@ -405,6 +405,6 @@ def _find_history_values_for_running_order_names():
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO,
-                        format='%(asctime)s - %(name)s [%(process)d] %(funcName)s [%(levelname)s] %(message)s')
+                        format='%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s')
     logging.info("Creating static individual estimates for running order")
     combine_estimates_with_running_order()

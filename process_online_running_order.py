@@ -12,7 +12,7 @@ import shared
 # time poetry run python process_online_running_order.py 2023
 
 logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s - %(name)s [%(process)d] %(funcName)s [%(levelname)s] %(message)s')
+                    format='%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s')
 
 
 def fetch_running_order(year, ve_or_ju):

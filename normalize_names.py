@@ -4,7 +4,7 @@ import logging
 # time poetry run python normalize_names.py
 
 logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s - %(name)s [%(process)d] %(funcName)s [%(levelname)s] %(message)s')
+                    format='%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s')
 
 
 def read_first_names() -> set:

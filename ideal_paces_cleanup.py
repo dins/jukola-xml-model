@@ -7,7 +7,7 @@ import shared
 # time poetry run python ideal_paces_cleanup.py
 
 logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s - %(name)s [%(process)d] %(funcName)s [%(levelname)s] %(message)s')
+                    format='%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s')
 
 
 def _cleanup_ideal_times(race_type, marked_route):

@@ -7,7 +7,7 @@ import shared
 
 # RACE_TYPE=ve FORECAST_YEAR=2022 time poetry run python final_running_order.py && head data/running_order_final_ve_fy_2022.tsv
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s [%(process)d] %(funcName)s [%(levelname)s] %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s')
 
 
 def create_running_order_from_results():
