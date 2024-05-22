@@ -144,17 +144,7 @@ def _group_raw_runs_to_runners(raw_runs_by_name):
     by_unique_name = {}
     for name, raw_runs in raw_runs_by_name.items():
 
-        qualified_runs = [run for run in raw_runs if run["pace"] != "NA"]
-
-        # try to distinguish different people with same name from each other
-        # kaima vs tuplaaja
-        # namesakes vs those individuals who run multiple legs in one race
-        unique_teams_by_year = defaultdict(set)
-        for run in qualified_runs:
-            year = run["year"]
-            unique_teams_by_year[year].add(run["team"])
-
-        years_with_multiple_teams = [year for year, teams in unique_teams_by_year.items() if len(teams) > 1]
+        years_with_multiple_teams = _find_years_with_multiple_teams(raw_runs)
         has_multiple_teams_at_least_in_one_year = len(years_with_multiple_teams) > 0
         has_multiple_teams_only_in_one_year = len(years_with_multiple_teams) == 1
 
@@ -184,6 +174,19 @@ def _group_raw_runs_to_runners(raw_runs_by_name):
                 by_unique_name[unique_name] = runs_in_teams
                 logging.info(f"{unique_name} SPLIT\n{pd.DataFrame.from_dict(runs_in_teams)}")
     return by_unique_name
+
+
+def _find_years_with_multiple_teams(raw_runs):
+    qualified_runs = [run for run in raw_runs if run["pace"] != "NA"]
+    # try to distinguish different people with same name from each other
+    # kaima vs tuplaaja
+    # namesakes vs those individuals who run multiple legs in one race
+    unique_teams_by_year = defaultdict(set)
+    for run in qualified_runs:
+        year = run["year"]
+        unique_teams_by_year[year].add(run["team"])
+    years_with_multiple_teams = [year for year, teams in unique_teams_by_year.items() if len(teams) > 1]
+    return years_with_multiple_teams
 
 
 def _get_raw_runs_by_runner_name(ve_or_ju):
