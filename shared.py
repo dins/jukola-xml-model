@@ -7,7 +7,8 @@ from datetime import datetime
 import numpy as np
 import pandas as pd
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s')
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s')
 
 num_pace_years = 18
 pace_columns = [f"pace_{i}" for i in range(1, num_pace_years + 1)]
@@ -36,8 +37,10 @@ def race_id_str():
 
 
 years = {
-    "ve": ["2023", "2022", "2021", "2019", "2018", "2017", "2016", "2015", "2014", "2013", "2012", "2011", "2010", "2009", "2008", "2007", "2006", "2005", "2004", "2003", "2002"],
-    "ju": ["2023", "2022", "2021", "2019", "2018", "2017", "2016", "2015", "2014", "2013", "2012", "2011", "2010", "2009", "2008", "2007", "2006", "2005", "2004", "2003", "2002"]
+    "ve": ["2023", "2022", "2021", "2019", "2018", "2017", "2016", "2015", "2014", "2013", "2012", "2011", "2010",
+           "2009", "2008", "2007", "2006", "2005", "2004", "2003", "2002"],
+    "ju": ["2023", "2022", "2021", "2019", "2018", "2017", "2016", "2015", "2014", "2013", "2012", "2011", "2010",
+           "2009", "2008", "2007", "2006", "2005", "2004", "2003", "2002"]
 }
 
 # 2020 missing
@@ -46,9 +49,11 @@ all_years = [1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2
 
 
 def history_years():
-    all_years = years[race_type()]
-    fy = str(forecast_year())
-    history = list(filter(lambda year: year != fy, all_years))
+    all_years = [int(y_str) for y_str in years[race_type()]]
+    fy = forecast_year()
+    # filter out future data
+    history = list(filter(lambda year: year < fy, all_years))
+    history = [str(y_int) for y_int in history]
     logging.info(f"history_years: {history}")
     return history
 
