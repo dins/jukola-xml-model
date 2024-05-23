@@ -107,8 +107,8 @@ Data columns (total 55 columns):
  46  leg_6                  1 non-null      Sparse[bool, False]
  47  leg_7                  1 non-null      Sparse[bool, False]
  48  leg_distance           13630 non-null  float64            
- 49  log_stdev              13630 non-null  float64            
- 50  median_pace            13630 non-null  float64            
+ 49  log_stdev              9073 non-null   float64            
+ 50  median_pace            10659 non-null  float64            
  51  runs                   13630 non-null  int64              
  52  team_id                13630 non-null  int64              
  53  terrain_coefficient    13630 non-null  float64            

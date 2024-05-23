@@ -21,9 +21,8 @@ def read_persisted_dummy_column_values():
 
 
 def preprocess_features_v2(runs_df, top_countries, include_history_paces):
-    # log column names and types
-    logging.info("runs_df")
     log_utils.log_dataframe_info(runs_df)
+    logging.info(f"runs_df {len(runs_df)} rows")
     # convert some int columns to labels
     runs = runs_df.assign(leg=runs_df.leg.astype(str))
     # cliping 0 to 1 is a hack for when predicting for unknown runners
@@ -94,12 +93,13 @@ def prepare_run_features(include_history_paces):
     logging.info(f"Ideals:\n{ideals.head(5).round(3)}")
     logging.info(f"Loaded ideals for {len(ideals)} legs")
 
-    runs = pd.read_csv(f'data/runs_{shared.race_id_str()}.tsv', delimiter='\t')
+    runs = pd.read_csv(f'data/long_runs_and_running_order_{shared.race_id_str()}.tsv', delimiter='\t')
+    runs = runs.dropna(subset=['pace'])
     runs["log_pace"] = np.log(runs["pace"])
-    # TODO use median or other means to reduce outliers
-    runner_means = runs[["name", "log_pace"]].groupby(["name"]).agg("mean")
+    # TODO use median_pace
+    runner_means = runs[["unique_name", "log_pace"]].groupby(["unique_name"]).agg("mean")
 
-    runs["pace_mean"] = runner_means["log_pace"][runs["name"]].values
+    runs["pace_mean"] = runner_means["log_pace"][runs["unique_name"]].values
     logging.info(f"Runs: \n{runs.head(5).round(3)}")
 
     runs = pd.merge(runs,
@@ -121,24 +121,6 @@ def prepare_run_features(include_history_paces):
     logging.info(f"Shapes y: {y.shape}, x: {x.shape}")
     _write_features_report(features, include_history_paces, "training")
     return x, y, features
-
-
-def _load_history_and_calculate_log_paces():
-    history = pd.read_csv(f'data/grouped_paces_{shared.race_id_str()}.tsv', delimiter="\t")
-
-    # CHEAP TRICK: Use median instead of mean to filter out one time accidents,
-    # the std will still carry the uncertainty caused by those
-    history["predicted_log_pace_mean"] = np.nanmedian(np.log(history[shared.pace_columns]), axis=1)
-    history["predicted_log_pace_std"] = np.nanstd(np.log(history[shared.pace_columns]), axis=1)
-
-    return history[["num_valid_times", "predicted_log_pace_mean", "predicted_log_pace_std", "name", "teams"]]
-
-
-def switch_first_and_last_name(name):
-    names = name.split()
-    names.insert(0, names.pop())
-    switched_name = " ".join(names)
-    return switched_name
 
 
 def _predict_for_unknown_runners(features, unknown_or_known):
@@ -168,11 +150,15 @@ def _predict_for_unknown_runners(features, unknown_or_known):
 
 
 def combine_estimates_with_running_order():
-    running_order_with_history = _find_history_values_for_running_order_names()
+    # running_order_with_history = _find_history_values_for_running_order_names()
+    running_order_with_history = _load_history_values_for_running_order_names()
 
     running_order = _choose_final_estimates_from_various_models(running_order_with_history)
-    running_order = running_order[["team_id", "team", "leg", "leg_dist", "orig_name", "final_pace_mean", "final_pace_std", "num_runs"]]
-    running_order= running_order.rename(columns={"orig_name": "name", "leg_dist": "dist", "final_pace_mean": "log_mean", "final_pace_std": "log_std"})
+    running_order = running_order[
+        ["team_id", "team", "leg", "leg_dist", "ro_orig_name", "final_pace_mean", "final_pace_std", "num_runs"]]
+    running_order = running_order.rename(
+        columns={"ro_orig_name": "name", "leg_dist": "dist", "final_pace_mean": "log_mean",
+                 "final_pace_std": "log_std"})
 
     running_order.to_csv(f"data/running_order_with_estimates_{shared.race_id_str()}.tsv", sep="\t", index=False)
 
@@ -180,8 +166,8 @@ def combine_estimates_with_running_order():
 
 
 def _choose_final_estimates_from_various_models(running_order_with_history):
-    running_order = running_order_with_history[['team_id', 'team', 'team_base_name', 'team_country', 'leg', 'leg_dist',
-                                                'name', 'orig_name',
+    running_order = running_order_with_history[['team_id', 'team', 'team_country', 'leg', 'leg_dist',
+                                                'name', 'ro_orig_name',
                                                 'num_runs', 'pred_log_mean', 'pred_log_std']]
     # List of runners with na team_id
     missing_team_ids = running_order[running_order["team_id"].isna()]
@@ -203,6 +189,7 @@ def _choose_final_estimates_from_various_models(running_order_with_history):
 
     # In the training data the minimum is 1, for unknown runners
     running_order["num_runs"] = running_order["num_runs"] + 1
+    assert len(running_order) > 0, "Empty running_order"
     unknown_runners_features = preprocess_features_v2(running_order, top_countries, False)
     known_runners_features = preprocess_features_v2(running_order, top_countries, True)
     running_order["num_runs"] = running_order["num_runs"] - 1
@@ -296,6 +283,12 @@ def _choose_final_estimates_from_various_models(running_order_with_history):
     shared.log_df(missing_team_ids)
     assert len(missing_team_ids) == 0, "Missing team ids"
 
+    rows_with_na = running_order[running_order['final_pace_mean'].isna() | running_order['final_pace_std'].isna()]
+    shared.log_df(rows_with_na, 'NA values')
+
+    assert not running_order['final_pace_mean'].isna().any(), "final_pace_mean column contains NaN values"
+    assert not running_order['final_pace_std'].isna().any(), "final_pace_std column contains NaN values"
+
     return running_order
 
 
@@ -306,100 +299,25 @@ def _write_features_report(features: pd.DataFrame, include_history: bool, train_
                                     f'features/hgbr-{train_or_predict}-{known_or_unknown}-{shared.race_id_str()}.txt')
 
 
-def _find_history_values_for_running_order_names():
-    # running_order = pd.read_csv(f'data/running_order_j{shared.forecast_year()}_{shared.race_type()}.tsv', delimiter="\t")
-    running_order = pd.read_csv(f"data/running_order_final_{shared.race_id_str()}.tsv", delimiter="\t")
-    logging.info(f"running_order.shape: {running_order.shape}")
-    shared.log_df(running_order)
-    running_order["orig_name"] = running_order["name"]
-    # to lower case, trim spaces, remove double spaces
-    running_order["name"] = running_order["name"].str.lower().str.strip().str.replace(' +', ' ')
-    running_order["team_base_name_upper"] = running_order["team_base_name"].str.upper()
-    history = _load_history_and_calculate_log_paces()
-    # logging.info(f"history.shape before cleanup: {history.shape}")
-    # history = history[history["num_valid_times"] >= 1].reset_index()
-    logging.info(f"history.shape: {history.shape}")
-    shared.log_df(history)
-    history["num_runs"] = history["num_valid_times"]
-    history = history.assign(name_without_colon=history['name'].str.split(":").str[0])
-
-    switched_names = [switch_first_and_last_name(name) for name in history["name_without_colon"].values]
-    history = history.assign(switched_name=switched_names)
-    history["duplicate_name"] = history["name_without_colon"].duplicated(keep=False)
-    history["name_contains_colon"] = history['name'].str.contains(":", regex=False)
-
-    shared.log_df(
-        history[history["name_contains_colon"]][
-            ["name", "duplicate_name", "switched_name", "name_without_colon", "teams"]])
-    # No history defaults
-    running_order["pred_log_mean"] = 0
-    running_order["pred_log_std"] = 0
-    running_order["num_runs"] = 0
-    running_order["predicted_log_pace_mean"] = 0
-    running_order["predicted_log_pace_std"] = 0
-    running_order["num_valid_times"] = 0
-    # switched names
-    switched_names_history = history.sort_values('num_valid_times', ascending=False).drop_duplicates(['switched_name'])
-    running_order_with_history = running_order.merge(switched_names_history, how="left", left_on=["name"],
-                                                     right_on=["switched_name"], suffixes=("", "_switched"))
-    switched = running_order_with_history["predicted_log_pace_mean_switched"].notna()
-    logging.info(f"switched ratio: {switched.mean()}")
-    logging.info(f"switched count: {switched.sum()}")
-    assert len(running_order) == len(running_order_with_history)
-    running_order_with_history.loc[switched, "pred_log_mean"] = running_order_with_history[switched][
-        "predicted_log_pace_mean_switched"]
-    running_order_with_history.loc[switched, "pred_log_std"] = running_order_with_history[switched][
-        "predicted_log_pace_std_switched"]
-    running_order_with_history.loc[switched, "num_runs"] = running_order_with_history[switched][
-        "num_valid_times_switched"]
-    # Multiple teams
-    multi_team_history = history[history["name_contains_colon"]]
-    # logging.info(f"multi_team_history Mouhu")
-    # logging.info(multi_team_history[multi_team_history["name"].str.contains("ouhu")][["name", "teams", "duplicate_name", "name_without_colon"]].to_dict(orient="records"))
-    multi_team_history_expanded = multi_team_history.assign(
-        multi_team=multi_team_history['teams'].str.split(';')).explode('multi_team')
-    logging.info(f"multi_team_history_expanded {multi_team_history_expanded.info()}")
-    logging.info(f"multi_team_history_expanded new rows {len(multi_team_history_expanded) - len(multi_team_history)}")
-    # logging.info(multi_team_history_expanded[multi_team_history_expanded["name"].str.contains("ouhu")][["name", "teams", "multi_team", "name_without_colon"]].to_dict(orient="records"))
-
-    # teams column contain only a single team name if runs are split to multiple teams (one history row per team)
-    running_order_with_history = pd.merge(running_order_with_history, multi_team_history_expanded,
-                                          how="left", left_on=["name", "team_base_name_upper"],
-                                          right_on=["name_without_colon", "multi_team"],
-                                          suffixes=("", "_multi_team"), )
-    # logging.info(f"running_order_with_history Mouhu")
-    # shared.log_df(running_order_with_history[running_order_with_history["name"].str.contains("ouhu")][["name", "duplicate_name", "name_without_colon"]])
-    # logging.info(running_order_with_history[running_order_with_history["name"].str.contains("ouhu")][["name", "duplicate_name", "name_without_colon"]].to_dict(orient="records"))
-
-    multi_team = running_order_with_history["predicted_log_pace_mean_multi_team"].notna()
-    logging.info(f"multi_team ratio: {multi_team.mean()}")
-    logging.info(f"multi_team count: {multi_team.sum()}")
-    assert len(running_order) == len(running_order_with_history)
-    running_order_with_history.loc[multi_team, "pred_log_mean"] = running_order_with_history[multi_team][
-        "predicted_log_pace_mean_multi_team"]
-    running_order_with_history.loc[multi_team, "pred_log_std"] = running_order_with_history[multi_team][
-        "predicted_log_pace_std_multi_team"]
-    running_order_with_history.loc[multi_team, "num_runs"] = running_order_with_history[multi_team][
-        "num_valid_times_multi_team"]
-    # By just name, no special tricks (plain name)
-    running_order_with_history = pd.merge(running_order_with_history, history[history["duplicate_name"] == False],
-                                          how="left", left_on=["name"], right_on=["name"],
-                                          suffixes=("", "_plain_name"), )
-    shared.log_df(running_order_with_history[['name', "pred_log_mean", 'predicted_log_pace_mean_plain_name']])
-    plain_name = running_order_with_history["predicted_log_pace_mean_plain_name"].notna()
-    logging.info(f"plain_name ratio: {plain_name.mean()}")
-    logging.info(f"plain_name count: {plain_name.sum()}")
-    logging.info(f"running_order.shape: {running_order.shape}")
-    logging.info(f"running_order_with_history.shape: {running_order_with_history.shape}")
-    assert len(running_order) == len(running_order_with_history)
-    running_order_with_history.loc[plain_name, "pred_log_mean"] = running_order_with_history[plain_name][
-        "predicted_log_pace_mean_plain_name"]
-    running_order_with_history.loc[plain_name, "pred_log_std"] = running_order_with_history[plain_name][
-        "predicted_log_pace_std_plain_name"]
-    running_order_with_history.loc[plain_name, "num_runs"] = running_order_with_history[plain_name][
-        "num_valid_times_plain_name"]
+def _load_history_values_for_running_order_names():
+    # unique_name	num_runs	name	team_id	team	team_country	year	pace	emit	leg	median_pace	log_stdev
+    runs = pd.read_csv(f'data/long_runs_and_running_order_{shared.race_id_str()}.tsv', delimiter='\t')
+    # runs = runs.dropna(subset=['pace'])
+    # runs["log_pace"] = np.log(runs["pace"])
+    runs = runs[runs['year'] == shared.forecast_year()]
+    running_order_with_history = runs.rename(columns={
+        'median_log_pace': 'pred_log_mean',
+        'log_stdev': 'pred_log_std',
+    })
+    # TODO team is currently, team_base_name
     shared.log_df(running_order_with_history[['name', 'num_runs', 'pred_log_mean']])
-    logging.info(f"running_order_with_history.columns: {running_order_with_history.columns}")
+    running_order_with_history = running_order_with_history[
+        ['team_id', 'team', 'team_country', 'leg', 'leg_dist',
+         'name', 'ro_orig_name',
+         'num_runs', 'pred_log_mean', 'pred_log_std']]
+    logging.info(
+        f"running_order_with_history {len(running_order_with_history)} rows, columns: {running_order_with_history.columns}")
+
     return running_order_with_history
 
 

@@ -6,8 +6,8 @@ set -ef -o pipefail
 
 # BEFORE_RACE="true"
 echo $(date -u +"%F %T") "RACE_TYPE: ${RACE_TYPE}, FORECAST_YEAR: ${FORECAST_YEAR}, RUN_TS: ${RUN_TS}"
-time poetry run python group_csv.py
-echo $(date -u +"%F %T") "group_csv ${RACE_TYPE} ${FORECAST_YEAR} DONE"
+time poetry run python group_names.py
+echo $(date -u +"%F %T") "group_names ${RACE_TYPE} ${FORECAST_YEAR} DONE"
 time poetry run python cluster_names.py
 echo $(date -u +"%F %T") "cluster_names ${RACE_TYPE} ${FORECAST_YEAR} DONE"
 time poetry run python estimate_personal_coefficients.py

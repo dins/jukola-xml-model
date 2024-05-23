@@ -5,14 +5,19 @@ import pandas as pd
 import shared
 import json
 
-# RACE_TYPE=ve FORECAST_YEAR=2022 time poetry run python cluster_names.py
+# time RACE_TYPE=ve FORECAST_YEAR=2022 poetry run python cluster_names.py
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s')
 
 
 def cluster_names():
     logging.info(f"computing name clusters for {shared.race_id_str()}")
-    history = pd.read_csv(f'data/grouped_paces_{shared.race_id_str()}.tsv', delimiter="\t")
+    runs = pd.read_csv(f'data/long_runs_and_running_order_{shared.race_id_str()}.tsv', delimiter='\t')
+    runs = runs.dropna(subset=['pace'])
+    history = runs.groupby('name').agg(
+        num_valid_times=('pace', 'count'),
+        mean_pace=('pace', 'mean'),
+    ).reset_index()
 
     # preprocess
     history["first_name"] = history.name.str.split(" ", expand=True).iloc[:, 0]
@@ -37,7 +42,8 @@ def cluster_names():
     sorted = names.sort_values(by=["mean_pace_count"], ascending=False)[
         ["mean_pace_count", "fn_pace_class", "fn_pace_std_class"]]
     logging.info(sorted)
-    sorted.to_csv(f"data/name_pace_classes_{shared.race_id_str()}.tsv", "\t")
-
+    output_path = f"data/name_pace_classes_{shared.race_id_str()}.tsv"
+    sorted.to_csv(output_path, sep="\t")
+    logging.info(f'Wrote: {output_path}')
 
 cluster_names()

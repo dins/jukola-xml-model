@@ -10,9 +10,9 @@ import normalize_names
 import shared
 
 
-# time RACE_TYPE=ju FORECAST_YEAR=2023 poetry run python group_csv.py
+# time RACE_TYPE=ju FORECAST_YEAR=2023 poetry run python group_names.py
 # To get all years use next year:
-# time RACE_TYPE=ju FORECAST_YEAR=2024 poetry run python group_csv.py
+# time RACE_TYPE=ju FORECAST_YEAR=2024 poetry run python group_names.py
 def _connect_teams_by_emit(runs):
     runs_by_team = defaultdict(list)
     for run in runs:
@@ -64,79 +64,43 @@ def _connect_teams_by_emit(runs):
     return connected_teams_sets
 
 
-def open_output_file(out_file_name, column_names):
-    print(f"Writing output to {out_file_name}")
-    out_file = open(out_file_name, 'w')
-    csvwriter = csv.writer(out_file, delimiter="\t", quoting=csv.QUOTE_ALL)
-    csvwriter.writerow(column_names)
-    return (out_file, csvwriter)
-
-
 def _write_individual_runs_file(grouped_runs_by_unique_name):
-    # TODO add "leg_distance" column to runs.tsv
-    # TODO add "log_median" column ?
-    runs_file_cols = ["name", "year", "team_id", "team", "team_country", "pace", "leg", "num_runs", "median_pace",
-                      "log_stdev"]
-    (runs_out_file, runs_csvwriter) = open_output_file(f'data/runs_{shared.race_id_str()}.tsv',
-                                                       runs_file_cols)
-    for unique_name, runs in grouped_runs_by_unique_name.items():
-        for run in runs:
-            pace = run["pace"]
-            if pace != "NA":
-                row = [unique_name, run["year"], run["team_id"], run["team"], run["team_country"], pace, run["leg"],
-                       len(runs), run["median_pace"], run["log_stdev"]]
-                runs_csvwriter.writerow(row)
-    runs_out_file.close()
+    records = [
+        {"unique_name": unique_name, **run}
+        for unique_name, runs in grouped_runs_by_unique_name.items()
+        for run in runs
+    ]
 
+    # Use json_normalize to create the DataFrame
+    df = pd.json_normalize(records)
+    # Convert 'pace' column to numeric, coercing errors to NaN
+    df['pace'] = pd.to_numeric(df['pace'], errors='coerce')
 
-def _write_grouped_paces_file(grouped_runs_by_unique_name):
-    column_names = ["mean_team_id", "teams", "name", "num_runs", "num_valid_times", "mean_pace", "stdev", "log_stdev",
-                    "most_common_leg", "most_common_country", "years_and_legs"] + shared.pace_columns
-    (out_file, csvwriter) = open_output_file(f'data/grouped_paces_{shared.race_id_str()}.tsv', column_names)
-    max_years = shared.num_pace_years
-    for unique_name, runs in grouped_runs_by_unique_name.items():
-        team_ids = map(lambda run: run["team_id"], runs)
-        teams = map(lambda run: run["team"], runs)
-        joined_teams = ";".join(set(teams))
-        paces = map(lambda run: run["pace"], runs)
+    # Add a temporary 'log_pace' column
+    df['log_pace'] = np.log(df['pace'])
+    fy_year = shared.forecast_year()
 
-        valid_paces = [pace for pace in paces if pace != "NA"]
-        available_paces = valid_paces[:max_years] + ["NA" for x in range(max_years - len(valid_paces))]
+    grouped = df.groupby('unique_name').agg(
+        # TODO which one is better?
+        median_pace=('pace', 'median'),
+        median_log_pace=('log_pace', 'median'),
+        log_stdev=('log_pace', 'std'),
+        # Does not count in NAs, so DNFs and running order entries are filtered out
+        num_runs=('pace', 'count'),
+    ).reset_index()
 
-        median_team_id = round(np.median(list(team_ids)), 1)
+    df = df.merge(grouped, on='unique_name')
 
-        if len(valid_paces) > max_years + 2:
-            print(f'{unique_name} {len(runs)} runs')
-            for run in runs:
-                print(run)
+    # Drop the temporary 'log_pace' column
+    df.drop(columns=['log_pace'], inplace=True)
 
-        if len(valid_paces) > 0:
-            float_paces = np.array(valid_paces).astype(float)
-            # TODO weighted mean to emphasize recent values
-            # CHEAP TRICK: Use median instead of mean to filter out one time accidents,
-            # the std will still carry the uncertainty caused by those
-            # TODO change to median_log_pace
-            median_pace = round(np.median(float_paces), 4)
-            stdev = round(np.std(float_paces), 4)
-            log_stdev = round(np.std(np.log(float_paces)), 4)
-            legs = map(lambda run: run["leg"], runs)
-            most_common_leg = collections.Counter(legs).most_common()[0][0]
-            countries = map(lambda run: run["team_country"], runs)
-            most_common_country = collections.Counter(countries).most_common()[0][0]
-            years_and_legs = map(lambda run: f'{run["year"]}.{run["leg"]}', runs)
-            years_and_legs_str = " ".join(years_and_legs)
-        else:
-            median_pace = "NA"
-            stdev = "NA"
+    ve_or_ju = shared.race_type()
+    # df['leg_dist'] = df.apply(lambda row: f"{row['first_name']} {row['last_name']}", axis=1)
+    df['leg_dist'] = df.apply(lambda row: shared.leg_distance(ve_or_ju, int(row['year']), row['leg']), axis=1)
 
-        for run in runs:
-            run["median_pace"] = str(median_pace)
-            run["log_stdev"] = str(log_stdev)
-
-        row = [median_team_id, joined_teams, unique_name, len(runs), len(valid_paces), median_pace, stdev, log_stdev,
-               most_common_leg, most_common_country, years_and_legs_str] + available_paces
-        csvwriter.writerow(row)
-    out_file.close()
+    output_file_path = f'data/long_runs_and_running_order_{shared.race_id_str()}.tsv'
+    df.to_csv(output_file_path, sep='\t', index=False)
+    logging.info(f'Wrote: {output_file_path}')
 
 
 def _group_raw_runs_to_runners(raw_runs_by_name):
@@ -237,18 +201,38 @@ def _get_raw_runs_by_runner_name(ve_or_ju):
 def _group_runs_to_runners():
     ve_or_ju = shared.race_type()
 
-    # TODO Delete whole file
-    #raw_runs_by_name = _get_raw_runs_by_runner_name(ve_or_ju)
+    raw_runs_by_name = _get_raw_runs_by_runner_name(ve_or_ju)
 
-    #grouped_runs_by_unique_name = _group_raw_runs_to_runners(raw_runs_by_name)
+    _add_running_order(raw_runs_by_name)
 
-    #_write_grouped_paces_file(grouped_runs_by_unique_name)
+    # assert len(running_order) == 0
+    grouped_runs_by_unique_name = _group_raw_runs_to_runners(raw_runs_by_name)
 
-    #_write_individual_runs_file(grouped_runs_by_unique_name)
+    _write_individual_runs_file(grouped_runs_by_unique_name)
+
+
+def _add_running_order(raw_runs_by_name):
+    logging.info(raw_runs_by_name['jesper svensk'])
+    running_order = pd.read_csv(f"data/running_order_final_{shared.race_id_str()}.tsv", delimiter="\t")
+    running_order["ro_orig_name"] = running_order["name"]
+    # to lower case, trim spaces, remove double spaces
+    running_order["name"] = running_order["name"].str.lower().str.strip().str.replace(' +', ' ')
+    shared.log_df(running_order)
+    logging.info(f"running_order: {running_order.head(1).T}")
+    logging.info(f"running_order: {running_order.info()}")
+    running_order["team"] = running_order["team_base_name"].str.upper()
+    running_order["year"] = shared.forecast_year()
+    running_order["pace"] = 'NA'
+    running_order["emit"] = 'NA'
+    #
+    running_order = running_order[
+        ['name', 'ro_orig_name', 'team_id', 'team', 'team_country', 'year', 'pace', 'emit', 'leg']]
+    for running_order_rec in running_order.to_dict(orient='records'):
+        logging.info(running_order_rec)
+        raw_runs_by_name[running_order_rec['name']].append(running_order_rec)
 
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO,
                         format='%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s')
-    logging.info("Grouping history results from different years by runner name")
     _group_runs_to_runners()

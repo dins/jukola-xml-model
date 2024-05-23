@@ -26,7 +26,7 @@ def race_type(default="ve"):
     return type
 
 
-def forecast_year(default=2023):
+def forecast_year(default=2023) -> int:
     year = os.getenv('FORECAST_YEAR', default)
     logging.info(f"FORECAST_YEAR: {year}")
     return int(year)
@@ -209,11 +209,11 @@ num_legs = {
 }
 
 
-def log_df(value):
+def log_df(value, title=''):
     if isinstance(value, str):
         logging.info(value)
     else:
-        logging.info(f"FY{forecast_year()}\n{value}")
+        logging.info(f"FY{forecast_year()} {title}\n{value}")
 
 
 def write_simple_text_report(reports, file_name):
