@@ -51,7 +51,7 @@ def preprocess_features_v2(runs_df, top_countries, include_history_paces):
     features["terrain_coefficient"] = runs["terrain_coefficient"]
     features["vertical_per_km"] = runs["vertical_per_km"]
     # features["marking_per_km"] = runs["marking_per_km"]
-    features["leg_distance"] = runs["leg_distance"]
+    features["leg_distance"] = runs["leg_dist"]
 
     if include_history_paces:
         # replace "NA" string with nan and convert to float
@@ -88,11 +88,6 @@ def preprocess_features_v2(runs_df, top_countries, include_history_paces):
 
 
 def prepare_run_features(include_history_paces):
-    ideals = pd.read_csv(f'Jukola-terrain/ideal-paces-{shared.race_type()}.tsv', delimiter='\t')
-    ideals["marking_per_km"] = ideals["marking"] / ideals["leg_distance"]
-    logging.info(f"Ideals:\n{ideals.head(5).round(3)}")
-    logging.info(f"Loaded ideals for {len(ideals)} legs")
-
     runs = pd.read_csv(f'data/long_runs_and_running_order_{shared.race_id_str()}.tsv', delimiter='\t')
     runs = runs.dropna(subset=['pace'])
     runs["log_pace"] = np.log(runs["pace"])
@@ -102,9 +97,6 @@ def prepare_run_features(include_history_paces):
     runs["pace_mean"] = runner_means["log_pace"][runs["unique_name"]].values
     logging.info(f"Runs: \n{runs.head(5).round(3)}")
 
-    runs = pd.merge(runs,
-                    ideals[["year", "leg", "leg_distance", "terrain_coefficient", "vertical_per_km", "marking_per_km"]],
-                    how="left", on=["year", "leg"])
     runs.sample(10).round(3)
     country_counts = runs["team_country"].value_counts()
     top_country_counts = country_counts[country_counts > 30]
@@ -166,23 +158,19 @@ def combine_estimates_with_running_order():
 
 
 def _choose_final_estimates_from_various_models(running_order_with_history):
-    running_order = running_order_with_history[['team_id', 'team', 'team_country', 'leg', 'leg_dist',
-                                                'name', 'ro_orig_name',
-                                                'num_runs', 'pred_log_mean', 'pred_log_std']]
+    running_order = running_order_with_history[
+        ['team_id', 'team', 'team_country', 'leg', 'leg_dist',
+         'name', 'ro_orig_name',
+         'num_runs', 'pred_log_mean', 'pred_log_std', 'terrain_coefficient',
+         'vertical_per_km']
+    ]
+    running_order = running_order.reset_index()
     # List of runners with na team_id
     missing_team_ids = running_order[running_order["team_id"].isna()]
     shared.log_df(missing_team_ids)
     assert len(missing_team_ids) == 0, "Missing team ids"
 
-    ideals = pd.read_csv(f'Jukola-terrain/ideal-paces-{shared.race_type()}.tsv', delimiter='\t')
-    ideals["marking_per_km"] = ideals["marking"] / ideals["leg_distance"]
-    logging.info(f"Ideals:\n{ideals.head(5).round(3)}")
-    logging.info(f"Loaded ideals for {len(ideals)} legs")
     running_order["year"] = shared.forecast_year()
-    running_order = pd.merge(running_order,
-                             ideals[["year", "leg", "leg_distance", "terrain_coefficient", "vertical_per_km",
-                                     "marking_per_km"]],
-                             how="left", on=["year", "leg"])
     top_countries = read_persisted_dummy_column_values()
     running_order["median_pace"] = np.exp(running_order["pred_log_mean"])
     running_order["log_stdev"] = running_order["pred_log_std"]
@@ -207,6 +195,10 @@ def _choose_final_estimates_from_various_models(running_order_with_history):
 
     # overwrite where num_runs is greater than 1
     known_runners = running_order["num_runs"] > 1
+    logging.info(f"{running_order.shape=}, {known_runners.shape=}, {hgbr_known_runners_est.shape=}, ")
+    # Ensure indices match
+    assert running_order.index.equals(hgbr_known_runners_est.index), "Indices do not match"
+
     running_order.loc[known_runners, "predicted"] = hgbr_known_runners_est.loc[known_runners, "predicted"]
 
     # Do not use historical std from known runners as its quite narrow
@@ -311,10 +303,10 @@ def _load_history_values_for_running_order_names():
     })
     # TODO team is currently, team_base_name
     shared.log_df(running_order_with_history[['name', 'num_runs', 'pred_log_mean']])
-    running_order_with_history = running_order_with_history[
-        ['team_id', 'team', 'team_country', 'leg', 'leg_dist',
-         'name', 'ro_orig_name',
-         'num_runs', 'pred_log_mean', 'pred_log_std']]
+    running_order_with_history = running_order_with_history[[
+        'team_id', 'team', 'team_country', 'leg', 'leg_dist', 'name', 'ro_orig_name',
+        'num_runs', 'pred_log_mean', 'pred_log_std', 'terrain_coefficient', 'vertical_per_km']
+    ]
     logging.info(
         f"running_order_with_history {len(running_order_with_history)} rows, columns: {running_order_with_history.columns}")
 

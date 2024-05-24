@@ -15,12 +15,6 @@ race_type = shared.race_type()
 year = shared.forecast_year()
 startTime = time.time()
 
-ideal_paces = pd.read_csv(f'Jukola-terrain/ideal-paces-{race_type}.tsv', delimiter='\t')
-
-logging.info(f"{ideal_paces.head().round(3)}")
-
-logging.info(f"{ideal_paces.info()}")
-logging.info(f"{ideal_paces.nunique()}")
 
 runs = pd.read_csv(f'data/long_runs_and_running_order_{shared.race_id_str()}.tsv', delimiter='\t')
 runs = runs.dropna(subset=['pace'])
@@ -33,7 +27,6 @@ runner_means = runs[["unique_name", "log_pace"]].groupby(["unique_name"]).agg("m
 runs["pace_mean"] = runner_means["log_pace"][runs["unique_name"]].values
 runs["personal_coefficient"] = runs["log_pace"] / runs["pace_mean"]
 
-runs = pd.merge(runs, ideal_paces[["year", "leg", "terrain_coefficient"]], how="left", on=["year", "leg"])
 logging.info(f"{runs.sample(10).round(3)}")
 
 X = np.array(runs["terrain_coefficient"]).reshape(-1, 1)

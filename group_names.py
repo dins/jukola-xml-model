@@ -1,4 +1,3 @@
-import collections
 import csv
 import logging
 from collections import defaultdict
@@ -75,10 +74,11 @@ def _write_individual_runs_file(grouped_runs_by_unique_name):
     df = pd.json_normalize(records)
     # Convert 'pace' column to numeric, coercing errors to NaN
     df['pace'] = pd.to_numeric(df['pace'], errors='coerce')
+    df['year'] = df['year'].astype(int)
 
     # Add a temporary 'log_pace' column
     df['log_pace'] = np.log(df['pace'])
-    fy_year = shared.forecast_year()
+    #fy_year = shared.forecast_year()
 
     grouped = df.groupby('unique_name').agg(
         # TODO which one is better?
@@ -94,9 +94,24 @@ def _write_individual_runs_file(grouped_runs_by_unique_name):
     # Drop the temporary 'log_pace' column
     df.drop(columns=['log_pace'], inplace=True)
 
-    ve_or_ju = shared.race_type()
+    # ve_or_ju = shared.race_type()
     # df['leg_dist'] = df.apply(lambda row: f"{row['first_name']} {row['last_name']}", axis=1)
-    df['leg_dist'] = df.apply(lambda row: shared.leg_distance(ve_or_ju, int(row['year']), row['leg']), axis=1)
+    # df['leg_dist'] = df.apply(lambda row: shared.leg_distance(ve_or_ju, int(row['year']), row['leg']), axis=1)
+
+    ideals = pd.read_csv(f'Jukola-terrain/ideal-paces-{shared.race_type()}.tsv', delimiter='\t')
+    ideals = ideals.rename(columns={
+        'leg_distance': 'leg_dist'
+    })
+    ideals["marking_per_km"] = ideals["marking"] / ideals["leg_dist"]
+    logging.info(f"Ideals:\n{ideals.head(5).round(3)}")
+    logging.info(f"Loaded ideals for {len(ideals)} legs")
+
+    ideals = ideals[["year", "leg", "leg_dist", "terrain_coefficient", "vertical_per_km", "marking_per_km"]]
+    #ideals["year"] = ideals["year"].astype(str)
+    ideals.info()
+    df.info()
+    df = pd.merge(df, ideals, how="left", on=["year", "leg"]).reset_index()
+    df.info()
 
     output_file_path = f'data/long_runs_and_running_order_{shared.race_id_str()}.tsv'
     df.to_csv(output_file_path, sep='\t', index=False)

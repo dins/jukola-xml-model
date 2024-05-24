@@ -41,7 +41,7 @@ team_id int64
 terrain_coefficient float64
 vertical_per_km float64
 <class 'pandas.core.frame.DataFrame'>
-RangeIndex: 79486 entries, 0 to 79485
+Index: 79486 entries, 0 to 86755
 Data columns (total 42 columns):
  #   Column                 Non-Null Count  Dtype              
 ---  ------                 --------------  -----              
@@ -88,5 +88,5 @@ Data columns (total 42 columns):
  40  terrain_coefficient    79486 non-null  float64            
  41  vertical_per_km        57094 non-null  float64            
 dtypes: Sparse[bool, False](37), float64(3), int64(2)
-memory usage: 4.5 MB
+memory usage: 5.2 MB
 
