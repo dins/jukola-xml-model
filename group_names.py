@@ -212,11 +212,16 @@ def _group_runs_to_runners():
 
 
 def _add_running_order(raw_runs_by_name):
-    logging.info(raw_runs_by_name['jesper svensk'])
     running_order = pd.read_csv(f"data/running_order_final_{shared.race_id_str()}.tsv", delimiter="\t")
     running_order["ro_orig_name"] = running_order["name"]
     # to lower case, trim spaces, remove double spaces
+
     running_order["name"] = running_order["name"].str.lower().str.strip().str.replace(' +', ' ')
+    running_order["name"] = running_order["name"].astype(str).apply(normalize_names.normalize_name, convert_dtype=False)
+    running_order.replace('', pd.NA, inplace=True)
+    running_order.replace('nan', pd.NA, inplace=True)
+    logging.info(f'Name missing in {sum(running_order.name.isna())} rows')
+    running_order = running_order.dropna(subset="name")
     shared.log_df(running_order)
     logging.info(f"running_order: {running_order.head(1).T}")
     logging.info(f"running_order: {running_order.info()}")
