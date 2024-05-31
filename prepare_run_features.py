@@ -141,7 +141,20 @@ def _predict_for_unknown_runners(features, unknown_or_known):
     return hgbr_sd_estimate
 
 
+#def _PYMC5_combine_estimates_with_running_order():
 def combine_estimates_with_running_order():
+    # running_order_with_history = _find_history_values_for_running_order_names()
+    running_order_with_history = _load_pymc_history_values_for_running_order_names()
+
+    running_order = running_order_with_history.rename(columns={"ro_orig_name": "name", "leg_dist": "dist"})
+
+    running_order.to_csv(f"data/running_order_with_estimates_{shared.race_id_str()}.tsv", sep="\t", index=False)
+
+    shared.log_df(running_order[['num_runs', "log_std", "log_mean"]].groupby('num_runs').agg(["mean"]).round(2))
+
+
+#def combine_estimates_with_running_order():
+def _OLD_combine_estimates_with_running_order():
     # running_order_with_history = _find_history_values_for_running_order_names()
     running_order_with_history = _load_history_values_for_running_order_names()
 
@@ -309,6 +322,46 @@ def _load_history_values_for_running_order_names():
     ]
     logging.info(
         f"running_order_with_history {len(running_order_with_history)} rows, columns: {running_order_with_history.columns}")
+
+    return running_order_with_history
+
+
+def _load_pymc_history_values_for_running_order_names():
+    # unique_name	num_runs	name	team_id	team	team_country	year	pace	emit	leg	median_pace	log_stdev
+    runs = pd.read_csv(f'data/long_runs_and_running_order_{shared.race_id_str()}.tsv', delimiter='\t')
+    # runs = runs.dropna(subset=['pace'])
+    # runs["log_pace"] = np.log(runs["pace"])
+    running_order = runs[runs['year'] == shared.forecast_year()]
+
+    results_dir = '~/koodi/Statistical-Rethinking/pymc5-stats-rethink/results/fulldata-jax-v4'
+    #results_dir = '~/koodi/Statistical-Rethinking/pymc5-stats-rethink/results/jax-dev'
+    path = f'{results_dir}/pymc5_v3_estimates_{shared.race_id_str()}.tsv'
+
+    history = pd.read_csv(path, delimiter='\t')
+    history.info()
+    history = history.drop(columns=['num_runs', 'median_pace'])
+
+    running_order_with_history = pd.merge(running_order, history, on='unique_name', how='left',
+                                          suffixes=['_ro', '_history']).reset_index()
+    running_order_with_history.info()
+    shared.log_df(running_order_with_history[['unique_name', 'num_runs', 'log_mean']])
+    # TODO team is currently, team_base_name
+    running_order_with_history = running_order_with_history[
+        ['team_id', 'team', 'team_country', 'leg', 'leg_dist',
+         'name', 'ro_orig_name',
+         'num_runs', 'log_mean', 'log_std']]
+    logging.info(
+        f"running_order_with_history {len(running_order_with_history)} rows, columns: {running_order_with_history.columns}")
+
+    # TODO HACK: just add the median for all unknown runners
+
+    fresh_runners = running_order_with_history['num_runs'] <= 2
+    log_pace_median = running_order_with_history[fresh_runners]['log_mean'].dropna().median()
+    running_order_with_history['log_mean'].fillna(log_pace_median, inplace=True)
+    log_pace_std_median = running_order_with_history[fresh_runners]['log_std'].dropna().median()
+    running_order_with_history['log_std'].fillna(log_pace_std_median, inplace=True)
+
+    running_order_with_history.info()
 
     return running_order_with_history
 

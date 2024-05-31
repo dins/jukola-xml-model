@@ -75,12 +75,14 @@ def _write_individual_runs_file(grouped_runs_by_unique_name):
     # Convert 'pace' column to numeric, coercing errors to NaN
     df['pace'] = pd.to_numeric(df['pace'], errors='coerce')
     df['year'] = df['year'].astype(int)
+    df = df.sort_values(by=['unique_name', 'year', 'leg', 'team_id'])
+    df['run_num'] = df.groupby('unique_name').cumcount() + 1
 
     # Add a temporary 'log_pace' column
     df['log_pace'] = np.log(df['pace'])
     #fy_year = shared.forecast_year()
 
-    grouped = df.groupby('unique_name').agg(
+    runner_stats_df = df.groupby('unique_name').agg(
         # TODO which one is better?
         median_pace=('pace', 'median'),
         median_log_pace=('log_pace', 'median'),
@@ -89,7 +91,7 @@ def _write_individual_runs_file(grouped_runs_by_unique_name):
         num_runs=('pace', 'count'),
     ).reset_index()
 
-    df = df.merge(grouped, on='unique_name')
+    df = df.merge(runner_stats_df, on='unique_name')
 
     # Drop the temporary 'log_pace' column
     df.drop(columns=['log_pace'], inplace=True)

@@ -13,11 +13,11 @@ echo $(date -u +"%F %T") "cluster_names ${RACE_TYPE} ${FORECAST_YEAR} DONE"
 time poetry run python estimate_personal_coefficients.py
 echo $(date -u +"%F %T") "personal_coefficients ${RACE_TYPE} ${FORECAST_YEAR} DONE"
 
-UNKNOWN_OR_KNOWN=unknown time poetry run jupyter nbconvert --to notebook --inplace --ExecutePreprocessor.timeout=600 --execute individual-estimates.ipynb
-echo $(date -u +"%F %T") "UNKNOWN individual-estimates.ipynb ${RACE_TYPE} ${FORECAST_YEAR} DONE"
+#UNKNOWN_OR_KNOWN=unknown time poetry run jupyter nbconvert --to notebook --inplace --ExecutePreprocessor.timeout=600 --execute individual-estimates.ipynb
+#echo $(date -u +"%F %T") "UNKNOWN individual-estimates.ipynb ${RACE_TYPE} ${FORECAST_YEAR} DONE"
+#UNKNOWN_OR_KNOWN=known time poetry run jupyter nbconvert --to notebook --inplace --ExecutePreprocessor.timeout=600 --execute individual-estimates.ipynb
+#echo $(date -u +"%F %T") "KNOWN individual-estimates.ipynb ${RACE_TYPE} ${FORECAST_YEAR} DONE"
 
-UNKNOWN_OR_KNOWN=known time poetry run jupyter nbconvert --to notebook --inplace --ExecutePreprocessor.timeout=600 --execute individual-estimates.ipynb
-echo $(date -u +"%F %T") "KNOWN individual-estimates.ipynb ${RACE_TYPE} ${FORECAST_YEAR} DONE"
 
 time poetry run python prepare_run_features.py
 echo $(date -u +"%F %T") "prepare_run_features.py ${RACE_TYPE} ${FORECAST_YEAR} DONE"
