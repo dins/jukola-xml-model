@@ -141,19 +141,22 @@ def _predict_for_unknown_runners(features, unknown_or_known):
     return hgbr_sd_estimate
 
 
-#def _PYMC5_combine_estimates_with_running_order():
+# def _PYMC5_combine_estimates_with_running_order():
 def combine_estimates_with_running_order():
     # running_order_with_history = _find_history_values_for_running_order_names()
-    running_order_with_history = _load_pymc_history_values_for_running_order_names()
+    running_order_with_estimates = _load_pymc_history_values_for_running_order_names()
 
-    running_order = running_order_with_history.rename(columns={"ro_orig_name": "name", "leg_dist": "dist"})
-
-    running_order.to_csv(f"data/running_order_with_estimates_{shared.race_id_str()}.tsv", sep="\t", index=False)
-
-    shared.log_df(running_order[['num_runs', "log_std", "log_mean"]].groupby('num_runs').agg(["mean"]).round(2))
+    estimates = running_order_with_estimates.rename(columns={"ro_orig_name": "name", "leg_dist": "dist"})
 
 
-#def combine_estimates_with_running_order():
+    path = f"data/running_order_with_estimates_{shared.race_id_str()}.tsv"
+    estimates.to_csv(path, sep="\t", index=False)
+    logging.info(f'Wrote: {path}')
+
+    shared.log_df(estimates[['num_runs', "log_std", "log_mean"]].groupby('num_runs').agg(["mean"]).round(2))
+
+
+# def combine_estimates_with_running_order():
 def _OLD_combine_estimates_with_running_order():
     # running_order_with_history = _find_history_values_for_running_order_names()
     running_order_with_history = _load_history_values_for_running_order_names()
@@ -334,36 +337,47 @@ def _load_pymc_history_values_for_running_order_names():
     running_order = runs[runs['year'] == shared.forecast_year()]
 
     results_dir = '~/koodi/Statistical-Rethinking/pymc5-stats-rethink/results/fulldata-jax-v4'
-    #results_dir = '~/koodi/Statistical-Rethinking/pymc5-stats-rethink/results/jax-dev'
+    # results_dir = '~/koodi/Statistical-Rethinking/pymc5-stats-rethink/results/jax-dev'
     path = f'{results_dir}/pymc5_v3_estimates_{shared.race_id_str()}.tsv'
 
-    history = pd.read_csv(path, delimiter='\t')
-    history.info()
-    history = history.drop(columns=['num_runs', 'median_pace'])
+    history_estimates = pd.read_csv(path, delimiter='\t')
+    history_estimates.info()
+    history_estimates = history_estimates.drop(columns=['num_runs', 'median_pace'])
 
-    running_order_with_history = pd.merge(running_order, history, on='unique_name', how='left',
-                                          suffixes=['_ro', '_history']).reset_index()
-    running_order_with_history.info()
-    shared.log_df(running_order_with_history[['unique_name', 'num_runs', 'log_mean']])
+    missing_estimate_0 = history_estimates[history_estimates['log_mean'].isna()]
+    logging.info(f'Found {len(missing_estimate_0)} runners without history estimate:\n{missing_estimate_0.to_string(index=False)}')
+    assert len(missing_estimate_0) == 0, "All should have estiamte pace"
+
+    running_order_with_estimates = pd.merge(running_order, history_estimates, on='unique_name', how='left',
+                                            suffixes=['_ro', '_history']).reset_index()
+
+    shared.log_df(running_order_with_estimates[['unique_name', 'num_runs', 'log_mean']])
+
+    debug_df = running_order_with_estimates[running_order_with_estimates['unique_name'].str.contains('jonna virtanen')]
+    shared.log_df(debug_df[['unique_name', 'num_runs', 'log_mean', 'log_std']])
+
     # TODO team is currently, team_base_name
-    running_order_with_history = running_order_with_history[
-        ['team_id', 'team', 'team_country', 'leg', 'leg_dist',
-         'name', 'ro_orig_name',
-         'num_runs', 'log_mean', 'log_std']]
+    running_order_with_estimates = running_order_with_estimates[[
+        'team_id', 'team', 'team_country', 'leg', 'leg_dist', 'unique_name', 'ro_orig_name',
+        'num_runs', 'log_mean', 'log_std',
+        'personal_start_95', 'personal_end_95', 'pace_samples',
+    ]]
     logging.info(
-        f"running_order_with_history {len(running_order_with_history)} rows, columns: {running_order_with_history.columns}")
+        f"running_order_with_estimates {len(running_order_with_estimates)} rows, columns: {running_order_with_estimates.columns}")
+
+    missing_estimate = running_order_with_estimates[running_order_with_estimates['log_mean'].isna()]
+    logging.info(f'Found {len(missing_estimate)} runners without estimate:\n{missing_estimate.to_string(index=False)}')
 
     # TODO HACK: just add the median for all unknown runners
+    fresh_runners = running_order_with_estimates['num_runs'] <= 2
+    log_pace_median = running_order_with_estimates[fresh_runners]['log_mean'].dropna().median()
+    running_order_with_estimates['log_mean'] = running_order_with_estimates['log_mean'].fillna(log_pace_median)
+    log_pace_std_median = running_order_with_estimates[fresh_runners]['log_std'].dropna().median()
+    running_order_with_estimates['log_std'] = running_order_with_estimates['log_std'].fillna(log_pace_std_median)
 
-    fresh_runners = running_order_with_history['num_runs'] <= 2
-    log_pace_median = running_order_with_history[fresh_runners]['log_mean'].dropna().median()
-    running_order_with_history['log_mean'].fillna(log_pace_median, inplace=True)
-    log_pace_std_median = running_order_with_history[fresh_runners]['log_std'].dropna().median()
-    running_order_with_history['log_std'].fillna(log_pace_std_median, inplace=True)
+    running_order_with_estimates.info()
 
-    running_order_with_history.info()
-
-    return running_order_with_history
+    return running_order_with_estimates
 
 
 if __name__ == '__main__':

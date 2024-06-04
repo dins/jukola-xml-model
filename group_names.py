@@ -149,7 +149,7 @@ def _group_raw_runs_to_runners(raw_runs_by_name):
                 by_team_set[key_set].append(run)
             for team_set, runs_in_teams in by_team_set.items():
                 # logging.info(f"{name=}, {team_set=}, {runs_in_teams=}")
-                team_names = ';'.join(team_set)
+                team_names = ';'.join(sorted(team_set))
                 unique_name = f"{name}:{team_names}"
                 by_unique_name[unique_name] = runs_in_teams
                 logging.info(f"{unique_name} SPLIT\n{pd.DataFrame.from_dict(runs_in_teams)}")
