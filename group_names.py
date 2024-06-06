@@ -115,9 +115,61 @@ def _write_individual_runs_file(grouped_runs_by_unique_name):
     df = pd.merge(df, ideals, how="left", on=["year", "leg"]).reset_index()
     df.info()
 
+    # FIRST NAME STATS
+    df = _first_name_stats(df)
+
     output_file_path = f'data/long_runs_and_running_order_{shared.race_id_str()}.tsv'
     df.to_csv(output_file_path, sep='\t', index=False)
     logging.info(f'Wrote: {output_file_path}')
+
+
+def _first_name_stats(df):
+    # df = runs[['unique_name', 'pace', 'year', 'leg']].copy()
+    df['first_name'] = df['unique_name'].str.split().str[0]
+    # logging.info(df.head(50).to_string(index=False) )
+    leg_medians_df = df.dropna(subset=['pace']).groupby(['year', 'leg']).agg(
+        # leg_num_valid_runs=('pace', 'count'),
+        leg_median_pace=('pace', 'median'),
+    ).reset_index()
+    #logging.info(leg_medians_df.head(20).to_string(index=False))
+    df = pd.merge(df, leg_medians_df, how="left", on=['year', 'leg'])
+    df['scaled_pace'] = df['pace'] / df['leg_median_pace']
+    #logging.info(df.head(5).to_string(index=False))
+
+    # Count the last years
+    fn_counts_df = df[df['year'] >= 2014].groupby('first_name').agg(
+        fn_nunique_runners=('unique_name', 'nunique'),
+    ).sort_values('fn_nunique_runners').reset_index()
+    logging.info(fn_counts_df)
+
+    #fn_counts_df = fn_counts_df[fn_counts_df['fn_nunique_runners'] >= 5]
+    df = pd.merge(df, fn_counts_df, how="left", on=['first_name'])
+    df['fn_nunique_runners'] = df['fn_nunique_runners'].fillna(-1)
+    unqualified_first_name_mask = df['fn_nunique_runners'] < 5
+    df.loc[unqualified_first_name_mask, 'first_name'] = 'OTHER'
+
+    logging.info(f'{np.mean(unqualified_first_name_mask)=}')
+
+    # Count fn stats only for the last years
+    fn_stats_df = df[df['year'] >= 2014].groupby('first_name').agg(
+        fn_median_scaled_pace=('scaled_pace', 'median'),
+        fn_stats_runners=('unique_name', 'nunique'),
+    ).sort_values('fn_median_scaled_pace').reset_index()
+    logging.info(fn_stats_df)
+
+    df = pd.merge(df, fn_stats_df, how="left", on=['first_name'])
+    logging.info(df)
+
+    default_scaled_pace = fn_stats_df[fn_stats_df['first_name'] == 'OTHER'].head(1)['fn_median_scaled_pace'].item()
+    logging.info(f'{default_scaled_pace=}')
+    df['fn_scaled_pace'] = df['fn_median_scaled_pace'].fillna(default_scaled_pace)
+
+    logging.info(df[['unique_name', 'first_name', 'pace', 'fn_scaled_pace', 'fn_median_scaled_pace']])
+
+    df.info()
+    df = df.drop(columns=['first_name', 'fn_median_scaled_pace', 'leg_median_pace', 'scaled_pace', 'fn_nunique_runners'])
+    df.info()
+    return df
 
 
 def _group_raw_runs_to_runners(raw_runs_by_name):

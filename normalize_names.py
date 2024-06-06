@@ -28,19 +28,9 @@ def correct_hyphen_spacing_in_names(name):
     corrected_name = re.sub(r'\s+', ' ', corrected_name)
     return corrected_name
 
+
 def normalize_name(orig_name):
-    name = orig_name.strip()
-    name = correct_hyphen_spacing_in_names(name)
-
-    if "  " in name:
-        logging.info(f"Trimming DOUBLE or multiple spaces '{orig_name}'")
-        name = ' '.join(name.split())
-
-    if "|" in name:
-        logging.info(f"Trimming pipes '{orig_name}'")
-        name = name.replace("|", "")
-
-
+    name = cleanup_name(orig_name)
 
     splits = name.split()
     if len(splits) <= 1:
@@ -56,6 +46,18 @@ def normalize_name(orig_name):
             logging.info(f"swithced name '{orig_name}' TO '{swithced_name}'")
             return swithced_name
 
+    return name
+
+
+def cleanup_name(orig_name):
+    name = orig_name.strip()
+    name = correct_hyphen_spacing_in_names(name)
+    if "  " in name:
+        logging.info(f"Trimming DOUBLE or multiple spaces '{orig_name}'")
+        name = ' '.join(name.split())
+    if "|" in name:
+        logging.info(f"Trimming pipes '{orig_name}'")
+        name = name.replace("|", "")
     return name
 
 

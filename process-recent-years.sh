@@ -6,6 +6,9 @@ set -euf -o pipefail
 RUN_TS=$(date -u '+%Y%m%d_%H%M%S')
 SECONDS=0
 
+time poetry run python count_names.py
+echo $(date -u +"%F %T") "count_names.py DONE"
+
 function process_one_race {
   LOG_PATH="logs/parallel-${RACE_TYPE}-${FORECAST_YEAR}-${RUN_TS}.log"
   start_secs=$SECONDS

@@ -2,10 +2,14 @@ import csv
 import logging
 
 import pandas as pd
+
+import normalize_names
 import shared
+
 # time poetry run python count_names.py
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s')
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s')
 
 
 def _append_names(year, ve_or_ju, all_names):
@@ -28,7 +32,7 @@ def analyze_names():
         _append_names(year, "ve", all_names)
         _append_names(year, "ju", all_names)
 
-    all_names
+    all_names = [normalize_names.cleanup_name(name) for name in all_names]
     runs = pd.DataFrame(all_names, columns=["name"])
 
     runs = runs[runs.name.str.count(" ") >= 1]
