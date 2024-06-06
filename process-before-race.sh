@@ -16,22 +16,22 @@ function process_one_race {
   echo $(date -u +"%F %T") "DONE ${LOG_PATH} in $duration secs"
 }
 
-RO_LOG_PATH="logs/running-order-${FORECAST_YEAR}-${RUN_TS}.log"
-poetry run python fetch_running_order.py 2024  &> ${RO_LOG_PATH}
-tail -n 10 ${RO_LOG_PATH}
+#RO_LOG_PATH="logs/running-order-${FORECAST_YEAR}-${RUN_TS}.log"
+#poetry run python fetch_running_order.py 2024  &> ${RO_LOG_PATH}
+#tail -n 10 ${RO_LOG_PATH}
 
-ORO_LOG_PATH="logs/running-order-online-${FORECAST_YEAR}-${RUN_TS}.log"
-echo $(date -u +"%F %T") "Starting ${ORO_LOG_PATH}"
-poetry run python process_online_running_order.py 2024  &> ${ORO_LOG_PATH}
-tail -n 10 ${ORO_LOG_PATH}
+#ORO_LOG_PATH="logs/running-order-online-${FORECAST_YEAR}-${RUN_TS}.log"
+#echo $(date -u +"%F %T") "Starting ${ORO_LOG_PATH}"
+#poetry run python process_online_running_order.py 2024  &> ${ORO_LOG_PATH}
+#tail -n 10 ${ORO_LOG_PATH}
 
-cp "data/online_running_order_ve_fy_${FORECAST_YEAR}.tsv" "data/running_order_final_ve_fy_${FORECAST_YEAR}.tsv"
-cp "data/online_running_order_ju_fy_${FORECAST_YEAR}.tsv" "data/running_order_final_ju_fy_${FORECAST_YEAR}.tsv"
-cp "data/online_team_countries_j${FORECAST_YEAR}_ve.tsv" "data/team_countries_j${FORECAST_YEAR}_ve.tsv"
-cp "data/online_team_countries_j${FORECAST_YEAR}_ju.tsv" "data/team_countries_j${FORECAST_YEAR}_ju.tsv"
+#cp "data/online_running_order_ve_fy_${FORECAST_YEAR}.tsv" "data/running_order_final_ve_fy_${FORECAST_YEAR}.tsv"
+#cp "data/online_running_order_ju_fy_${FORECAST_YEAR}.tsv" "data/running_order_final_ju_fy_${FORECAST_YEAR}.tsv"
+#cp "data/online_team_countries_j${FORECAST_YEAR}_ve.tsv" "data/team_countries_j${FORECAST_YEAR}_ve.tsv"
+#cp "data/online_team_countries_j${FORECAST_YEAR}_ju.tsv" "data/team_countries_j${FORECAST_YEAR}_ju.tsv"
 
 wc data/running_order_final_ju_fy_${FORECAST_YEAR}.tsv
-echo $(date -u +"%F %T") "DONE ${RO_LOG_PATH} in $SECONDS secs"
+#echo $(date -u +"%F %T") "DONE ${RO_LOG_PATH} in $SECONDS secs"
 
 
 BEFORE_RACE="true" RACE_TYPE=ve process_one_race &

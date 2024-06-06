@@ -145,7 +145,8 @@ start_timestamp = {
         2019: pd.Timestamp(year=2019, month=6, day=15, hour=14, tz="Europe/Helsinki"),
         2021: pd.Timestamp(year=2021, month=8, day=21, hour=13, minute=45, tz="Europe/Helsinki"),
         2022: pd.Timestamp(year=2022, month=6, day=18, hour=14, tz="Europe/Helsinki"),
-        2023: pd.Timestamp(year=2023, month=6, day=17, hour=14, tz="Europe/Helsinki")
+        2023: pd.Timestamp(year=2023, month=6, day=17, hour=14, tz="Europe/Helsinki"),
+        2024: pd.Timestamp(year=2024, month=6, day=15, hour=14, tz="Europe/Helsinki"),
     },
     "ju": {
         2017: pd.Timestamp(year=2017, month=6, day=17, hour=23, tz="Europe/Helsinki"),
@@ -153,7 +154,8 @@ start_timestamp = {
         2019: pd.Timestamp(year=2019, month=6, day=15, hour=23, tz="Europe/Helsinki"),
         2021: pd.Timestamp(year=2021, month=8, day=21, hour=23, tz="Europe/Helsinki"),
         2022: pd.Timestamp(year=2022, month=6, day=18, hour=23, tz="Europe/Helsinki"),
-        2023: pd.Timestamp(year=2023, month=6, day=17, hour=23, tz="Europe/Helsinki")
+        2023: pd.Timestamp(year=2023, month=6, day=17, hour=23, tz="Europe/Helsinki"),
+        2024: pd.Timestamp(year=2024, month=6, day=15, hour=23, tz="Europe/Helsinki"),
     }
 }
 
@@ -164,7 +166,8 @@ changeover_closing = {
         2019: pd.Timestamp(year=2019, month=6, day=15, hour=18, minute=30, tz="Europe/Helsinki"),
         2021: pd.Timestamp(year=2021, month=8, day=21, hour=18, minute=15, tz="Europe/Helsinki"),
         2022: pd.Timestamp(year=2022, month=6, day=18, hour=18, minute=30, tz="Europe/Helsinki"),
-        2023: pd.Timestamp(year=2023, month=6, day=17, hour=18, minute=30, tz="Europe/Helsinki")
+        2023: pd.Timestamp(year=2023, month=6, day=17, hour=18, minute=30, tz="Europe/Helsinki"),
+        2024: pd.Timestamp(year=2024, month=6, day=15, hour=18, minute=30, tz="Europe/Helsinki"),
     },
     "ju": {
         2017: pd.Timestamp(year=2017, month=6, day=18, hour=8, minute=45, tz="Europe/Helsinki"),
@@ -172,7 +175,8 @@ changeover_closing = {
         2019: pd.Timestamp(year=2019, month=6, day=16, hour=8, minute=45, tz="Europe/Helsinki"),
         2021: pd.Timestamp(year=2021, month=8, day=22, hour=8, minute=45, tz="Europe/Helsinki"),
         2022: pd.Timestamp(year=2022, month=6, day=19, hour=8, minute=45, tz="Europe/Helsinki"),
-        2023: pd.Timestamp(year=2023, month=6, day=18, hour=8, minute=45, tz="Europe/Helsinki")
+        2023: pd.Timestamp(year=2023, month=6, day=18, hour=8, minute=45, tz="Europe/Helsinki"),
+        2024: pd.Timestamp(year=2024, month=6, day=16, hour=8, minute=45, tz="Europe/Helsinki"),
     }
 }
 
@@ -200,7 +204,11 @@ dark_period = {
     2023: {
         "start": pd.Timestamp(year=2023, month=6, day=17, hour=22, minute=48, tz="Europe/Helsinki"),
         "end": pd.Timestamp(year=2023, month=6, day=18, hour=3, minute=48, tz="Europe/Helsinki")
-    }
+    },
+    2024: {
+        "start": pd.Timestamp(year=2024, month=6, day=15, hour=23, minute=58, tz="Europe/Helsinki"),
+        "end": pd.Timestamp(year=2024, month=6, day=16, hour=3, minute=19, tz="Europe/Helsinki")
+    },
 }
 
 num_legs = {
