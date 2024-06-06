@@ -622,7 +622,7 @@
         resultsQueryParamsStr += "&timeTravelRaceTime=" + timeTravelRaceTime
     }
 
-    const currentMonth = new Date().getMonth();
+    const currentMonth = new Date().getMonth() + 1;
     var selectedYear = new Date().getFullYear()
     if (currentMonth <= 5) {
         // Use previous year before June
