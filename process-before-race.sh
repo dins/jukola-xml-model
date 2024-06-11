@@ -29,6 +29,8 @@ echo $(date -u +"%F %T") "group_names ju ${FORECAST_YEAR} DONE"
 
 # cannot do more before running Pymc models
 
+tail -n 10 ${RO_LOG_PATH}
+
 echo "DONE ${RUN_TS} in $SECONDS secs"
 
 # time poetry run python json_reports.py
