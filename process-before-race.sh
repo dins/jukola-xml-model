@@ -6,38 +6,28 @@ set -euf -o pipefail
 RUN_TS="br-$(date -u '+%Y%m%d_%H%M%S')"
 SECONDS=0
 
-echo $(date -u +"%F %T") "Starting BEFORE_RACE ${RUN_TS}"
 
-function process_one_race {
-  LOG_PATH="logs/parallel-${RACE_TYPE}-${FORECAST_YEAR}-${RUN_TS}.log"
-  echo $(date -u +"%F %T") "Starting ${LOG_PATH}"
-  RUN_TS=${RUN_TS} ./process-one-race.sh &> ${LOG_PATH} || echo $(date -u +"%F %T") "FAILED ${LOG_PATH}"
-  duration=$SECONDS
-  echo $(date -u +"%F %T") "DONE ${LOG_PATH} in $duration secs"
-}
 
-#RO_LOG_PATH="logs/running-order-${FORECAST_YEAR}-${RUN_TS}.log"
-#poetry run python fetch_running_order.py 2024  &> ${RO_LOG_PATH}
-#tail -n 10 ${RO_LOG_PATH}
+RO_LOG_PATH="logs/running-order-${FORECAST_YEAR}-${RUN_TS}.log"
+echo $(date -u +"%F %T") "Starting BEFORE_RACE ${RUN_TS}, logs: ${RO_LOG_PATH}"
+
+poetry run python fetch_running_order.py 2024  &> ${RO_LOG_PATH}
+tail -n 10 ${RO_LOG_PATH}
 
 #ORO_LOG_PATH="logs/running-order-online-${FORECAST_YEAR}-${RUN_TS}.log"
 #echo $(date -u +"%F %T") "Starting ${ORO_LOG_PATH}"
 #poetry run python process_online_running_order.py 2024  &> ${ORO_LOG_PATH}
 #tail -n 10 ${ORO_LOG_PATH}
 
-#cp "data/online_running_order_ve_fy_${FORECAST_YEAR}.tsv" "data/running_order_final_ve_fy_${FORECAST_YEAR}.tsv"
-#cp "data/online_running_order_ju_fy_${FORECAST_YEAR}.tsv" "data/running_order_final_ju_fy_${FORECAST_YEAR}.tsv"
-#cp "data/online_team_countries_j${FORECAST_YEAR}_ve.tsv" "data/team_countries_j${FORECAST_YEAR}_ve.tsv"
-#cp "data/online_team_countries_j${FORECAST_YEAR}_ju.tsv" "data/team_countries_j${FORECAST_YEAR}_ju.tsv"
-
 wc data/running_order_final_ju_fy_${FORECAST_YEAR}.tsv
-#echo $(date -u +"%F %T") "DONE ${RO_LOG_PATH} in $SECONDS secs"
 
+time RACE_TYPE=ve poetry run python group_names.py
+echo $(date -u +"%F %T") "group_names ve ${FORECAST_YEAR} DONE"
 
-BEFORE_RACE="true" RACE_TYPE=ve process_one_race &
-BEFORE_RACE="true" RACE_TYPE=ju process_one_race &
+time RACE_TYPE=ju poetry run python group_names.py
+echo $(date -u +"%F %T") "group_names ju ${FORECAST_YEAR} DONE"
 
-wait
+# cannot do more before running Pymc models
 
 echo "DONE ${RUN_TS} in $SECONDS secs"
 
