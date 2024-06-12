@@ -395,16 +395,16 @@
             if (!runner.nextControlEstimates || runner.nextControlEstimates.length === 0) {
                 return ""
             }
-            runner.nextControlEstimates[0].first = true;
 
             let timesHtml = runner.nextControlEstimates.map(function (nextControl) {
                 let lateClass = ""
                 let delayMinsText = ""
                 let controlEstimateTime = timestampToDate(nextControl.timestampMedian)
 
-                if (nextControl.first && runner.runnerIsLateFromNextControl) {
+                if (nextControl.isFirst && runner.runnerIsLateFromNextControl) {
                     lateClass = "runnerIsLate"
-                    controlEstimateTime = new Date(controlEstimateTime.getTime() - runner.runnerIsLateMillis)
+                    // TODO  remove - runner.runnerIsLateMillis
+                    //controlEstimateTime = new Date(controlEstimateTime.getTime() - runner.runnerIsLateMillis)
                     let delayMins = Math.round(runner.runnerIsLateMillis / 1000 / 60)
                     delayMinsText = " (+" + delayMins + "min)"
                 }
