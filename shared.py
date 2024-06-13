@@ -94,6 +94,7 @@ distances = {
         2022: [7.5, 8.0, 6.1, 8.7],
         2023: [6.7, 5.3, 6.6, 7.7],
         2024: [8.0, 7.9, 6.8, 9.0],
+        2099: [1.9, 1.9, 1.9, 1.9],
     },
     "ju": {
         1992: [12.2, 12.7, 14.4, 8.4, 8.3, 10.4, 13.7],
@@ -147,6 +148,7 @@ start_timestamp = {
         2022: pd.Timestamp(year=2022, month=6, day=18, hour=14, tz="Europe/Helsinki"),
         2023: pd.Timestamp(year=2023, month=6, day=17, hour=14, tz="Europe/Helsinki"),
         2024: pd.Timestamp(year=2024, month=6, day=15, hour=14, tz="Europe/Helsinki"),
+        2099: pd.Timestamp(year=2024, month=6, day=12, hour=17, minute=30, tz="Europe/Helsinki"),
     },
     "ju": {
         2017: pd.Timestamp(year=2017, month=6, day=17, hour=23, tz="Europe/Helsinki"),
@@ -168,6 +170,7 @@ changeover_closing = {
         2022: pd.Timestamp(year=2022, month=6, day=18, hour=18, minute=30, tz="Europe/Helsinki"),
         2023: pd.Timestamp(year=2023, month=6, day=17, hour=18, minute=30, tz="Europe/Helsinki"),
         2024: pd.Timestamp(year=2024, month=6, day=15, hour=18, minute=30, tz="Europe/Helsinki"),
+        2099: pd.Timestamp(year=2024, month=6, day=12, hour=18, minute=00, tz="Europe/Helsinki"), # Some code was using this
     },
     "ju": {
         2017: pd.Timestamp(year=2017, month=6, day=18, hour=8, minute=45, tz="Europe/Helsinki"),
@@ -208,6 +211,10 @@ dark_period = {
     2024: {
         "start": pd.Timestamp(year=2024, month=6, day=15, hour=23, minute=58, tz="Europe/Helsinki"),
         "end": pd.Timestamp(year=2024, month=6, day=16, hour=3, minute=19, tz="Europe/Helsinki")
+    },
+    2099: {
+        "start": pd.Timestamp(year=2024, month=6, day=12, hour=23, minute=58, tz="Europe/Helsinki"),
+        "end": pd.Timestamp(year=2024, month=6, day=13, hour=3, minute=19, tz="Europe/Helsinki")
     },
 }
 

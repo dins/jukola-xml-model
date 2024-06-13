@@ -65,7 +65,7 @@ def fetch_running_order(year, ve_or_ju):
     logging.info(f"{len(runners)=}")
     logging.info(f"{runners[0]=}")
     raw_df = pd.json_normalize(runners)
-    #logging.info(f"{raw_df.info()=}")
+    # logging.info(f"{raw_df.info()=}")
     logging.info(f"{raw_df.head()=}")
 
     out_file_name = f"data/online_running_order_{ve_or_ju}_fy_{year}.tsv"
@@ -92,7 +92,9 @@ if __name__ == "__main__":
     year = int(sys.argv[1])
 
     ve_file = fetch_running_order(year, "ve")
-    ju_file = fetch_running_order(year, "ju")
+    if year != 2099:
+        ju_file = fetch_running_order(year, "ju")
 
     _summarize(ve_file)
-    _summarize(ju_file)
+    if year != 2099:
+        _summarize(ju_file)

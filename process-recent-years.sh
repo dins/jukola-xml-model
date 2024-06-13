@@ -37,10 +37,10 @@ sleep 2
 RACE_TYPE=ju FORECAST_YEAR=2017 process_one_race &
 RACE_TYPE=ve FORECAST_YEAR=2017 process_one_race &
 
-wait
+BEFORE_RACE="true" RACE_TYPE=ve FORECAST_YEAR=2024 process_one_race &
+BEFORE_RACE="true" RACE_TYPE=ju FORECAST_YEAR=2024 process_one_race &
 
-BEFORE_RACE="true" RACE_TYPE=ve FORECAST_YEAR=2024 process_one_race
-BEFORE_RACE="true" RACE_TYPE=ju FORECAST_YEAR=2024 process_one_race
+wait
 
 echo "DONE ${RUN_TS}"
 
