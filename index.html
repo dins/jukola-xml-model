@@ -403,8 +403,6 @@
 
                 if (nextControl.isFirst && runner.runnerIsLateFromNextControl) {
                     lateClass = "runnerIsLate"
-                    // TODO  remove - runner.runnerIsLateMillis
-                    //controlEstimateTime = new Date(controlEstimateTime.getTime() - runner.runnerIsLateMillis)
                     let delayMins = Math.round(runner.runnerIsLateMillis / 1000 / 60)
                     delayMinsText = " (+" + delayMins + "min)"
                 }
