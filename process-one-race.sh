@@ -8,16 +8,6 @@ set -ef -o pipefail
 echo $(date -u +"%F %T") "RACE_TYPE: ${RACE_TYPE}, FORECAST_YEAR: ${FORECAST_YEAR}, RUN_TS: ${RUN_TS}"
 time poetry run python group_names.py
 echo $(date -u +"%F %T") "group_names ${RACE_TYPE} ${FORECAST_YEAR} DONE"
-time poetry run python cluster_names.py
-echo $(date -u +"%F %T") "cluster_names ${RACE_TYPE} ${FORECAST_YEAR} DONE"
-time poetry run python estimate_personal_coefficients.py
-echo $(date -u +"%F %T") "personal_coefficients ${RACE_TYPE} ${FORECAST_YEAR} DONE"
-
-#UNKNOWN_OR_KNOWN=unknown time poetry run jupyter nbconvert --to notebook --inplace --ExecutePreprocessor.timeout=600 --execute individual-estimates.ipynb
-#echo $(date -u +"%F %T") "UNKNOWN individual-estimates.ipynb ${RACE_TYPE} ${FORECAST_YEAR} DONE"
-#UNKNOWN_OR_KNOWN=known time poetry run jupyter nbconvert --to notebook --inplace --ExecutePreprocessor.timeout=600 --execute individual-estimates.ipynb
-#echo $(date -u +"%F %T") "KNOWN individual-estimates.ipynb ${RACE_TYPE} ${FORECAST_YEAR} DONE"
-
 
 time poetry run python prepare_run_features.py
 echo $(date -u +"%F %T") "prepare_run_features.py ${RACE_TYPE} ${FORECAST_YEAR} DONE"
@@ -28,10 +18,9 @@ echo $(date -u +"%F %T") "prepare_run_features.py ${RACE_TYPE} ${FORECAST_YEAR} 
 time poetry run jupyter nbconvert --to notebook --inplace --ExecutePreprocessor.timeout=1200 --execute relay-simulation-2024.ipynb
 echo $(date -u +"%F %T") "relay-simulation-2024.ipynb ${RACE_TYPE} ${FORECAST_YEAR} DONE"
 
-if [[ -z "${BEFORE_RACE}"  ]]; then
+if [[ -z "${BEFORE_RACE}" ]]; then
   time poetry run jupyter nbconvert --to notebook --inplace --execute post-race-analysis.ipynb
   echo $(date -u +"%F %T") "post-race-analysis ${RACE_TYPE} ${FORECAST_YEAR} DONE"
 else
   echo $(date -u +"%F %T") "SKIPPING post-race-analysis ${RACE_TYPE} ${FORECAST_YEAR}"
 fi
-

@@ -47,26 +47,19 @@ nice poetry run jupyter notebook
 
 
 ## TODO
-
+* limit extremes?
+* team is currently, team_base_name
 * Speedup processing:
-  * preprocess name joins (mapping history to a competitor)
   * Vectorize simulation
-  * reduce categorial variables?
-* Check the difference on estimates when num_years is 3 and 4 
 * Move code from notebooks to .py files for better version control
-* Try regularization
 * replace & with &amp; in xml files, but not &amp; with &&amp;
 * Post analyze darkness and mass start estimates
-* Weighted means and stds
-* k-fold validation
 * Race and terrain specific things:
   * Estimate Jukola paces from Venla paces
-  * Real time estimates for intermediaries
-  * Data from year 2010 made predictions worse. Solve it by some kind of year/leg speed factor?
   * Match Venla names in Jukola
 * Data clean ups:
   * Add runners from disqualified teams
   * Match people with emit number, for example those that changed lastname at some point.
 * Document that we no longer use lognormal. It's now log Student T. 
-* Use country specific continuous variables instead of classes. country_median for example. 
+* Use country_median
     
