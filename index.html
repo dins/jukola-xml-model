@@ -328,7 +328,7 @@
         const onlineMassStart = runner.inMassStart
         const staticMassStart = runner.mass_start
 
-        const massStartProbability = onlineMassStart || staticMassStart
+        const massStartProbability = onlineMassStart !== undefined ? onlineMassStart : staticMassStart;
         if (massStartProbability > 0.5) {
             massStartClass = " mass-start-runner "
         }
