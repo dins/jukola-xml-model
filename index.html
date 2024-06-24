@@ -336,7 +336,6 @@
             massStartClass = " mass-start-runner "
         }
 
-
         let personal_duration = Math.exp(runner.ind_log_mean) * runner.legDistance;
         var fin_time_median = timestampToDate(runner.fin_time_median)
         var fin_time_start95 = timestampToDate(runner.fin_time_start95)
@@ -415,11 +414,8 @@
             return "<span class='nextControl'><div>Ennustetut väliajat:</div>" + timesHtml + "</span>"
         }
 
-        // TODO fix online simulation, now its too far from static values to show
-        let onlineMassStartHtml = ""
-        // if (onlineMassStart) {
-        //    onlineMassStartHtml = "<div class='online'>" + formatPercent(onlineMassStart) + "</div>"
-        //}
+        const onlineDarkDuringLeg = runner.onlineDarkDuringLeg
+        const staticDarkDuringLeg = runner.dark_during_leg
 
         $("#estimate-summary tbody").append(
             "<tr class='" + rowClass + currentRunnerClass + massStartClass + "'>" +
@@ -448,9 +444,10 @@
             + "</td><td class=estimate>"
             + "<div class='static'>" + formatPercent(staticMassStart) + "</div>"
             + "<div class='online'>" + formatPercent(onlineMassStart) + "</div>"
-            + onlineMassStartHtml
-            + "</td><td class=estimate>" + formatPercent(runner.darkDuringLeg || runner.dark_during_leg)
-            + "</td></tr>")
+            + "</td><td class=estimate>"
+            + "<div class='static'>" + formatPercent(staticDarkDuringLeg) + "</div>"
+            + "<div class='online'>" + formatPercent(onlineDarkDuringLeg) + "</div>"
+           + "</td></tr>")
     }
 
     function showTeam(teamId, teamRunners, ve_or_ju, selectedYear) {
