@@ -311,6 +311,9 @@
     }
 
     function formatPercent(floatPropability) {
+        if (floatPropability === null || floatPropability === undefined) {
+            return '';
+        }
         return (floatPropability * 100).toFixed(0) + '%'
     }
 
@@ -442,7 +445,9 @@
             + "<td class=finish-time>"
             + "<div class='online finishTime relay'>" + finishTime + "</div>"
             + "<div class='online finishTime duration'>" + finishLegDuration + "</div>"
-            + "</td><td class=estimate><div class=''>" + formatPercent(massStartProbability) + "</div>"
+            + "</td><td class=estimate>"
+            + "<div class='static'>" + formatPercent(staticMassStart) + "</div>"
+            + "<div class='online'>" + formatPercent(onlineMassStart) + "</div>"
             + onlineMassStartHtml
             + "</td><td class=estimate>" + formatPercent(runner.darkDuringLeg || runner.dark_during_leg)
             + "</td></tr>")
