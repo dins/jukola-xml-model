@@ -109,6 +109,12 @@
             color: grey;
         }
 
+        #estimate-summary .disqualified .online {
+            color: maroon;
+            font-weight: normal;
+            text-decoration: line-through;
+        }
+
         #estimate-summary .online {
             color: forestgreen;
         }
@@ -394,7 +400,7 @@
         }
 
         function nextControlsHtml(runner) {
-            if (!runner.nextControlEstimates || runner.nextControlEstimates.length === 0) {
+            if (!runner.nextControlEstimates || runner.nextControlEstimates.length === 0 || !runner.okStatus) {
                 return ""
             }
 
@@ -417,6 +423,18 @@
         const onlineDarkDuringLeg = runner.onlineDarkDuringLeg
         const staticDarkDuringLeg = runner.dark_during_leg
 
+        var disqualifiedClass = ""
+        var disqualifiedStatus = ""
+        const okStatuses = ["OK", "OP"]
+        runner.okStatus = okStatuses.includes(runner.legStatus)
+        if (!runner.okStatus) {
+            disqualifiedClass = "disqualified"
+            // For some reason runners get DNS status if their team is disqualified
+            if (runner.legStatus !== "DNS") {
+                disqualifiedStatus = runner.legStatus + ": "
+            }
+        }
+
         $("#estimate-summary tbody").append(
             "<tr class='" + rowClass + currentRunnerClass + massStartClass + "'>" +
             "<th scope=\"row\">" + runner.leg + "</th>" +
@@ -438,16 +456,16 @@
             + "<div class='static pointEstimate duration'>" + staticPointEstimateDurationText + "</div>"
             + "<div class='online pointEstimate relay'>" + onlinePointEstimateText + "</div>"
             + "</td>"
-            + "<td class=finish-time>"
-            + "<div class='online finishTime relay'>" + finishTime + "</div>"
-            + "<div class='online finishTime duration'>" + finishLegDuration + "</div>"
+            + "<td class='finish-time " + disqualifiedClass + " '>"
+            + "<div class='online finishTime relay'>" + disqualifiedStatus + finishTime + "</div>"
+            + "<div class='online finishTime duration'>" + disqualifiedStatus + finishLegDuration + "</div>"
             + "</td><td class=estimate>"
             + "<div class='static'>" + formatPercent(staticMassStart) + "</div>"
             + "<div class='online'>" + formatPercent(onlineMassStart) + "</div>"
             + "</td><td class=estimate>"
             + "<div class='static'>" + formatPercent(staticDarkDuringLeg) + "</div>"
             + "<div class='online'>" + formatPercent(onlineDarkDuringLeg) + "</div>"
-           + "</td></tr>")
+            + "</td></tr>")
     }
 
     function showTeam(teamId, teamRunners, ve_or_ju, selectedYear) {
