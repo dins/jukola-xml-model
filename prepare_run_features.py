@@ -29,7 +29,8 @@ def _load_pymc_history_values_for_running_order_names():
     # runs["log_pace"] = np.log(runs["pace"])
     running_order = runs[runs['year'] == shared.forecast_year()]
 
-    results_dir = '~/koodi/Statistical-Rethinking/pymc5-stats-rethink/results/fulldata-jax-v9'
+    #results_dir = '~/koodi/Statistical-Rethinking/pymc5-stats-rethink/results/fulldata-jax-v9'
+    results_dir = '~/koodi/Statistical-Rethinking/pymc5-stats-rethink/results/py312-numpyro'
     # results_dir = '~/koodi/Statistical-Rethinking/pymc5-stats-rethink/results/jax-dev'
     path = f'{results_dir}/pymc5_v3_estimates_{shared.race_id_str()}.tsv'
 

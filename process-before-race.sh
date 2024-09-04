@@ -18,6 +18,9 @@ ORO_LOG_PATH="logs/running-order-online-${FORECAST_YEAR}-${RUN_TS}.log"
 echo $(date -u +"%F %T") "Starting ${ORO_LOG_PATH}"
 poetry run python process_online_running_order.py 2024  &> ${ORO_LOG_PATH}
 tail -n 10 ${ORO_LOG_PATH}
+cp data/online_running_order_ve_fy_2024.tsv data/running_order_final_ve_fy_2024.tsv
+cp data/online_running_order_ju_fy_2024.tsv data/running_order_final_ju_fy_2024.tsv
+
 
 wc data/running_order_final_ju_fy_${FORECAST_YEAR}.tsv
 
