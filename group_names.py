@@ -9,9 +9,9 @@ import normalize_names
 import shared
 
 
-# time RACE_TYPE=ju FORECAST_YEAR=2023 poetry run python group_names.py
-# To get all years use next year:
 # time RACE_TYPE=ju FORECAST_YEAR=2024 poetry run python group_names.py
+# To get all years use next year:
+# time RACE_TYPE=ju FORECAST_YEAR=2025 poetry run python group_names.py
 def _connect_teams_by_emit(runs):
     runs_by_team = defaultdict(list)
     for run in runs:
@@ -121,6 +121,12 @@ def _write_individual_runs_file(grouped_runs_by_unique_name):
     output_file_path = f'data/long_runs_and_running_order_{shared.race_id_str()}.tsv'
     df.to_csv(output_file_path, sep='\t', index=False)
     logging.info(f'Wrote: {output_file_path}')
+
+    duplicates = df[df.duplicated(subset=["year", "team_id", "leg"], keep=False)]
+    logging.info(f'Duplicate legs {len(duplicates)} in running order:\n{duplicates.to_string(index=False)}')
+    assert len(duplicates) == 0, "Duplicate legs"
+
+
 
 
 def _first_name_stats(df):

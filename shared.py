@@ -10,8 +10,8 @@ import pandas as pd
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s')
 
-num_pace_years = 18
-pace_columns = [f"pace_{i}" for i in range(1, num_pace_years + 1)]
+#num_pace_years = 19
+#pace_columns = [f"pace_{i}" for i in range(1, num_pace_years + 1)]
 
 np.random.seed(2019)
 
@@ -26,7 +26,7 @@ def race_type(default="ve"):
     return type
 
 
-def forecast_year(default=2024) -> int:
+def forecast_year(default=2025) -> int:
     year = os.getenv('FORECAST_YEAR', default)
     logging.info(f"FORECAST_YEAR: {year}")
     return int(year)
@@ -36,16 +36,17 @@ def race_id_str():
     return f"{race_type()}_fy_{forecast_year()}"
 
 
+# TODO replace with ALL_YEARS below???
 years = {
-    "ve": ["2023", "2022", "2021", "2019", "2018", "2017", "2016", "2015", "2014", "2013", "2012", "2011", "2010",
+    "ve": ["2024", "2023", "2022", "2021", "2019", "2018", "2017", "2016", "2015", "2014", "2013", "2012", "2011", "2010",
            "2009", "2008", "2007", "2006", "2005", "2004", "2003", "2002"],
-    "ju": ["2023", "2022", "2021", "2019", "2018", "2017", "2016", "2015", "2014", "2013", "2012", "2011", "2010",
+    "ju": ["2024", "2023", "2022", "2021", "2019", "2018", "2017", "2016", "2015", "2014", "2013", "2012", "2011", "2010",
            "2009", "2008", "2007", "2006", "2005", "2004", "2003", "2002"]
 }
 
 # 2020 missing
 all_years = [1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009,
-             2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2021, 2022, 2023]
+             2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2021, 2022, 2023, 2024]
 
 
 def history_years():
@@ -94,6 +95,7 @@ distances = {
         2022: [7.5, 8.0, 6.1, 8.7],
         2023: [6.7, 5.3, 6.6, 7.7],
         2024: [8.0, 7.9, 6.8, 9.0],
+        2025: [5.8, 8.6, 5.0, 7.6],
         2099: [1.9, 1.9, 1.9, 1.9],
     },
     "ju": {
@@ -130,6 +132,7 @@ distances = {
         2022: [13.9, 11.7, 14.9, 8.7, 9.2, 14.6, 16.8],
         2023: [12.8, 12.9, 14.4, 8.2, 9.5, 9.3, 15.1],
         2024: [13.6, 14.8, 13.2, 9.5, 9.3, 13.1, 15.8],
+        2025: [12.0, 9.8, 12.9, 6.2, 6.3, 11.1, 14.9],
     }
 }
 
@@ -148,6 +151,7 @@ start_timestamp = {
         2022: pd.Timestamp(year=2022, month=6, day=18, hour=14, tz="Europe/Helsinki"),
         2023: pd.Timestamp(year=2023, month=6, day=17, hour=14, tz="Europe/Helsinki"),
         2024: pd.Timestamp(year=2024, month=6, day=15, hour=14, tz="Europe/Helsinki"),
+        2025: pd.Timestamp(year=2025, month=6, day=14, hour=13, minute=30, tz="Europe/Helsinki"),
         2099: pd.Timestamp(year=2024, month=6, day=12, hour=17, minute=30, tz="Europe/Helsinki"),
     },
     "ju": {
@@ -158,6 +162,7 @@ start_timestamp = {
         2022: pd.Timestamp(year=2022, month=6, day=18, hour=23, tz="Europe/Helsinki"),
         2023: pd.Timestamp(year=2023, month=6, day=17, hour=23, tz="Europe/Helsinki"),
         2024: pd.Timestamp(year=2024, month=6, day=15, hour=23, tz="Europe/Helsinki"),
+        2025: pd.Timestamp(year=2025, month=6, day=14, hour=23, tz="Europe/Helsinki"),
     }
 }
 
@@ -170,6 +175,7 @@ changeover_closing = {
         2022: pd.Timestamp(year=2022, month=6, day=18, hour=18, minute=30, tz="Europe/Helsinki"),
         2023: pd.Timestamp(year=2023, month=6, day=17, hour=18, minute=30, tz="Europe/Helsinki"),
         2024: pd.Timestamp(year=2024, month=6, day=15, hour=18, minute=30, tz="Europe/Helsinki"),
+        2025: pd.Timestamp(year=2025, month=6, day=14, hour=18, minute=30, tz="Europe/Helsinki"),
         2099: pd.Timestamp(year=2024, month=6, day=12, hour=18, minute=00, tz="Europe/Helsinki"), # Some code was using this
     },
     "ju": {
@@ -180,6 +186,7 @@ changeover_closing = {
         2022: pd.Timestamp(year=2022, month=6, day=19, hour=8, minute=45, tz="Europe/Helsinki"),
         2023: pd.Timestamp(year=2023, month=6, day=18, hour=8, minute=45, tz="Europe/Helsinki"),
         2024: pd.Timestamp(year=2024, month=6, day=16, hour=8, minute=45, tz="Europe/Helsinki"),
+        2025: pd.Timestamp(year=2025, month=6, day=15, hour=8, minute=45, tz="Europe/Helsinki"),
     }
 }
 
@@ -211,6 +218,10 @@ dark_period = {
     2024: {
         "start": pd.Timestamp(year=2024, month=6, day=15, hour=23, minute=58, tz="Europe/Helsinki"),
         "end": pd.Timestamp(year=2024, month=6, day=16, hour=3, minute=19, tz="Europe/Helsinki")
+    },
+    2025: {
+        "start": pd.Timestamp(year=2025, month=6, day=14, hour=23, minute=1, tz="Europe/Helsinki"),
+        "end": pd.Timestamp(year=2025, month=6, day=15, hour=3, minute=21, tz="Europe/Helsinki")
     },
     2099: {
         "start": pd.Timestamp(year=2024, month=6, day=12, hour=23, minute=58, tz="Europe/Helsinki"),

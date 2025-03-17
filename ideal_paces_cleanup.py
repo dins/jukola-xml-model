@@ -20,7 +20,7 @@ def _cleanup_ideal_times(race_type, marked_route):
     cleaned["vertical"] = raw["Nousu"].str.extract('(\d+)').astype(float)
     raw['Osuuspituus_str'] = raw['Osuuspituus'].str.extract('(\d+,\d+)')
     cleaned["leg_distance"] = raw['Osuuspituus_str'].str.replace(",", ".").astype(float)
-    logging.info(f"Osuuspituudet: {cleaned['leg_distance'].values}")
+    logging.info(f"Osuuspituudet:\n{cleaned['leg_distance'].values}")
 
     # def _resolve_leg_distance(row):
     #    return shared.leg_distance(race_type, row["year"], row["leg"])
