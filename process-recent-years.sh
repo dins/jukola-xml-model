@@ -19,24 +19,22 @@ function process_one_race {
 }
 
 RACE_TYPE=ve FORECAST_YEAR=2024 process_one_race &
-RACE_TYPE=ju FORECAST_YEAR=2024 process_one_race &
-RACE_TYPE=ju FORECAST_YEAR=2023 process_one_race &
 RACE_TYPE=ve FORECAST_YEAR=2023 process_one_race &
-RACE_TYPE=ju FORECAST_YEAR=2022 process_one_race &
 RACE_TYPE=ve FORECAST_YEAR=2022 process_one_race &
-RACE_TYPE=ju FORECAST_YEAR=2021 process_one_race &
 RACE_TYPE=ve FORECAST_YEAR=2021 process_one_race &
+RACE_TYPE=ve FORECAST_YEAR=2019 process_one_race &
+RACE_TYPE=ve FORECAST_YEAR=2018 process_one_race &
+RACE_TYPE=ve FORECAST_YEAR=2017 process_one_race &
 
 wait
 
+RACE_TYPE=ju FORECAST_YEAR=2024 process_one_race &
+RACE_TYPE=ju FORECAST_YEAR=2023 process_one_race &
+RACE_TYPE=ju FORECAST_YEAR=2022 process_one_race &
+RACE_TYPE=ju FORECAST_YEAR=2021 process_one_race &
 RACE_TYPE=ju FORECAST_YEAR=2019 process_one_race &
-RACE_TYPE=ve FORECAST_YEAR=2019 process_one_race &
-
 RACE_TYPE=ju FORECAST_YEAR=2018 process_one_race &
-RACE_TYPE=ve FORECAST_YEAR=2018 process_one_race &
-
 RACE_TYPE=ju FORECAST_YEAR=2017 process_one_race &
-RACE_TYPE=ve FORECAST_YEAR=2017 process_one_race &
 
 wait
 

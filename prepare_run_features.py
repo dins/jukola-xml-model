@@ -11,7 +11,8 @@ import shared
 
 
 def combine_estimates_with_running_order():
-    running_order_with_estimates = _load_pymc_history_values_for_running_order_names()
+    #running_order_with_estimates = _load_pymc_history_values_for_running_order_names()
+    running_order_with_estimates = _load_ngboost_estimates_for_running_order_names()
 
     estimates = running_order_with_estimates.rename(columns={"ro_orig_name": "name", "leg_dist": "dist"})
 
@@ -74,6 +75,72 @@ def _load_pymc_history_values_for_running_order_names():
     running_order_with_estimates.info()
 
     return running_order_with_estimates
+
+def _load_ngboost_estimates_for_running_order_names():
+    # unique_name	num_runs	name	team_id	team	team_country	year	pace	emit	leg	median_pace	log_stdev
+    runs = pd.read_csv(f'data/long_runs_and_running_order_{shared.race_id_str()}.tsv', delimiter='\t')
+    # runs = runs.dropna(subset=['pace'])
+    # runs["log_pace"] = np.log(runs["pace"])
+    running_order = runs[runs['year'] == shared.forecast_year()]
+
+
+    #results_dir = '~/koodi/jukola-ngboost/results/ngboost-dev'
+    results_dir = '~/koodi/jukola-ngboost/results/ngboost-student-t'
+    #results_dir = '~/koodi/jukola-ngboost/results/hgb_reg-dev'
+    #results_dir = '~/koodi/jukola-ngboost/results/hgb-NO-BC-dev'
+    forecasts_path = f'{results_dir}/running_order_samples_v2_{shared.race_id_str()}.json'
+
+    ngboost_estimates = pd.read_json(forecasts_path)
+    ngboost_estimates.info()
+    ngboost_estimates = ngboost_estimates[[
+        'team_id', 'leg', 'unique_name', 'log_mean', 'log_std',
+        'personal_start_95', 'personal_end_95', 'pace_samples',
+    ]]
+    #logging.info(
+    #    f'Found {len(ngboost_estimates)} NGBoost estimates:\n{ngboost_estimates.head(5).to_string(index=False)}')
+
+    missing_estimate_0 = ngboost_estimates[ngboost_estimates['log_mean'].isna()]
+    logging.info(
+        f'Found {len(missing_estimate_0)} runners without NGBoost estimate:\n{missing_estimate_0.to_string(index=False)}')
+    assert len(missing_estimate_0) == 0, "All should have estimate pace"
+
+    running_order_with_estimates = pd.merge(running_order, ngboost_estimates, on=['team_id', 'leg', 'unique_name'], how='left',
+                                            suffixes=['_ro', '_history']).reset_index()
+
+    shared.log_df(running_order_with_estimates[['unique_name', 'num_runs', 'log_mean']])
+
+    debug_df = running_order_with_estimates[running_order_with_estimates['unique_name'].str.contains('jonna virtanen')]
+    shared.log_df(debug_df[['unique_name', 'num_runs', 'log_mean', 'log_std']])
+
+    # TODO team is currently, team_base_name
+    running_order_with_estimates = running_order_with_estimates[[
+        'team_id', 'team', 'team_country', 'leg', 'leg_dist', 'unique_name', 'ro_orig_name',
+        'num_runs', 'log_mean', 'log_std',
+        'personal_start_95', 'personal_end_95', 'pace_samples',
+    ]]
+    logging.info(
+        f"running_order_with_estimates {len(running_order_with_estimates)} rows, columns: {running_order_with_estimates.columns}")
+
+    missing_estimate = running_order_with_estimates[running_order_with_estimates['log_mean'].isna()]
+    logging.info(f'Found {len(missing_estimate)} runners without estimate:\n{missing_estimate.to_string(index=False)}')
+
+    assert len(missing_estimate) == 0
+    # TODO HACK: just add the median for all unknown runners
+    fresh_runners = running_order_with_estimates['num_runs'] <= 2
+    log_pace_median = running_order_with_estimates[fresh_runners]['log_mean'].dropna().median()
+    running_order_with_estimates['log_mean'] = running_order_with_estimates['log_mean'].fillna(log_pace_median)
+    log_pace_std_median = running_order_with_estimates[fresh_runners]['log_std'].dropna().median()
+    running_order_with_estimates['log_std'] = running_order_with_estimates['log_std'].fillna(log_pace_std_median)
+
+    running_order_with_estimates.info()
+
+    duplicates = running_order_with_estimates[running_order_with_estimates.duplicated(subset=["team_id", "leg"], keep=False)]
+    logging.info(f'Duplicate legs {len(duplicates)} in running order:\n{duplicates.to_string(index=False)}')
+    assert len(duplicates) == 0, "Duplicate legs"
+
+    return running_order_with_estimates
+
+
 
 
 if __name__ == '__main__':

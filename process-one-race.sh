@@ -9,6 +9,15 @@ echo $(date -u +"%F %T") "RACE_TYPE: ${RACE_TYPE}, FORECAST_YEAR: ${FORECAST_YEA
 time poetry run python group_names.py
 echo $(date -u +"%F %T") "group_names ${RACE_TYPE} ${FORECAST_YEAR} DONE"
 
+echo $(date -u +"%F %T") "Starting ngboost  ${RACE_TYPE} ${FORECAST_YEAR} in another directory"
+# Run in subshell
+(cd ~/koodi/jukola-ngboost; time RACE_TYPE=${RACE_TYPE} FORECAST_YEAR=${FORECAST_YEAR} BATCH_RUN_TS=${RUN_TS} PROCESSING_BATCH_ID=ngboost-student-t uv run jupyter nbconvert --to notebook --inplace --ExecutePreprocessor.timeout=36000  --execute ngboost-norm-tuned.ipynb)
+#(cd ~/koodi/jukola-ngboost; time RACE_TYPE=${RACE_TYPE} FORECAST_YEAR=${FORECAST_YEAR} PROCESSING_BATCH_ID=ngboost-student-t uv run jupyter nbconvert --to notebook --inplace --ExecutePreprocessor.timeout=36000  --execute ngboost-skwenorm.ipynb)
+#(cd ~/koodi/jukola-ngboost; time RACE_TYPE=${RACE_TYPE} FORECAST_YEAR=${FORECAST_YEAR} PROCESSING_BATCH_ID=ngboost-student-t uv run jupyter nbconvert --to notebook --inplace --ExecutePreprocessor.timeout=36000  --execute ngboost-student-t.ipynb)
+#(cd ~/koodi/jukola-ngboost; time RACE_TYPE=${RACE_TYPE} FORECAST_YEAR=${FORECAST_YEAR} PROCESSING_BATCH_ID=ngboost-student-t uv run jupyter nbconvert --to notebook --inplace --ExecutePreprocessor.timeout=36000  --execute ngboost-student-t-weights.ipynb)
+echo $(date -u +"%F %T") "ngboost ${RACE_TYPE} ${FORECAST_YEAR} DONE"
+
+
 time poetry run python prepare_run_features.py
 echo $(date -u +"%F %T") "prepare_run_features.py ${RACE_TYPE} ${FORECAST_YEAR} DONE"
 

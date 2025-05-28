@@ -30,7 +30,7 @@ def read_all_json_files_from_folder_to_df():
             reports_dict = json.load(f)
             execution_timestamp = reports_dict.pop("execution_timestamp")["value"]
             if execution_timestamp == "unknown":
-                logging.warning(f"Skipping {file_name} with unknown execution_timestamp")
+                #logging.warning(f"Skipping {file_name} with unknown execution_timestamp")
                 continue
             race_id = reports_dict.pop("race_id")["value"]
             num_runners = reports_dict.pop("num_runners")["value"]
@@ -59,7 +59,7 @@ def read_all_json_files_from_folder_to_df():
 
     # Should we distinguish ve and ju here?
     key_values_df = all_df[all_df["desc"].isin(
-        ["Viestin aikaväliennuste väärin", "Yksilöennusteen keskivirhe", "Yksilön aikaväliennuste väärin", "Aiempien Jukoloiden määrä (keskiarvo)"])]
+        ["Viestin aikaväliennuste väärin", "Yksilöennusteen keskivirhe", "Yksilön aikaväliennuste väärin",  "Yksilön aikavälin keskikoko"])] # "Aiempien Jukoloiden määrä (keskiarvo)",
 
     latest_kvs = key_values_df[key_values_df["execution_timestamp"] == key_values_df["execution_timestamp"].max()]
     shared.log_df(latest_kvs.pivot(index="race_id", columns="name", values="value").round(3))
@@ -71,7 +71,7 @@ def read_all_json_files_from_folder_to_df():
     averages_df.columns = ["execution_timestamp", "kpi", "value"]
     # convert long format to wide format
     wide_averages_df = averages_df.pivot(index="execution_timestamp", columns="kpi", values="value")
-    shared.log_df(wide_averages_df.round(3))
+    logging.info(f'\n{wide_averages_df.tail(20).round(3)}')
 
     summary_path = "reports/reports_summary.tsv"
     averages_df.round(3).to_csv(summary_path, sep="\t", index=False)
