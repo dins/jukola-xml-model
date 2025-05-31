@@ -1,39 +1,54 @@
 #!/usr/bin/env bash
 set -euf -o pipefail
 
-# time FORECAST_YEAR=2024 ./process-before-race.sh
+# time FORECAST_YEAR=2025 ./process-before-race.sh
 
 RUN_TS="br-$(date -u '+%Y%m%d_%H%M%S')"
 SECONDS=0
 
 
-
 RO_LOG_PATH="logs/running-order-${FORECAST_YEAR}-${RUN_TS}.log"
 echo $(date -u +"%F %T") "Starting BEFORE_RACE ${RUN_TS}, logs: ${RO_LOG_PATH}"
 
-#poetry run python fetch_running_order.py 2024  &> ${RO_LOG_PATH}
-#tail -n 10 ${RO_LOG_PATH}
+poetry run python fetch_running_order.py 2025  &> ${RO_LOG_PATH}
+tail -n 10 ${RO_LOG_PATH}
 
-ORO_LOG_PATH="logs/running-order-online-${FORECAST_YEAR}-${RUN_TS}.log"
-echo $(date -u +"%F %T") "Starting ${ORO_LOG_PATH}"
-poetry run python process_online_running_order.py 2024  &> ${ORO_LOG_PATH}
-tail -n 10 ${ORO_LOG_PATH}
-cp data/online_running_order_ve_fy_2024.tsv data/running_order_final_ve_fy_2024.tsv
-cp data/online_running_order_ju_fy_2024.tsv data/running_order_final_ju_fy_2024.tsv
+#ORO_LOG_PATH="logs/running-order-online-${FORECAST_YEAR}-${RUN_TS}.log"
+#echo $(date -u +"%F %T") "Starting ${ORO_LOG_PATH}"
+#poetry run python process_online_running_order.py 2024  &> ${ORO_LOG_PATH}
+#tail -n 10 ${ORO_LOG_PATH}
+#cp data/online_running_order_ve_fy_2024.tsv data/running_order_final_ve_fy_2024.tsv
+#cp data/online_running_order_ju_fy_2024.tsv data/running_order_final_ju_fy_2024.tsv
 
 
 wc data/running_order_final_ju_fy_${FORECAST_YEAR}.tsv
 
-time RACE_TYPE=ve poetry run python group_names.py
-echo $(date -u +"%F %T") "group_names ve ${FORECAST_YEAR} DONE"
+#time RACE_TYPE=ve poetry run python group_names.py
+#echo $(date -u +"%F %T") "group_names ve ${FORECAST_YEAR} DONE"
 
-time RACE_TYPE=ju poetry run python group_names.py
-echo $(date -u +"%F %T") "group_names ju ${FORECAST_YEAR} DONE"
+#time RACE_TYPE=ju poetry run python group_names.py
+#echo $(date -u +"%F %T") "group_names ju ${FORECAST_YEAR} DONE"
 
-# cannot do more before running Pymc models
+time poetry run python count_names.py
+echo $(date -u +"%F %T") "count_names.py DONE"
 
-#tail -n 10 ${RO_LOG_PATH}
-tail -n 10 ${ORO_LOG_PATH}
+tail -n 10 ${RO_LOG_PATH}
+
+function process_one_race {
+  LOG_PATH="logs/parallel-${RACE_TYPE}-${FORECAST_YEAR}-${RUN_TS}.log"
+  start_secs=$SECONDS
+  echo $(date -u +"%F %T") "Starting at ${start_secs} secs, ${LOG_PATH}"
+  BEFORE_RACE="true" RUN_TS=${RUN_TS} ./process-one-race.sh &>${LOG_PATH} || echo $(date -u +"%F %T") "FAILED ${LOG_PATH}"
+  duration=$((SECONDS - start_secs))
+  echo $(date -u +"%F %T") "DONE ${LOG_PATH} in $duration secs"
+}
+
+RACE_TYPE=ju process_one_race &
+RACE_TYPE=ve process_one_race &
+
+wait
+
+#tail -n 10 ${ORO_LOG_PATH}
 
 echo "DONE ${RUN_TS} in $SECONDS secs"
 

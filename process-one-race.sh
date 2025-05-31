@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -ef -o pipefail
 
-# time BEFORE_RACE="true" RACE_TYPE=ve FORECAST_YEAR=2023 ./process-one-race.sh
-# time RACE_TYPE=ve FORECAST_YEAR=2023 ./process-one-race.sh
+# time BEFORE_RACE="true" RACE_TYPE=ve FORECAST_YEAR=2025 ./process-one-race.sh
+# time RACE_TYPE=ve FORECAST_YEAR=2024 ./process-one-race.sh
 
 # BEFORE_RACE="true"
 echo $(date -u +"%F %T") "RACE_TYPE: ${RACE_TYPE}, FORECAST_YEAR: ${FORECAST_YEAR}, RUN_TS: ${RUN_TS}"

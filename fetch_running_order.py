@@ -37,7 +37,6 @@ def fetch_running_order(year, ve_or_ju):
         rows = tree.xpath('//*[@id="site_main"]/table/tr')
         logging.info(f'Got {len(rows)} rows')
 
-
         output_rows = []
 
         current_team_id = ""
@@ -61,10 +60,13 @@ def fetch_running_order(year, ve_or_ju):
                 if name is not None and name.strip() != "" and name != " " and leg is not None:
                     leg = int(leg.strip())
                     name = normalize_names.normalize_name(name)
-                    # logging.info("Adding: " + current_team_id + " " + current_team_name + " " + str(leg) + " '" + name + "'")
-                    output_rows.append(
-                        [current_team_id, current_team_name, current_team_base_name, current_team_country, leg,
-                         leg_dist(leg), name])
+                    if current_team_id:
+                        output_rows.append(
+                            [current_team_id, current_team_name, current_team_base_name, current_team_country, leg,
+                             leg_dist(leg), name])
+                    else:
+                        logging.warning(f"Will not add: {current_team_id=} '{current_team_name=}' {leg=} '{name=}'")
+
         return output_rows
 
     # out_file_name = f'data/running_order_j{year}_{ve_or_ju}.tsv'
