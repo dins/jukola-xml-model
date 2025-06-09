@@ -39,11 +39,11 @@ def race_id_str():
 # TODO replace with ALL_YEARS below???
 years = {
     "ve": ["2024", "2023", "2022", "2021", "2019", "2018", "2017", "2016", "2015", "2014", "2013", "2012", "2011",
-           "2010",
-           "2009", "2008", "2007", "2006", "2005", "2004", "2003", "2002"],
+           "2010", "2009", "2008", "2007", "2006", "2005", "2004", "2003", "2002", "2001", "2000", "1999", "1998",
+           "1997"],
     "ju": ["2024", "2023", "2022", "2021", "2019", "2018", "2017", "2016", "2015", "2014", "2013", "2012", "2011",
-           "2010",
-           "2009", "2008", "2007", "2006", "2005", "2004", "2003", "2002"]
+           "2010", "2009", "2008", "2007", "2006", "2005", "2004", "2003", "2002", "2001", "2000", "1999", "1998",
+           "1997"]
 }
 
 # 2020 missing
@@ -60,6 +60,16 @@ def history_years():
     logging.info(f"history_years: {history}")
     return history
 
+
+# Linkkejä: https://web.archive.org/web/19990225112310/http://personal.inet.fi/urheilu/jukola/
+
+# 1997 https://web.archive.org/web/19990128003252/http://www.jyu.fi/%7Emikie/jukola-97/jyvas/suomi/terrain.html
+# 1998 https://web.archive.org/web/19990218203037/http://www.jukola98.kolumbus.fi/sradat.htm
+# 1999 Tarkat osuusajat puuttuu joten laskettu keskiarvo
+# 1999 https://web.archive.org/web/20010714001205/http://www.satanet.fi/hiisi-jukola/kilpailu/kilpailukutsu.htm
+# 2000 Tarkat osuusajat puuttuu joten laskettu keskiarvo
+# 2000 https://web.archive.org/web/20000511173546/http://www.kalevanrasti.fi/jukola2000/kilp/FI/85kutsu.htm
+# 2001 https://web.archive.org/web/20010511091625/http://www.kolumbus.fi/nikkari-jukola/kilpailuinfo/ratatiedot.html
 
 # time for year in $(seq 1992 2019); do ./parse-leg-distances.sh $year ve; done
 distances = {

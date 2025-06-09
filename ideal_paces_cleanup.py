@@ -16,9 +16,9 @@ def _cleanup_ideal_times(race_type, marked_route):
     cleaned = raw[["year"]].copy()  # make a copy to avoid SettingWithCopy warnings
 
     cleaned["leg"] = raw["Osuus"].astype(int)
-    cleaned["ideal_time"] = raw["Aika"].str.extract('(\d+)').astype(int)
-    cleaned["vertical"] = raw["Nousu"].str.extract('(\d+)').astype(float)
-    raw['Osuuspituus_str'] = raw['Osuuspituus'].str.extract('(\d+,\d+)')
+    cleaned["ideal_time"] = raw["Aika"].str.extract(r'(\d+)').astype(int)
+    cleaned["vertical"] = raw["Nousu"].str.extract(r'(\d+)').astype(float)
+    raw['Osuuspituus_str'] = raw['Osuuspituus'].str.extract(r'(\d+,\d+)')
     cleaned["leg_distance"] = raw['Osuuspituus_str'].str.replace(",", ".").astype(float)
     logging.info(f"Osuuspituudet:\n{cleaned['leg_distance'].values}")
 

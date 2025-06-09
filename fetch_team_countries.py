@@ -14,7 +14,8 @@ def fetch_team_country(year, ve_or_ju):
     def fetch_order(url):
         logging.info("Fetching " + url)
         page = requests.get(url, timeout=15)
-        tree = html.fromstring(page.content.decode('ISO-8859-1').encode("utf-8").strip())
+        #tree = html.fromstring(page.content.decode('ISO-8859-1').encode("utf-8").strip())
+        tree = html.fromstring(page.content.decode('utf-8').strip())
         rows = tree.xpath('//*[@id="site_main"]/table/table/tr')
         logging.info(f"Found {len(rows)} rows")
         assert len(rows) > 100
@@ -22,10 +23,21 @@ def fetch_team_country(year, ve_or_ju):
         for row in rows:
             if (len(row.xpath('td[1]')) > 0):
                 team_id = next(iter(row.xpath('.//td[1]/text()') or []), None)
-                team_base_name = next(iter(row.xpath('.//td[2]/a/text()')))
-                team_country = next(iter(row.xpath('.//td[3]/img/@title') or []), "NA")
-                # logging.info("Team line: " + " " + team_id + " " + team_country + " " + team_base_name)
-                output_rows.append([team_id, team_base_name, team_country])
+                team_base_name = next(iter(row.xpath('.//td[2]/a/text()') or []), "NA")
+                team_country_name = next(iter(row.xpath('.//td[3]/img/@title') or []), "NA")
+
+                # 1. Get the full URL:
+                img_url = next(iter(row.xpath('.//td[3]/img/@src') or []), None)
+
+                if img_url:
+                    # 2. Take everything after the last slash, then strip “.png”
+                    filename = img_url.rsplit('/', 1)[-1]       # e.g. "FIN.png"
+                    team_country_code = filename.rsplit('.', 1)[0]  # -> "FIN"
+                else:
+                    team_country_code = "NA"
+
+                logging.info(f"Team line: {team_id} {team_country_code} {team_country_name} {team_base_name} ")
+                output_rows.append([team_id, team_base_name, team_country_code, team_country_name])
 
         return output_rows
 
@@ -33,7 +45,7 @@ def fetch_team_country(year, ve_or_ju):
     csv_file = open(out_file_name, 'w')
 
     csvwriter = csv.writer(csv_file, delimiter="\t", quoting=csv.QUOTE_ALL)
-    header = ["team_id", "team_base_name", "team_country"]
+    header = ["team_id", "team_base_name", "team_country", "team_country_name"]
 
     csvwriter.writerow(header)
 

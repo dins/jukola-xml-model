@@ -1743,3 +1743,207 @@ execution_timestamp	kpi	value
 20250531_093345	Yksilöennusteen keskivirhe	13.891
 20250531_093345	Yksilön aikaväliennuste väärin	0.05
 20250531_093345	Yksilön aikavälin keskikoko	67.652
+20250531_154645	Viestin aikaväliennuste väärin	0.117
+20250531_154645	Yksilöennusteen keskivirhe	13.937
+20250531_154645	Yksilön aikaväliennuste väärin	0.049
+20250531_154645	Yksilön aikavälin keskikoko	68.517
+20250601_051348	Viestin aikaväliennuste väärin	0.129
+20250601_051348	Yksilöennusteen keskivirhe	14.05
+20250601_051348	Yksilön aikaväliennuste väärin	0.054
+20250601_051348	Yksilön aikavälin keskikoko	66.569
+20250601_055845	Viestin aikaväliennuste väärin	0.114
+20250601_055845	Yksilöennusteen keskivirhe	13.988
+20250601_055845	Yksilön aikaväliennuste väärin	0.047
+20250601_055845	Yksilön aikavälin keskikoko	69.48
+20250601_075254	Viestin aikaväliennuste väärin	0.12
+20250601_075254	Yksilöennusteen keskivirhe	14.192
+20250601_075254	Yksilön aikaväliennuste väärin	0.05
+20250601_075254	Yksilön aikavälin keskikoko	68.578
+20250601_083322	Viestin aikaväliennuste väärin	0.119
+20250601_083322	Yksilöennusteen keskivirhe	14.143
+20250601_083322	Yksilön aikaväliennuste väärin	0.049
+20250601_083322	Yksilön aikavälin keskikoko	68.592
+20250601_085612	Viestin aikaväliennuste väärin	0.12
+20250601_085612	Yksilöennusteen keskivirhe	14.179
+20250601_085612	Yksilön aikaväliennuste väärin	0.049
+20250601_085612	Yksilön aikavälin keskikoko	68.653
+20250601_091409	Viestin aikaväliennuste väärin	0.117
+20250601_091409	Yksilöennusteen keskivirhe	14.084
+20250601_091409	Yksilön aikaväliennuste väärin	0.048
+20250601_091409	Yksilön aikavälin keskikoko	68.624
+20250601_163716	Viestin aikaväliennuste väärin	0.146
+20250601_163716	Yksilöennusteen keskivirhe	15.316
+20250601_163716	Yksilön aikaväliennuste väärin	0.061
+20250601_163716	Yksilön aikavälin keskikoko	69.226
+20250601_165220	Viestin aikaväliennuste väärin	0.115
+20250601_165220	Yksilöennusteen keskivirhe	14.574
+20250601_165220	Yksilön aikaväliennuste väärin	0.046
+20250601_165220	Yksilön aikavälin keskikoko	72.772
+20250602_040118	Viestin aikaväliennuste väärin	0.115
+20250602_040118	Yksilöennusteen keskivirhe	14.595
+20250602_040118	Yksilön aikaväliennuste väärin	0.046
+20250602_040118	Yksilön aikavälin keskikoko	72.834
+20250602_052538	Viestin aikaväliennuste väärin	0.124
+20250602_052538	Yksilöennusteen keskivirhe	13.97
+20250602_052538	Yksilön aikaväliennuste väärin	0.052
+20250602_052538	Yksilön aikavälin keskikoko	66.361
+20250602_055309	Viestin aikaväliennuste väärin	0.112
+20250602_055309	Yksilöennusteen keskivirhe	13.867
+20250602_055309	Yksilön aikaväliennuste väärin	0.047
+20250602_055309	Yksilön aikavälin keskikoko	68.12
+20250602_175713	Viestin aikaväliennuste väärin	0.109
+20250602_175713	Yksilöennusteen keskivirhe	14.096
+20250602_175713	Yksilön aikaväliennuste väärin	0.045
+20250602_175713	Yksilön aikavälin keskikoko	69.365
+20250602_182635	Viestin aikaväliennuste väärin	0.131
+20250602_182635	Yksilöennusteen keskivirhe	13.904
+20250602_182635	Yksilön aikaväliennuste väärin	0.058
+20250602_182635	Yksilön aikavälin keskikoko	64.272
+20250603_042118	Viestin aikaväliennuste väärin	0.106
+20250603_042118	Yksilöennusteen keskivirhe	14.666
+20250603_042118	Yksilön aikaväliennuste väärin	0.041
+20250603_042118	Yksilön aikavälin keskikoko	74.819
+20250603_044054	Viestin aikaväliennuste väärin	0.153
+20250603_044054	Yksilöennusteen keskivirhe	14.005
+20250603_044054	Yksilön aikaväliennuste väärin	0.071
+20250603_044054	Yksilön aikavälin keskikoko	62.038
+20250603_182225	Viestin aikaväliennuste väärin	0.155
+20250603_182225	Yksilöennusteen keskivirhe	14.038
+20250603_182225	Yksilön aikaväliennuste väärin	0.071
+20250603_182225	Yksilön aikavälin keskikoko	62.58
+20250603_191843	Viestin aikaväliennuste väärin	0.114
+20250603_191843	Yksilöennusteen keskivirhe	14.094
+20250603_191843	Yksilön aikaväliennuste väärin	0.048
+20250603_191843	Yksilön aikavälin keskikoko	67.824
+20250603_194950	Viestin aikaväliennuste väärin	0.121
+20250603_194950	Yksilöennusteen keskivirhe	14.203
+20250603_194950	Yksilön aikaväliennuste väärin	0.05
+20250603_194950	Yksilön aikavälin keskikoko	67.392
+20250603_201147	Viestin aikaväliennuste väärin	0.13
+20250603_201147	Yksilöennusteen keskivirhe	14.116
+20250603_201147	Yksilön aikaväliennuste väärin	0.061
+20250603_201147	Yksilön aikavälin keskikoko	66.76
+20250604_051217	Viestin aikaväliennuste väärin	0.134
+20250604_051217	Yksilöennusteen keskivirhe	14.016
+20250604_051217	Yksilön aikaväliennuste väärin	0.068
+20250604_051217	Yksilön aikavälin keskikoko	65.701
+20250604_060959	Viestin aikaväliennuste väärin	0.135
+20250604_060959	Yksilöennusteen keskivirhe	14.042
+20250604_060959	Yksilön aikaväliennuste väärin	0.069
+20250604_060959	Yksilön aikavälin keskikoko	65.9
+20250604_070128	Viestin aikaväliennuste väärin	0.155
+20250604_070128	Yksilöennusteen keskivirhe	13.91
+20250604_070128	Yksilön aikaväliennuste väärin	0.085
+20250604_070128	Yksilön aikavälin keskikoko	61.573
+20250604_080111	Viestin aikaväliennuste väärin	0.176
+20250604_080111	Yksilöennusteen keskivirhe	13.86
+20250604_080111	Yksilön aikaväliennuste väärin	0.101
+20250604_080111	Yksilön aikavälin keskikoko	58.22
+20250604_183617	Viestin aikaväliennuste väärin	0.173
+20250604_183617	Yksilöennusteen keskivirhe	13.815
+20250604_183617	Yksilön aikaväliennuste väärin	0.099
+20250604_183617	Yksilön aikavälin keskikoko	58.513
+20250604_192918	Viestin aikaväliennuste väärin	0.175
+20250604_192918	Yksilöennusteen keskivirhe	13.871
+20250604_192918	Yksilön aikaväliennuste väärin	0.101
+20250604_192918	Yksilön aikavälin keskikoko	58.781
+20250605_045037	Viestin aikaväliennuste väärin	0.158
+20250605_045037	Yksilöennusteen keskivirhe	13.852
+20250605_045037	Yksilön aikaväliennuste väärin	0.086
+20250605_045037	Yksilön aikavälin keskikoko	60.753
+20250605_052708	Viestin aikaväliennuste väärin	0.19
+20250605_052708	Yksilöennusteen keskivirhe	14.506
+20250605_052708	Yksilön aikaväliennuste väärin	0.09
+20250605_052708	Yksilön aikavälin keskikoko	64.735
+20250605_143212	Viestin aikaväliennuste väärin	0.193
+20250605_143212	Yksilöennusteen keskivirhe	14.084
+20250605_143212	Yksilön aikaväliennuste väärin	0.091
+20250605_143212	Yksilön aikavälin keskikoko	62.013
+20250605_150834	Viestin aikaväliennuste väärin	0.176
+20250605_150834	Yksilöennusteen keskivirhe	13.919
+20250605_150834	Yksilön aikaväliennuste väärin	0.087
+20250605_150834	Yksilön aikavälin keskikoko	61.952
+20250605_153254	Viestin aikaväliennuste väärin	0.184
+20250605_153254	Yksilöennusteen keskivirhe	13.971
+20250605_153254	Yksilön aikaväliennuste väärin	0.089
+20250605_153254	Yksilön aikavälin keskikoko	62.377
+20250605_161106	Viestin aikaväliennuste väärin	0.179
+20250605_161106	Yksilöennusteen keskivirhe	14.151
+20250605_161106	Yksilön aikaväliennuste väärin	0.095
+20250605_161106	Yksilön aikavälin keskikoko	61.146
+20250605_163614	Viestin aikaväliennuste väärin	0.158
+20250605_163614	Yksilöennusteen keskivirhe	13.615
+20250605_163614	Yksilön aikaväliennuste väärin	0.082
+20250605_163614	Yksilön aikavälin keskikoko	61.371
+20250605_174846	Viestin aikaväliennuste väärin	0.166
+20250605_174846	Yksilöennusteen keskivirhe	13.633
+20250605_174846	Yksilön aikaväliennuste väärin	0.085
+20250605_174846	Yksilön aikavälin keskikoko	61.163
+20250605_181907	Viestin aikaväliennuste väärin	0.168
+20250605_181907	Yksilöennusteen keskivirhe	13.645
+20250605_181907	Yksilön aikaväliennuste väärin	0.086
+20250605_181907	Yksilön aikavälin keskikoko	61.027
+20250605_185029	Viestin aikaväliennuste väärin	0.185
+20250605_185029	Yksilöennusteen keskivirhe	13.844
+20250605_185029	Yksilön aikaväliennuste väärin	0.09
+20250605_185029	Yksilön aikavälin keskikoko	61.527
+20250605_193636	Viestin aikaväliennuste väärin	0.182
+20250605_193636	Yksilöennusteen keskivirhe	13.736
+20250605_193636	Yksilön aikaväliennuste väärin	0.09
+20250605_193636	Yksilön aikavälin keskikoko	60.446
+20250606_043003	Viestin aikaväliennuste väärin	0.145
+20250606_043003	Yksilöennusteen keskivirhe	13.951
+20250606_043003	Yksilön aikaväliennuste väärin	0.065
+20250606_043003	Yksilön aikavälin keskikoko	67.264
+20250606_052112	Viestin aikaväliennuste väärin	0.184
+20250606_052112	Yksilöennusteen keskivirhe	13.773
+20250606_052112	Yksilön aikaväliennuste väärin	0.091
+20250606_052112	Yksilön aikavälin keskikoko	60.345
+20250606_071859	Viestin aikaväliennuste väärin	0.156
+20250606_071859	Yksilöennusteen keskivirhe	13.769
+20250606_071859	Yksilön aikaväliennuste väärin	0.085
+20250606_071859	Yksilön aikavälin keskikoko	61.133
+20250607_050645	Viestin aikaväliennuste väärin	0.157
+20250607_050645	Yksilöennusteen keskivirhe	13.761
+20250607_050645	Yksilön aikaväliennuste väärin	0.086
+20250607_050645	Yksilön aikavälin keskikoko	61.002
+20250607_054236	Viestin aikaväliennuste väärin	0.13
+20250607_054236	Yksilöennusteen keskivirhe	13.893
+20250607_054236	Yksilön aikaväliennuste väärin	0.066
+20250607_054236	Yksilön aikavälin keskikoko	66.045
+20250607_061901	Viestin aikaväliennuste väärin	0.157
+20250607_061901	Yksilöennusteen keskivirhe	13.767
+20250607_061901	Yksilön aikaväliennuste väärin	0.085
+20250607_061901	Yksilön aikavälin keskikoko	61.156
+20250607_065451	Viestin aikaväliennuste väärin	0.181
+20250607_065451	Yksilöennusteen keskivirhe	13.683
+20250607_065451	Yksilön aikaväliennuste väärin	0.103
+20250607_065451	Yksilön aikavälin keskikoko	57.282
+20250607_074627	Viestin aikaväliennuste väärin	0.199
+20250607_074627	Yksilöennusteen keskivirhe	13.648
+20250607_074627	Yksilön aikaväliennuste väärin	0.116
+20250607_074627	Yksilön aikavälin keskikoko	55.056
+20250607_090147	Viestin aikaväliennuste väärin	0.18
+20250607_090147	Yksilöennusteen keskivirhe	13.704
+20250607_090147	Yksilön aikaväliennuste väärin	0.103
+20250607_090147	Yksilön aikavälin keskikoko	57.532
+20250607_100659	Viestin aikaväliennuste väärin	0.171
+20250607_100659	Yksilöennusteen keskivirhe	13.721
+20250607_100659	Yksilön aikaväliennuste väärin	0.096
+20250607_100659	Yksilön aikavälin keskikoko	58.96
+20250607_104150	Viestin aikaväliennuste väärin	0.182
+20250607_104150	Yksilöennusteen keskivirhe	13.684
+20250607_104150	Yksilön aikaväliennuste väärin	0.105
+20250607_104150	Yksilön aikavälin keskikoko	57.227
+20250609_061000	Viestin aikaväliennuste väärin	0.108
+20250609_061000	Yksilöennusteen keskivirhe	13.996
+20250609_061000	Yksilön aikaväliennuste väärin	0.051
+20250609_061000	Yksilön aikavälin keskikoko	71.263
+20250609_090031	Viestin aikaväliennuste väärin	0.108
+20250609_090031	Yksilöennusteen keskivirhe	13.996
+20250609_090031	Yksilön aikaväliennuste väärin	0.051
+20250609_090031	Yksilön aikavälin keskikoko	71.263
+20250609_092602	Viestin aikaväliennuste väärin	0.172
+20250609_092602	Yksilöennusteen keskivirhe	13.638
+20250609_092602	Yksilön aikaväliennuste väärin	0.097
+20250609_092602	Yksilön aikavälin keskikoko	58.289
