@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="fi">
 <head>
     <title>Jukola Vaihtoajat</title>
     <!-- Required meta tags -->
@@ -159,7 +159,7 @@
         <th scope="col">Ennusteen luottamus&shy;väli</th>
         <!-- <th scope="col">Toden&shy;näköisin loppu&shy;aika</th>-->
         <th scope="col">Loppu&shy;aika</th>
-        <th scope="col">Maalissa</th>
+        <th class="finish-time" scope="col">Maalissa</th>
         <!-- <th scope="col">Yhteis&shy;lähdön toden&shy;näköisyys</th> -->
         <th scope="col">Yhteis&shy;lähtö</th>
         <!-- <th scope="col">Osuuden aikana on pimeää</th>-->
@@ -190,6 +190,7 @@
                 class='runnerIsLateColor'>oranssilla</span> värillä ja ennuste "myöhäistää" tuleviakin aikoja. </p>
     <p>Jos yhteislähdön todennäköisyys on osuudelle yli 50%, näytetään yhteislähtöön perustuvat kellonajat.</p>
     <p>Ennuste on tehty täysin harrasteprojektina ja kilpailunaikainen toimivuus nähdään aina vasta kisapäivänä.</p>
+    <p><a href="tietosuojaseloste.html">Palvelun tietosuojaseloste</a>.</p>
 </div>
 
 <canvas id="chartjs-plot" width="1000" height="800"></canvas>
@@ -428,7 +429,7 @@
         var disqualifiedClass = ""
         var disqualifiedStatus = ""
         const okStatuses = ["OK", "OP"]
-        if(runner.legStatus) {
+        if(runner.legStatus !== undefined) {
             runner.okStatus = okStatuses.includes(runner.legStatus)
             if (!runner.okStatus) {
                 disqualifiedClass = "disqualified"
