@@ -29,8 +29,8 @@ Fetch team country and running orders:
 
 ```bash
 time for year in $(seq 2009 2019); do echo "YEAR $year"; time poetry run python fetch_team_countries.py ${year} && wc data/team_countries_j${year}_ju.tsv; done
-RACE_TYPE=ve FORECAST_YEAR=2022 time poetry run python fetch_online_team_countries.py && RACE_TYPE=ju FORECAST_YEAR=2022 time poetry run python fetch_online_team_countries.py 
-RACE_TYPE=ve FORECAST_YEAR=2022 time poetry run python final_running_order.py && RACE_TYPE=ju FORECAST_YEAR=2022 time poetry run python final_running_order.py  # Post race running order from results
+time RACE_TYPE=ve FORECAST_YEAR=2025 poetry run python fetch_online_team_countries.py && time RACE_TYPE=ju FORECAST_YEAR=2025 poetry run python fetch_online_team_countries.py 
+time RACE_TYPE=ve FORECAST_YEAR=2025 poetry run python final_running_order.py && time RACE_TYPE=ju FORECAST_YEAR=2025 poetry run python final_running_order.py  # Post race running order from results
 ```
 
 Then run a script.

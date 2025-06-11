@@ -105,8 +105,10 @@ def _summarize(running_order_file):
 if __name__ == "__main__":
     year = int(sys.argv[1])
 
+    # ke_file = fetch_running_order(year, "ke")
     ve_file = fetch_running_order(year, "ve")
     ju_file = fetch_running_order(year, "ju")
 
+    # _summarize(ke_file)
     _summarize(ve_file)
     _summarize(ju_file)

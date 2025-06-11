@@ -38,12 +38,13 @@ def race_id_str():
 
 # TODO replace with ALL_YEARS below???
 years = {
+    "ke": ["2024"],
     "ve": ["2024", "2023", "2022", "2021", "2019", "2018", "2017", "2016", "2015", "2014", "2013", "2012", "2011",
            "2010", "2009", "2008", "2007", "2006", "2005", "2004", "2003", "2002", "2001", "2000", "1999", "1998",
            "1997"],
     "ju": ["2024", "2023", "2022", "2021", "2019", "2018", "2017", "2016", "2015", "2014", "2013", "2012", "2011",
            "2010", "2009", "2008", "2007", "2006", "2005", "2004", "2003", "2002", "2001", "2000", "1999", "1998",
-           "1997"]
+           "1997"],
 }
 
 # 2020 missing
@@ -73,6 +74,10 @@ def history_years():
 
 # time for year in $(seq 1992 2019); do ./parse-leg-distances.sh $year ve; done
 distances = {
+    "ke": {
+        2024: [8.0, 7.9, 6.8, 9.0],
+        2025: [0.7, 0.7, 0.7, 0.7,],
+    },
     "ve": {
         1992: [6.8, 6.7, 5.7, 8.6],
         1993: [6.2, 6.7, 5.6, 8.5],
@@ -155,6 +160,9 @@ def leg_distance(ve_or_ju, year, leg):
 
 
 start_timestamp = {
+    "ke": {
+        2025: pd.Timestamp(year=2025, month=6, day=11, hour=18, minute=00, tz="Europe/Helsinki"),
+    },
     "ve": {
         2017: pd.Timestamp(year=2017, month=6, day=17, hour=14, tz="Europe/Helsinki"),
         2018: pd.Timestamp(year=2018, month=6, day=16, hour=14, tz="Europe/Helsinki"),
@@ -179,6 +187,9 @@ start_timestamp = {
 }
 
 changeover_closing = {
+    "ke": {
+        2025: pd.Timestamp(year=2025, month=6, day=11, hour=19, minute=00, tz="Europe/Helsinki"),
+    },
     "ve": {
         2017: pd.Timestamp(year=2017, month=6, day=17, hour=18, minute=30, tz="Europe/Helsinki"),
         2018: pd.Timestamp(year=2018, month=6, day=16, hour=18, minute=30, tz="Europe/Helsinki"),
@@ -243,6 +254,7 @@ dark_period = {
 }
 
 num_legs = {
+    "ke": 4,
     "ve": 4,
     "ju": 7
 }

@@ -91,6 +91,9 @@ def _summarize(running_order_file):
 if __name__ == "__main__":
     year = int(sys.argv[1])
 
+    # ke_file = fetch_running_order(year, "ke")
+    # _summarize(ke_file)
+
     ve_file = fetch_running_order(year, "ve")
     if year != 2099:
         ju_file = fetch_running_order(year, "ju")

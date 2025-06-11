@@ -198,16 +198,21 @@
 <script>
 
     var raceStart = {
+        ke: new Date(Date.parse('2025-06-11T18:00:00+03:00')), // parse returns something else than Date
         ve: new Date(Date.parse('2025-06-14T13:30:00+03:00')), // parse returns something else than Date
         ju: new Date(Date.parse('2025-06-14T23:00:00+03:00'))
     }
 
     var changeoverClosing = {
+        ke: new Date(Date.parse('2025-06-11T19:00:00+0300')), // parse returns something else than Date
         ve: new Date(Date.parse('2025-06-14T18:30:00+0300')), // parse returns something else than Date
         ju: new Date(Date.parse('2025-06-15T09:15:00+0300'))
     }
 
     const changeoverClosingMap = {
+        "ke": {
+            2025: new Date("2025-06-11T19:00:00+0300"),
+        },
         "ve": {
             2019: new Date("2019-06-15T18:30:00+0300"),
             2021: new Date("2021-08-21T18:15:00+0300"),
@@ -670,7 +675,7 @@
         });
     }
 
-    if (teamId > 0 && (ve_or_ju === "ve" || ve_or_ju === "ju")) {
+    if (teamId > 0 && (ve_or_ju === "ve" || ve_or_ju === "ju" || ve_or_ju === "ke")) {
         fetchAndShowTeamEstimates(teamId, ve_or_ju);
     }
 
@@ -697,6 +702,7 @@
 
     var juRunnersUrl = "https://dins.github.io/jukola-xml-model/web-lib/for_web_ju_fy_" + selectedYear + ".json";
     var veRunnersUrl = "https://dins.github.io/jukola-xml-model/web-lib/for_web_ve_fy_" + selectedYear + ".json";
+    var keRunnersUrl = "https://dins.github.io/jukola-xml-model/web-lib/for_web_ke_fy_" + selectedYear + ".json";
 
     $.getJSON(veRunnersUrl, function (runners) {
         _.each(runners, function (runner) {
