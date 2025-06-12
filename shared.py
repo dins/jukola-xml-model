@@ -210,7 +210,7 @@ changeover_closing = {
         2022: pd.Timestamp(year=2022, month=6, day=19, hour=8, minute=45, tz="Europe/Helsinki"),
         2023: pd.Timestamp(year=2023, month=6, day=18, hour=8, minute=45, tz="Europe/Helsinki"),
         2024: pd.Timestamp(year=2024, month=6, day=16, hour=8, minute=45, tz="Europe/Helsinki"),
-        2025: pd.Timestamp(year=2025, month=6, day=15, hour=8, minute=45, tz="Europe/Helsinki"),
+        2025: pd.Timestamp(year=2025, month=6, day=15, hour=9, minute=15, tz="Europe/Helsinki"),
     }
 }
 
