@@ -1,42 +1,47 @@
 #!/usr/bin/env bash
 set -euf -o pipefail
 
-# time ./process-recent-years.sh
-
-RUN_TS=$(date -u '+%Y%m%d_%H%M%S')
-SECONDS=0
+export RUN_TS=$(date -u '+%Y%m%d_%H%M%S')
+export SCRIPT_START_TIME=$(date +%s)
 
 time poetry run python count_names.py
-echo $(date -u +"%F %T") "count_names.py DONE"
+echo "$(date -u +"%F %T") count_names.py DONE"
 
-function process_one_race {
-  LOG_PATH="logs/parallel-${RACE_TYPE}-${FORECAST_YEAR}-${RUN_TS}.log"
-  start_secs=$SECONDS
-  echo $(date -u +"%F %T") "Starting at ${start_secs} secs, ${LOG_PATH}"
-  RUN_TS=${RUN_TS} ./process-one-race.sh &>${LOG_PATH} || echo $(date -u +"%F %T") "FAILED ${LOG_PATH}"
-  duration=$((SECONDS - start_secs))
-  echo $(date -u +"%F %T") "DONE ${LOG_PATH} in $duration secs"
+# 1. Define the worker logic as a standard, readable function
+function process_race_worker() {
+  local current_race_type=$1
+  local current_forecast_year=$2
+
+  local log_path="logs/parallel-${current_race_type}-${current_forecast_year}-${RUN_TS}.log"
+  local now=$(date +%s)
+  local start_secs=$((now - SCRIPT_START_TIME))
+
+  echo "$(date -u +"%F %T") Starting at ${start_secs} secs, ${log_path}"
+
+  # Run the script and capture duration
+  if RACE_TYPE="${current_race_type}" FORECAST_YEAR="${current_forecast_year}" RUN_TS="${RUN_TS}" ./process-one-race.sh > "${log_path}" 2>&1; then
+    local end_now=$(date +%s)
+    local duration=$((end_now - now))
+    echo "$(date -u +"%F %T") DONE ${log_path} in ${duration} secs"
+  else
+    echo "$(date -u +"%F %T") FAILED ${log_path}"
+  fi
 }
 
-RACE_TYPE=ve FORECAST_YEAR=2024 process_one_race &
-RACE_TYPE=ve FORECAST_YEAR=2023 process_one_race &
-RACE_TYPE=ve FORECAST_YEAR=2022 process_one_race &
-RACE_TYPE=ve FORECAST_YEAR=2021 process_one_race &
-RACE_TYPE=ve FORECAST_YEAR=2019 process_one_race &
-RACE_TYPE=ve FORECAST_YEAR=2018 process_one_race &
-RACE_TYPE=ve FORECAST_YEAR=2017 process_one_race &
+# 2. Export the function so xargs subshells can execute it
+export -f process_race_worker
 
-wait
+# 3. Define the queue as a flat list of arguments (type, year, type, year)
+pending_races=(
+  "ju" "2025" "ju" "2024" "ju" "2023" "ju" "2022" "ju" "2021" "ju" "2019" "ju" "2018" "ju" "2017"
+  "ve" "2025" "ve" "2024" "ve" "2023" "ve" "2022" "ve" "2021" "ve" "2019" "ve" "2018" "ve" "2017"
+)
 
-RACE_TYPE=ju FORECAST_YEAR=2024 process_one_race &
-RACE_TYPE=ju FORECAST_YEAR=2023 process_one_race &
-RACE_TYPE=ju FORECAST_YEAR=2022 process_one_race &
-RACE_TYPE=ju FORECAST_YEAR=2021 process_one_race &
-RACE_TYPE=ju FORECAST_YEAR=2019 process_one_race &
-RACE_TYPE=ju FORECAST_YEAR=2018 process_one_race &
-RACE_TYPE=ju FORECAST_YEAR=2017 process_one_race &
 
-wait
+# 4. Use xargs to pass arguments to our exported function
+# -n 2: Passes exactly 2 arguments (Type and Year) to the function at a time
+# -P 8: Maintains exactly 8 workers concurrently
+printf "%s\n" "${pending_races[@]}" | xargs -n 2 -P 7 bash -c 'process_race_worker "$1" "$2"' _
 
 echo "DONE ${RUN_TS}"
 
