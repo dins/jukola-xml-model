@@ -3,11 +3,36 @@ import logging
 import numpy as np
 import pandas as pd
 import shared
+import re
+from typing import Optional
+
 
 # time poetry run python ideal_paces_cleanup.py
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s')
+
+
+
+def parse_distance(distance_str: str) -> Optional[float]:
+    """
+    Extracts and averages distance values from a string, handling comma as decimal separator.
+
+    Args:
+        distance_str: A string containing distance information (e.g., "8,9 km" or "10,7 – 10,8 km").
+
+    Returns:
+        The average distance as a float, or None if no valid distance is found.
+    """
+    numbers = re.findall(r'(\d+,\d+)', distance_str)
+    if not numbers:
+        return None
+    # Convert comma to dot and then to float
+    numbers = [float(num.replace(',', '.')) for num in numbers]
+    average = round(sum(numbers) / len(numbers), 2)
+    print(f'{average},    {numbers=}')
+    return average
+
 
 
 def _cleanup_ideal_times(race_type, marked_route):
@@ -18,9 +43,11 @@ def _cleanup_ideal_times(race_type, marked_route):
     cleaned["leg"] = raw["Osuus"].astype(int)
     cleaned["ideal_time"] = raw["Aika"].str.extract(r'(\d+)').astype(int)
     cleaned["vertical"] = raw["Nousu"].str.extract(r'(\d+)').astype(float)
-    raw['Osuuspituus_str'] = raw['Osuuspituus'].str.extract(r'(\d+,\d+)')
-    cleaned["leg_distance"] = raw['Osuuspituus_str'].str.replace(",", ".").astype(float)
-    logging.info(f"Osuuspituudet:\n{cleaned['leg_distance'].values}")
+
+    # raw['Osuuspituus_str'] = raw['Osuuspituus'].str.extract(r'(\d+,\d+)')
+    # cleaned["leg_distance"] = raw['Osuuspituus_str'].str.replace(",", ".").astype(float)
+    cleaned['leg_distance'] = raw['Osuuspituus'].apply(parse_distance)
+    logging.info(f"Osuuspituudet:\n{cleaned[['year', 'leg_distance']]}")
 
     # def _resolve_leg_distance(row):
     #    return shared.leg_distance(race_type, row["year"], row["leg"])
