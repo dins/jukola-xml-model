@@ -2,6 +2,7 @@ import json
 import logging
 import re
 import sys
+import count_names
 
 
 # time poetry run python normalize_names.py
@@ -21,16 +22,8 @@ def is_firstname(name):
     return name.lower() in first_names
 
 
-def correct_hyphen_spacing_in_names(name):
-    # Remove extra spaces around hyphens
-    corrected_name = re.sub(r'\s*-\s*', '-', name)
-    # Ensure only one space between words
-    corrected_name = re.sub(r'\s+', ' ', corrected_name)
-    return corrected_name
-
-
 def normalize_name(orig_name):
-    name = cleanup_name(orig_name)
+    name = count_names.cleanup_name(orig_name)
 
     splits = name.split()
     if len(splits) <= 1:
@@ -46,18 +39,6 @@ def normalize_name(orig_name):
             logging.info(f"swithced name '{orig_name}' TO '{swithced_name}'")
             return swithced_name
 
-    return name
-
-
-def cleanup_name(orig_name):
-    name = orig_name.strip()
-    name = correct_hyphen_spacing_in_names(name)
-    if "  " in name:
-        logging.info(f"Trimming DOUBLE or multiple spaces '{orig_name}'")
-        name = ' '.join(name.split())
-    if "|" in name:
-        logging.info(f"Trimming pipes '{orig_name}'")
-        name = name.replace("|", "")
     return name
 
 

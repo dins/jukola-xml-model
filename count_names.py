@@ -1,15 +1,38 @@
 import csv
 import logging
+import re
 
 import pandas as pd
 
-import normalize_names
+
 import shared
 
 # time poetry run python count_names.py
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s')
+
+
+def _correct_hyphen_spacing_in_names(name):
+    # Remove extra spaces around hyphens
+    corrected_name = re.sub(r'\s*-\s*', '-', name)
+    # Ensure only one space between words
+    corrected_name = re.sub(r'\s+', ' ', corrected_name)
+    return corrected_name
+
+
+
+def cleanup_name(orig_name):
+    name = orig_name.strip()
+    name = _correct_hyphen_spacing_in_names(name)
+    if "  " in name:
+        logging.info(f"Trimming DOUBLE or multiple spaces '{orig_name}'")
+        name = ' '.join(name.split())
+    if "|" in name:
+        logging.info(f"Trimming pipes '{orig_name}'")
+        name = name.replace("|", "")
+    return name
+
 
 
 def _append_names(year, ve_or_ju, all_names):
@@ -32,7 +55,7 @@ def analyze_names():
         _append_names(year, "ve", all_names)
         _append_names(year, "ju", all_names)
 
-    all_names = [normalize_names.cleanup_name(name) for name in all_names]
+    all_names = [cleanup_name(name) for name in all_names]
     runs = pd.DataFrame(all_names, columns=["name"])
 
     runs = runs[runs.name.str.count(" ") >= 1]
