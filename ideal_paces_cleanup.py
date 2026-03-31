@@ -7,7 +7,7 @@ import re
 from typing import Optional
 
 
-# time poetry run python ideal_paces_cleanup.py
+# time uv run python ideal_paces_cleanup.py
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s')

@@ -5,7 +5,7 @@ import pandas as pd
 
 import shared
 
-#  time RACE_TYPE=ve FORECAST_YEAR=2025 poetry run python final_running_order.py && head data/running_order_final_ve_fy_2025.tsv
+#  time RACE_TYPE=ve FORECAST_YEAR=2025 uv run python final_running_order.py && head data/running_order_final_ve_fy_2025.tsv
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s')
 

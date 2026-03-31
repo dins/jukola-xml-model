@@ -5,7 +5,7 @@ import sys
 import count_names
 
 
-# time poetry run python normalize_names.py
+# time uv run python normalize_names.py
 
 
 def read_first_names() -> set:

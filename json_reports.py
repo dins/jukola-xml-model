@@ -7,7 +7,7 @@ import numpy as np
 
 import shared
 
-# time poetry run python json_reports.py && wc data/all_json_reports.tsv
+# time uv run python json_reports.py && wc data/all_json_reports.tsv
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s')
 

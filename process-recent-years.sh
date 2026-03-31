@@ -4,7 +4,7 @@ set -euf -o pipefail
 export RUN_TS=$(date -u '+%Y%m%d_%H%M%S')
 export SCRIPT_START_TIME=$(date +%s)
 
-time poetry run python count_names.py
+time uv run python count_names.py
 echo "$(date -u +"%F %T") count_names.py DONE"
 
 # 1. Define the worker logic as a standard, readable function
@@ -45,4 +45,4 @@ printf "%s\n" "${pending_races[@]}" | xargs -n 2 -P 7 bash -c 'process_race_work
 
 echo "DONE ${RUN_TS}"
 
-time poetry run python json_reports.py
+time uv run python json_reports.py

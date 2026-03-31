@@ -3,10 +3,10 @@ Analyze and estimate Jukola Relay results
 
 ## Setup
 ```bash
-poetry install
+uv sync
 # Enable jupyter execution time measurement extension
-poetry run jupyter contrib nbextension install --user
-poetry run jupyter nbextension enable execute_time/ExecuteTime
+uv run jupyter contrib nbextension install --user
+uv run jupyter nbextension enable execute_time/ExecuteTime
 ```
 
 Fetch xml files (history):
@@ -21,16 +21,16 @@ Right after the race fetch results from "online" site: ` time curl "https://onli
 Convert xml to csv:
 
 ```bash
-RACE_TYPE=ve && time for year in $(seq 1992 2019); do echo "YEAR $year RACE: $RACE_TYPE"; time poetry run python result_xml_to_csv.py $year $RACE_TYPE && head data/results_with_dist_j${year}_${RACE_TYPE}.tsv; done
-time poetry run python count_names.py
+RACE_TYPE=ve && time for year in $(seq 1992 2019); do echo "YEAR $year RACE: $RACE_TYPE"; time uv run python result_xml_to_csv.py $year $RACE_TYPE && head data/results_with_dist_j${year}_${RACE_TYPE}.tsv; done
+time uv run python count_names.py
 ```
 
 Fetch team country and running orders:
 
 ```bash
-time for year in $(seq 2009 2019); do echo "YEAR $year"; time poetry run python fetch_team_countries.py ${year} && wc data/team_countries_j${year}_ju.tsv; done
-time RACE_TYPE=ve FORECAST_YEAR=2025 poetry run python fetch_online_team_countries.py && time RACE_TYPE=ju FORECAST_YEAR=2025 poetry run python fetch_online_team_countries.py 
-time RACE_TYPE=ve FORECAST_YEAR=2025 poetry run python final_running_order.py && time RACE_TYPE=ju FORECAST_YEAR=2025 poetry run python final_running_order.py  # Post race running order from results
+time for year in $(seq 2009 2019); do echo "YEAR $year"; time uv run python fetch_team_countries.py ${year} && wc data/team_countries_j${year}_ju.tsv; done
+time RACE_TYPE=ve FORECAST_YEAR=2025 uv run python fetch_online_team_countries.py && time RACE_TYPE=ju FORECAST_YEAR=2025 uv run python fetch_online_team_countries.py 
+time RACE_TYPE=ve FORECAST_YEAR=2025 uv run python final_running_order.py && time RACE_TYPE=ju FORECAST_YEAR=2025 uv run python final_running_order.py  # Post race running order from results
 ```
 
 Then run a script.
@@ -42,7 +42,7 @@ time ./process-recent-years.sh
 
 Start jupyter:
 ```bash
-nice poetry run jupyter notebook
+nice uv run jupyter notebook
 ```
 
 

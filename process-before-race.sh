@@ -10,12 +10,12 @@ SECONDS=0
 RO_LOG_PATH="logs/running-order-${FORECAST_YEAR}-${RUN_TS}.log"
 echo $(date -u +"%F %T") "Starting BEFORE_RACE ${RUN_TS}, logs: ${RO_LOG_PATH}"
 
-poetry run python fetch_running_order.py 2025  &> ${RO_LOG_PATH}
+uv run python fetch_running_order.py 2025  &> ${RO_LOG_PATH}
 tail -n 10 ${RO_LOG_PATH}
 
 #ORO_LOG_PATH="logs/running-order-online-${FORECAST_YEAR}-${RUN_TS}.log"
 #echo $(date -u +"%F %T") "Starting ${ORO_LOG_PATH}"
-#poetry run python process_online_running_order.py 2025  &> ${ORO_LOG_PATH}
+#uv run python process_online_running_order.py 2025  &> ${ORO_LOG_PATH}
 #tail -n 10 ${ORO_LOG_PATH}
 #cp data/online_running_order_ke_fy_2025.tsv data/running_order_final_ke_fy_2025.tsv
 #cp data/online_running_order_ve_fy_2024.tsv data/running_order_final_ve_fy_2024.tsv
@@ -25,13 +25,13 @@ tail -n 10 ${RO_LOG_PATH}
 wc data/running_order_final_ju_fy_${FORECAST_YEAR}.tsv
 #wc data/running_order_final_ke_fy_${FORECAST_YEAR}.tsv
 
-#time RACE_TYPE=ve poetry run python group_names.py
+#time RACE_TYPE=ve uv run python group_names.py
 #echo $(date -u +"%F %T") "group_names ve ${FORECAST_YEAR} DONE"
 
-#time RACE_TYPE=ju poetry run python group_names.py
+#time RACE_TYPE=ju uv run python group_names.py
 #echo $(date -u +"%F %T") "group_names ju ${FORECAST_YEAR} DONE"
 
-time poetry run python count_names.py
+time uv run python count_names.py
 echo $(date -u +"%F %T") "count_names.py DONE"
 
 tail -n 10 ${RO_LOG_PATH}
@@ -55,4 +55,4 @@ wait
 
 echo "DONE ${RUN_TS} in $SECONDS secs"
 
-# time poetry run python json_reports.py
+# time uv run python json_reports.py

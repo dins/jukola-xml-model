@@ -7,7 +7,7 @@ import pandas as pd
 
 import shared
 
-# time poetry run python count_names.py
+# time uv run python count_names.py
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s')

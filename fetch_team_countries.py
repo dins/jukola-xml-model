@@ -5,7 +5,7 @@ import sys
 import requests
 from lxml import html
 
-# time poetry run python fetch_team_countries.py 2022 && wc data/team_countries_j2022_ju.tsv
+# time uv run python fetch_team_countries.py 2022 && wc data/team_countries_j2022_ju.tsv
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s')
 

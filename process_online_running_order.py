@@ -9,7 +9,7 @@ import pandas as pd
 import normalize_names
 import shared
 
-# time poetry run python process_online_running_order.py 2023
+# time uv run python process_online_running_order.py 2023
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s')

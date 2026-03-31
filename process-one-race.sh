@@ -6,7 +6,7 @@ set -ef -o pipefail
 
 # BEFORE_RACE="true"
 echo $(date -u +"%F %T") "RACE_TYPE: ${RACE_TYPE}, FORECAST_YEAR: ${FORECAST_YEAR}, RUN_TS: ${RUN_TS}"
-time poetry run python group_names.py
+time uv run python group_names.py
 echo $(date -u +"%F %T") "group_names ${RACE_TYPE} ${FORECAST_YEAR} DONE"
 
 echo $(date -u +"%F %T") "Starting ngboost  ${RACE_TYPE} ${FORECAST_YEAR} in another directory"
@@ -17,14 +17,14 @@ echo $(date -u +"%F %T") "Starting ngboost  ${RACE_TYPE} ${FORECAST_YEAR} in ano
 echo $(date -u +"%F %T") "ngboost ${RACE_TYPE} ${FORECAST_YEAR} DONE"
 
 
-time poetry run python prepare_run_features.py
+time uv run python prepare_run_features.py
 echo $(date -u +"%F %T") "prepare_run_features.py ${RACE_TYPE} ${FORECAST_YEAR} DONE"
 
-time poetry run jupyter nbconvert --to notebook --inplace --ExecutePreprocessor.timeout=1200 --execute relay-simulation-2024.ipynb
+time uv run jupyter nbconvert --to notebook --inplace --ExecutePreprocessor.timeout=1200 --execute relay-simulation-2024.ipynb
 echo $(date -u +"%F %T") "relay-simulation-2024.ipynb ${RACE_TYPE} ${FORECAST_YEAR} DONE"
 
 if [[ -z "${BEFORE_RACE}" ]]; then
-  time poetry run jupyter nbconvert --to notebook --inplace --execute post-race-analysis.ipynb
+  time uv run jupyter nbconvert --to notebook --inplace --execute post-race-analysis.ipynb
   echo $(date -u +"%F %T") "post-race-analysis ${RACE_TYPE} ${FORECAST_YEAR} DONE"
 else
   echo $(date -u +"%F %T") "SKIPPING post-race-analysis ${RACE_TYPE} ${FORECAST_YEAR}"
