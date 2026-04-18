@@ -16,4 +16,11 @@ dependencies = [
     "scikit-optimize>=0.10.0,<1",
     "xmltodict>=0.13.0,<1",
     "pandas>=2.3.3,<3",
+    "polars>=1.39.3",
+    "ty>=0.0.26",
+    "ngboost>=0.5.10",
+    "properscoring>=0.1",
+    "pyarrow>=23.0.1",
+    "optuna>=4.8.0",
+    "optuna-dashboard>=0.20.0",
 ]

@@ -41,7 +41,7 @@ pending_races=(
 # 4. Use xargs to pass arguments to our exported function
 # -n 2: Passes exactly 2 arguments (Type and Year) to the function at a time
 # -P 8: Maintains exactly 8 workers concurrently
-printf "%s\n" "${pending_races[@]}" | xargs -n 2 -P 7 bash -c 'process_race_worker "$1" "$2"' _
+printf "%s\n" "${pending_races[@]}" | xargs -n 2 -P 8 bash -c 'process_race_worker "$1" "$2"' _
 
 echo "DONE ${RUN_TS}"
 

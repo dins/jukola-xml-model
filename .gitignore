@@ -7,3 +7,5 @@ scratch.txt
 /web-lib/for_web_ju_fy_201*
 /logs/
 /json_reports/*
+.aider*
+/.optuna-runs/

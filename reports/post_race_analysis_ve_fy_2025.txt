@@ -3,6 +3,8 @@ Aiempien Jukoloiden määrä (keskiarvo): 5.57 (Mediaani): 4.0
 Yksilöennusteen etumerkillinen keskivirhe (juoksija myöhästyi ennusteesta): 17.5 minuuttia
 Yksilöennusteen keskivirhe: 18.4 minuuttia
 Yksilöennusteen mediaanivirhe: 13.8 minuuttia
+Yksilöennusteen keskimääräinen CRPS (otosarvio): 12.927
+Yksilöennusteen keskimääräinen NLL: 4.524
 Virheen suhde loppuaikaan: 16.6 %
 Yksilön aikaväliennuste väärin: 8.6 %
 Yksilö nopeampi kuin aikaväliennuste: 0.0 %
@@ -11,36 +13,36 @@ Yksilön aikavälin keskikoko: 63.7 minuuttia
 Yksilön aikavälin keskikoko kertaa virhe: 5.5 minuuttia
 Yksilön aikavälin mediaani koko: 56.7 minuuttia
 Yksilön aikavälin mediaani koko kertaa virhe: 4.9 minuuttia
-          ind_interval  ind_interval_error  ind_interval_error_size
-num_runs                                                           
-0                77.45                0.10                     7.83
-1                69.88                0.06                     4.54
-2                63.96                0.07                     4.47
-3                62.34                0.06                     3.75
-4                60.36                0.07                     4.07
-5                63.39                0.08                     5.33
-6                61.82                0.09                     5.34
-7                57.89                0.11                     6.31
-8                57.01                0.11                     6.06
-9                58.96                0.09                     5.05
-10               56.28                0.11                     6.13
-11               53.67                0.08                     4.08
-12               53.67                0.14                     7.73
-13               54.47                0.12                     6.63
-14               50.78                0.08                     4.23
-15               55.53                0.09                     5.11
-16               52.21                0.04                     2.30
-17               52.86                0.06                     3.06
-18               59.45                0.11                     6.61
-19               51.05                0.09                     4.44
-20               49.11                0.10                     5.12
-21               50.84                0.10                     4.96
-22               53.60                0.18                     9.57
-23               48.78                0.17                     8.41
-24               52.93                0.00                     0.00
-25               48.59                0.09                     4.22
-26               45.36                0.21                     9.72
-27               51.50                0.00                     0.00
+          ind_interval  ind_interval_error  ind_crps  ind_nll  ind_interval_error_size
+num_runs                                                                              
+0                77.45                0.10     15.27     4.71                     7.83
+1                69.88                0.06     12.86     4.49                     4.54
+2                63.96                0.07     12.09     4.41                     4.47
+3                62.34                0.06     11.39     4.36                     3.75
+4                60.36                0.07     11.68     4.42                     4.07
+5                63.39                0.08     12.95     4.54                     5.33
+6                61.82                0.09     13.09     4.53                     5.34
+7                57.89                0.11     13.12     4.57                     6.31
+8                57.01                0.11     12.10     4.49                     6.06
+9                58.96                0.09     12.72     4.50                     5.05
+10               56.28                0.11     13.38     4.61                     6.13
+11               53.67                0.08     11.62     4.41                     4.08
+12               53.67                0.14     12.98     4.63                     7.73
+13               54.47                0.12     13.75     4.68                     6.63
+14               50.78                0.08     12.28     4.52                     4.23
+15               55.53                0.09     13.37     4.66                     5.11
+16               52.21                0.04     11.51     4.44                     2.30
+17               52.86                0.06     11.84     4.38                     3.06
+18               59.45                0.11     13.23     4.67                     6.61
+19               51.05                0.09     11.31     4.36                     4.44
+20               49.11                0.10     12.30     4.49                     5.12
+21               50.84                0.10      9.99     4.34                     4.96
+22               53.60                0.18     15.95     4.77                     9.57
+23               48.78                0.17     10.41     4.43                     8.41
+24               52.93                0.00     11.19     4.40                     0.00
+25               48.59                0.09     10.55     4.32                     4.22
+26               45.36                0.21     11.60     4.52                     9.72
+27               51.50                0.00      8.18     4.21                     0.00
          ind_interval        ind_error        ind_interval_error       ind_error_signed       
                  mean median      mean median               mean count             mean median
 num_runs                                                                                      
@@ -74,6 +76,8 @@ num_runs
 27              51.50  47.73     11.16  11.06               0.00     7            10.31  11.06
 Viestiennusteen keskivirhe: 42.7 minuuttia
 Viestiennusteen virheen mediaani: 32.9 minuuttia
+Viestiennusteen keskimääräinen CRPS (otosarvio): 31.553
+Viestiennusteen keskimääräinen NLL: 5.601
     relay_error             
            mean median count
 leg                         
