@@ -1,18 +1,6 @@
 # Data Flow Documentation
 
-Complete trace of data sources, processing scripts, and output files for the jukola-xml-model project.
-
----
-
-## Table of Contents
-
-1. [High-Level Data Flow](#high-level-data-flow)
-2. [Running Order Data (3 Sources)](#running-order-data-3-sources)
-3. [Results with Distances](#results-with-distances)
-4. [Terrain / Trail Data](#terrain--trail-data)
-5. [Leg Distances (Hardcoded)](#leg-distances-hardcoded)
-6. [Output File Index](#output-file-index)
-7. [External Dependencies](#external-dependencies)
+Trace of data sources, processing scripts, and output files for the jukola-xml-model project.
 
 ---
 
@@ -20,67 +8,63 @@ Complete trace of data sources, processing scripts, and output files for the juk
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                    External Data Sources                                │
-│  registration.jukola.com    │  online.jukola.com    │  results.jukola.com│
-└────────────────────┬────────────────────────────────────────────────┘
-                       │
-           ┌───────────┼───────────┐
-           ▼            ▼            ▼
-  fetch_running_order.py  process_online_running_order.py  fetch_online_team_countries.py
-           │            │                            │
-           ▼            ▼                            ▼
-  running_order_final_*.tsv  online_running_order_*.tsv  team_countries_*.tsv
-           │            │                            │
-           └───────────┴──────────────────────────┘
-                       │
-                       ▼
-           process-recent-years.sh / process-one-race.sh
-                       │
-           ┌───────────┼─────────────────────────────────┐
-           ▼            ▼                                  ▼
-  count_names.py  result_xml_to_csv.py          shared.py (leg distances)
-           │            │                                │
-           ▼            ▼                                ▼
-  team_countries_*.tsv  results_with_dist_*.tsv  distances dict
-           │            │                                │
-           └───────────┴──────────────────────────────┘
-                       │
-                       ▼
-          Model training / post-race analysis (Python notebooks)
+│                    External Data Sources                                 │
+│  registration.jukola.com  │  online.jukola.com  │  results.jukola.com│
+└────────────────────┬─────────────────────────────────────────────────┘
+                     │
+        ┌────────────┼────────────┐
+        ▼            ▼            ▼
+fetch_running_order.py  process_online_running_order.py  fetch_online_team_countries.py
+        │            │                            │
+        ▼            ▼                            ▼
+running_order_final_*.tsv  online_running_order_*.tsv  team_countries_*.tsv
+        │            │                            │
+        └────────────┴───────────────────────────┘
+                     │
+                     ▼
+          process-recent-years.sh / process-one-race.sh
+                     │
+        ┌────────────┼──────────────────────────────────┐
+        ▼            ▼                                   ▼
+count_names.py  result_xml_to_csv.py          shared.py (leg distances)
+        │            │                                │
+        ▼            ▼                                ▼
+team_countries_*.tsv  results_with_dist_*.tsv  distances dict
+        │            │                                │
+        └────────────┴───────────────────────────────┘
+                     │
+                     ▼
+            Model training / post-race analysis (notebooks)
 ```
 
 ---
 
 ## Running Order Data (3 Sources)
 
-The project fetches running order (competitor lineup) data from **three different sources**, each serving a specific purpose:
-
 ### Source A: Registration Site (`fetch_running_order.py`)
 
 - **URL**: `https://registration.jukola.com/?kisa=j{YEAR}&view=1&sarja={VE_OR_JU}&...`
-- **Method**: HTML scraping (parses team lists from registration page using lxml)
+- **Method**: HTML scraping (parses team lists from registration page)
 - **Output**: `data/running_order_final_{VE_OR_JU}_fy_{YEAR}.tsv`
-- **Derived Output**: `data/team_countries_j{YEAR}_{VE_OR_JU}.tsv`
-- **When Used**: Default source for all years **except** the most recent completed year
-- **Key Fields**: team ID, team name, competitor name, country, start time, leg assignments
+- **Derived**: `data/team_countries_j{YEAR}_{VE_OR_JU}.tsv`
+- **When**: Default source for all years **except** the most recent completed year
 
 ### Source B: Online JSON API (`process_online_running_order.py`)
 
-- **Input**: Pre-downloaded JSON file from `data/online-running-order/`
-- **JSON Source URL**: `https://online.jukola.com/tulokset-new/online/online_j{YEAR}_{VE_OR_JU}_competitors.json`
+- **Input**: Pre-downloaded JSON from `data/online-running-order/`
+- **JSON URL**: `https://online.jukola.com/tulokset-new/online/online_j{YEAR}_{VE_OR_JU}_competitors.json`
 - **Output**: `data/online_running_order_{VE_OR_JU}_fy_{YEAR}.tsv`
-- **Derived Output**: `data/online_team_countries_j{YEAR}_{VE_OR_JU}.tsv`
-- **When Used**: For recent years where registration site data is unreliable or outdated
-- **Advantage**: Structured JSON (no HTML scraping needed)
+- **Derived**: `data/online_team_countries_j{YEAR}_{VE_OR_JU}.tsv`
+- **When**: Recent years where registration site data is unreliable
+- **Advantage**: Structured JSON (no HTML scraping)
 
-### Source C: Online Team Countries Only (`fetch_online_team_countries.py`)
+### Source C: Team Countries Only (`fetch_online_team_countries.py`)
 
 - **URL**: `https://online.jukola.com/tulokset-new/online/online_j{YEAR}_{RACE_TYPE}_competitors.json`
-- **Method**: JSON API parsing (extracts only team-country mappings from pre-downloaded JSON)
+- **Method**: Parses pre-downloaded JSON for team-country mappings
 - **Output**: `data/team_countries_j{YEAR}_{RACE_TYPE}.tsv`
-- **When Used**: One-off fetch for the current race year/RACE_TYPE (set via environment variables `RACE_TYPE` and `FORECAST_YEAR`)
-- **Purpose**: Gets team base names and countries without full running order
-- **Note**: RACE_TYPE is one of `ve` (Venlojen viesti), `ju` (Jukolan viesti), or `ke` (Kenraali harjoitus). In older code, it may also be referred to as `ve_or_ju`.
+- **When**: One-off fetch for current race year (via `RACE_TYPE` and `FORECAST_YEAR` env vars)
+- **Purpose**: Team base names and countries without full running order
 
 ---
 
@@ -92,17 +76,15 @@ The project fetches running order (competitor lineup) data from **three differen
 
 ### XML Source URLs
 
-Two possible sources for the XML results file:
-
-1. **Archived results** (reliable after race): `https://results.jukola.com/tulokset/results_j{YEAR}_{VE_OR_JU}.xml`
-2. **Online results** (available during/just after race): `https://online.jukola.com/tulokset-new/xml/results_j{YEAR}_{VE_OR_JU}.xml`
+1. **Archived** (reliable after race): `https://results.jukola.com/tulokset/results_j{YEAR}_{VE_OR_JU}.xml`
+2. **Online** (during/after race): `https://online.jukola.com/tulokset-new/xml/results_j{YEAR}_{VE_OR_JU}.xml`
 
 ### Output TSV Columns
 
 | Column | Description |
 |--------|-------------|
-| `team-id` | Unique team identifier |
-| `placement` | Team placement in race |
+| `team-id` | Team identifier |
+| `placement` | Race placement |
 | `team-time` | Total team time (seconds) |
 | `team-name` | Team name |
 | `team-nro` | Team number |
@@ -110,38 +92,37 @@ Two possible sources for the XML results file:
 | `emit` | Emit (chip) ID |
 | `leg-time` | Leg completion time (seconds) |
 | `competitor-name` | Competitor name |
-| `weighted_log_mean_pace` | Weighted average log pace |
-| `weighted_log_pace_std` | Std dev of weighted log paces |
-| `disqualified` | Whether leg was disqualified |
-| `leg_distance` | Distance of leg (meters) |
+| `weighted_log_mean_pace` | Weighted avg log pace |
+| `weighted_log_pace_std` | Log pace std dev |
+| `disqualified` | DQ status |
+| `leg_distance` | Leg distance (meters) |
 
 ---
 
 ## Terrain / Trail Data
 
-Static data provided by hand, stored in `Jukola-terrain/`:
+Static data in `Jukola-terrain/`:
 
 | File | Description |
 |------|-------------|
-| `ideal-paces-ju.tsv` | Ideal paces for Jukolan viesti terrain |
-| `ideal-paces-ke.tsv` | Ideal paces for Kenraali harjoitus terrain |
-| `ideal-paces-ve.tsv` | Ideal paces for Venlojen viesti terrain |
-| `ju-ideal-times.csv` | Ideal times per leg for Jukolan viesti |
-| `ve-ideal-times.csv` | Ideal times per leg for Venlojen viesti |
+| `ideal-paces-ju.tsv` | Ideal paces — Jukolan viesti |
+| `ideal-paces-ke.tsv` | Ideal paces — Kenraali harjoitus |
+| `ideal-paces-ve.tsv` | Ideal paces — Venlojen viesti |
+| `ju-ideal-times.csv` | Ideal times per leg — Jukolan viesti |
+| `ve-ideal-times.csv` | Ideal times per leg — Venlojen viesti |
 | `terrrain-descriptions.json` | Terrain type descriptions |
-| `viitoitus.csv` | Waymarking information |
+| `viitoitus.csv` | Waymarking info |
 
-**Used by**: Model training scripts, `ideal_paces_cleanup.py`, and post-race analysis notebooks.
+**Used by**: Model training scripts, `ideal_paces_cleanup.py`, post-race notebooks.
 
 ---
 
 ## Leg Distances (Hardcoded)
 
-Leg distances are **hardcoded in `shared.py`** in the `distances` dictionary.
+Leg distances are **hardcoded in `shared.py`** (`distances` dict).
 
-- **Accessor**: `shared.leg_distance(ve_or_ju, year, leg)` (1-indexed leg number; e.g., leg 1, 2, 3...; internally converts to 0-indexed via `dist[leg - 1]`)
-- **Update Frequency**: Each year after the race, distances are updated from official race data
-- **Where to find new distances**: Official race results XML or from `Jukola-terrain/` files
+- **Accessor**: `shared.leg_distance(ve_or_ju, year, leg)`
+- **Update**: Manually before race.
 
 ---
 
@@ -151,62 +132,32 @@ Leg distances are **hardcoded in `shared.py`** in the `distances` dictionary.
 
 | File | Produced By | Purpose |
 |------|-------------|---------|
-| `running_order_final_{VE_OR_JU}_fy_{YEAR}.tsv` | `fetch_running_order.py` | Full running order from registration site |
+| `running_order_final_{VE_OR_JU}_fy_{YEAR}.tsv` | `fetch_running_order.py` | Running order from registration |
 | `online_running_order_{VE_OR_JU}_fy_{YEAR}.tsv` | `process_online_running_order.py` | Running order from online JSON |
-| `team_countries_j{YEAR}_{VE_OR_JU}.tsv` | `fetch_running_order.py` | Team-country mappings (from registration) |
-| `online_team_countries_j{YEAR}_{VE_OR_JU}.tsv` | `process_online_running_order.py` | Team-country mappings (from online JSON) |
+| `team_countries_j{YEAR}_{VE_OR_JU}.tsv` | `fetch_running_order.py` | Team-country mappings (registration) |
+| `online_team_countries_j{YEAR}_{VE_OR_JU}.tsv` | `process_online_running_order.py` | Team-country mappings (online) |
 | `results_with_dist_j{YEAR}_{VE_OR_JU}.tsv` | `result_xml_to_csv.py` | Results with leg distances |
 
 ### `data/online-running-order/` Directory
 
-Pre-downloaded JSON files from online.jukola.com API. To fetch new data:
-
-```bash
-curl https://online.jukola.com/tulokset-new/online/online_j{YEAR}_{VE_OR_JU}_competitors.json \
-    > data/online-running-order/online_running_order_{YEAR}_{VE_OR_JU}.json
-```
+Pre-downloaded JSON files from online.jukola.com API.
 
 ### `reports/` Directory
 
-Post-race analysis output files (generated by model scripts, not covered in detail here).
+Post-race analysis output (generated by model scripts).
 
 ### `results/` Directory
 
-Model prediction outputs organized by model version (e.g., `ngboost-norm-tuned-reviewed/`). Contains:
+Model prediction outputs by model version (e.g., `ngboost-norm-tuned-reviewed/`):
 - `ngboost_metrics_{RACE_TYPE}_fy_{YEAR}.json` — Performance metrics
-- `running_order_samples_v2_{RACE_TYPE}_fy_{YEAR}.json` — Simulated pace samples for runners in running order
+- `running_order_samples_v2_{RACE_TYPE}_fy_{YEAR}.json` — Simulated pace samples
 
 ---
 
 ## External Dependencies
 
-| Domain | URL | What It Provides |
-|--------|-----|------------------|
-| Registration | `https://registration.jukola.com/` | Running order (competitor lineups) as HTML |
-| Online API | `https://online.jukola.com/` | Live results JSON, competitors JSON (as structured data) |
-| Results archive | `https://results.jukola.com/` | Archived XML results with full leg details |
-
----
-
-## How to Add a New Year's Data
-
-1. **Fetch running order** (from registration site):
-```bash
-# Set environment variables RACE_TYPE and FORECAST_YEAR before running
-uv run python fetch_running_order.py
-```
-
-2. **Fetch results with distances**:
-```bash
-curl https://results.jukola.com/tulokset/results_j{YEAR}_{VE_OR_JU}.xml \
-    > data/results_j{YEAR}_{VE_OR_JU}.xml
-uv run python result_xml_to_csv.py {YEAR} {VE_OR_JU}
-```
-
-3. **Update leg distances** in `shared.py` in the `distances` dictionary (if they changed from previous years)
-
-4. **Alternative: fetch from online JSON** (if registration site is unreliable or outdated):
-```bash
-curl https://online.jukola.com/tulokset-new/online/online_j{YEAR}_{VE_OR_JU}_competitors.json \
-    > data/online-running-order/online_running_order_{YEAR}_{VE_OR_JU}.json
-uv run python process_online_running_order.py
+| Domain | URL | Provides |
+|--------|-----|----------|
+| Registration | `registration.jukola.com` | Running order (HTML) |
+| Online API | `online.jukola.com` | Live results JSON |
+| Results archive | `results.jukola.com` | Archived XML results |
