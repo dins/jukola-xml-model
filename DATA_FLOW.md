@@ -76,12 +76,12 @@ The project fetches running order (competitor lineup) data from **three differen
 - **Available Files** (as of 2026-04-19):
   | File | Year | Race Type |
   |------|------|-----------|
-  | `online_running_order_2023_ju.json` | 2023 | Junior (Jukola) |
-  | `online_running_order_2023_ve.json` | 2023 | Veteran (Viesti) |
-  | `online_running_order_2024_ju.json` | 2024 | Junior |
-  | `online_running_order_2024_ve.json` | 2024 | Veteran |
-  | `online_running_order_2025_ke.json` | 2025 | Relay (Koulta) |
-  | `online_running_order_2099_ve.json` | 2099 | Veteran |
+   | `online_running_order_2023_ju.json` | 2023 | Jukolan viesti |
+   | `online_running_order_2023_ve.json` | 2023 | Venlojen viesti |
+   | `online_running_order_2024_ju.json` | 2024 | Jukolan viesti |
+   | `online_running_order_2024_ve.json` | 2024 | Venlojen viesti |
+   | `online_running_order_2025_ke.json` | 2025 | Kenraali harjoitus |
+   | `online_running_order_2099_ve.json` | 2099 | Venlojen viesti |
 - **Code**: Lines 20-141 of `process_online_running_order.py`
 
 ### Source C: Online Team Countries Only (`fetch_online_team_countries.py`)
@@ -89,8 +89,9 @@ The project fetches running order (competitor lineup) data from **three differen
 - **URL**: `https://online.jukola.com/tulokset-new/online/online_j{YEAR}_{RACE_TYPE}_competitors.json`
 - **Method**: JSON API parsing (extracts only team-country mappings)
 - **Output**: `data/team_countries_j{YEAR}_{RACE_TYPE}.tsv`
-- **When Used**: One-off fetch for the current race year/type (as set in `shared.py`)
+- **When Used**: One-off fetch for the current race year/RACE_TYPE (as set in `shared.py`)
 - **Purpose**: Gets team base names and countries without full running order
+- **Note**: RACE_TYPE is one of `ve` (Venlojen viesti), `ju` (Jukolan viesti), or `ke` (Kenraali harjoitus). In older code, it may also be referred to as `ve_or_ju`.
 - **Code**: Lines 33-53 of `fetch_online_team_countries.py`
 
 ---
@@ -141,11 +142,11 @@ Static data provided by hand, stored in `Jukola-terrain/`:
 
 | File | Description |
 |------|-------------|
-| `ideal-paces-ju.tsv` | Ideal paces for Junior (Jukola) terrain |
-| `ideal-paces-ke.tsv` | Ideal paces for Koulta (relay) terrain |
-| `ideal-paces-ve.tsv` | Ideal paces for Veteran (Viesti) terrain |
-| `ju-ideal-times.csv` | Ideal times per leg for Junior |
-| `ve-ideal-times.csv` | Ideal times per leg for Veteran |
+| `ideal-paces-ju.tsv` | Ideal paces for Jukolan viesti terrain |
+| `ideal-paces-ke.tsv` | Ideal paces for Kenraali harjoitus terrain |
+| `ideal-paces-ve.tsv` | Ideal paces for Venlojen viesti terrain |
+| `ju-ideal-times.csv` | Ideal times per leg for Jukolan viesti |
+| `ve-ideal-times.csv` | Ideal times per leg for Venlojen viesti |
 | `terrrain-descriptions.json` | Terrain type descriptions |
 | `viitoitus.csv` | Waymarking information |
 
@@ -170,7 +171,7 @@ distances = {
 }
 ```
 
-- **Accessor**: `shared.leg_distance(race_type, year, leg_number)` (0-indexed leg number)
+- **Accessor**: `shared.leg_distance(race_type, year, leg_number)` (0-indexed leg number; in older code, this parameter may also be referred to as `ve_or_ju`)
 - **Update Frequency**: Each year after the race, distances are updated from official race data
 - **Where to find new distances**: Official race results XML or from `Jukola-terrain/` files
 
