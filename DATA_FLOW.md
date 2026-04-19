@@ -20,32 +20,32 @@ Complete trace of data sources, processing scripts, and output files for the juk
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                    External Data Sources                              │
-│  registration.jukola.com  │  online.jukola.com  │  results.jukola.com│
+│                    External Data Sources                               │
+│  registration.jukola.com   │  online.jukola.com   │  results.jukola.com│
 └────────────────────┬────────────────────────────────────────────────┘
-                     │
-         ┌───────────┼───────────┐
-         ▼           ▼           ▼
+                      │
+          ┌───────────┼───────────┐
+          ▼           ▼           ▼
   fetch_running_order.py  process_online_running_order.py  fetch_online_team_countries.py
-         │           │                                │
-         ▼           ▼                                ▼
+          │           │                           │
+          ▼           ▼                           ▼
   running_order_final_*.tsv  online_running_order_*.tsv  team_countries_*.tsv
-         │           │                                │
-         └───────────┴────────────────────────────────┘
-                     │
-                     ▼
+          │           │                           │
+          └───────────┴──────────────────────────┘
+                      │
+                      ▼
            process-recent-years.sh / process-one-race.sh
-                     │
-         ┌───────────┼─────────────────────────────────┐
-         ▼           ▼                                 ▼
+                      │
+          ┌───────────┼─────────────────────────────────┐
+          ▼           ▼                                 ▼
   count_names.py  result_xml_to_csv.py          shared.py (leg distances)
-         │           │                              │
-         ▼           ▼                              ▼
+          │           │                               │
+          ▼           ▼                               ▼
   team_countries_*.tsv  results_with_dist_*.tsv  distances dict
-         │           │                              │
-         └───────────┴──────────────────────────────┘
-                     │
-                     ▼
+          │           │                               │
+          └───────────┴──────────────────────────────┘
+                      │
+                      ▼
           Model training / post-race analysis (Python notebooks)
 ```
 
@@ -63,7 +63,6 @@ The project fetches running order (competitor lineup) data from **three differen
 - **Derived Output**: `data/team_countries_j{YEAR}_{VE_OR_JU}.tsv`
 - **When Used**: Default source for all years **except** the most recent completed year
 - **Key Fields**: team ID, team name, competitor name, country, start time, leg assignments
-- **Code**: Lines 20-87 of `fetch_running_order.py`
 
 ### Source B: Online JSON API (`process_online_running_order.py`)
 
@@ -73,16 +72,6 @@ The project fetches running order (competitor lineup) data from **three differen
 - **Derived Output**: `data/online_team_countries_j{YEAR}_{VE_OR_JU}.tsv`
 - **When Used**: For recent years where registration site data is unreliable or outdated
 - **Advantage**: Structured JSON (no HTML scraping needed)
-- **Available Files** (as of 2026-04-19):
-  | File | Year | Race Type |
-  |------|------|-----------|
-   | `online_running_order_2023_ju.json` | 2023 | Jukolan viesti |
-   | `online_running_order_2023_ve.json` | 2023 | Venlojen viesti |
-   | `online_running_order_2024_ju.json` | 2024 | Jukolan viesti |
-   | `online_running_order_2024_ve.json` | 2024 | Venlojen viesti |
-   | `online_running_order_2025_ke.json` | 2025 | Kenraali harjoitus |
-   | `online_running_order_2099_ve.json` | 2099 | Venlojen viesti |
-- **Code**: Lines 20-141 of `process_online_running_order.py`
 
 ### Source C: Online Team Countries Only (`fetch_online_team_countries.py`)
 
@@ -92,7 +81,6 @@ The project fetches running order (competitor lineup) data from **three differen
 - **When Used**: One-off fetch for the current race year/RACE_TYPE (as set in `shared.py`)
 - **Purpose**: Gets team base names and countries without full running order
 - **Note**: RACE_TYPE is one of `ve` (Venlojen viesti), `ju` (Jukolan viesti), or `ke` (Kenraali harjoitus). In older code, it may also be referred to as `ve_or_ju`.
-- **Code**: Lines 33-53 of `fetch_online_team_countries.py`
 
 ---
 
@@ -127,13 +115,6 @@ Two possible sources for the XML results file:
 | `disqualified` | Whether leg was disqualified |
 | `leg_distance` | Distance of leg (meters) |
 
-### Processing Logic
-
-1. Parses XML `team` and `leg` elements
-2. For each leg, extracts control times (`cd` fields) and computes control-level paces
-3. Computes weighted log mean pace and standard deviation using leg distances as weights
-4. Looks up leg distance from `shared.leg_distance()` (hardcoded per year/race type)
-
 ---
 
 ## Terrain / Trail Data
@@ -156,20 +137,8 @@ Static data provided by hand, stored in `Jukola-terrain/`:
 
 ## Leg Distances (Hardcoded)
 
-Leg distances are **hardcoded in `shared.py`** in the `distances` dictionary:
+Leg distances are **hardcoded in `shared.py`** in the `distances` dictionary.
 
-```python
-distances = {
-    'ju': {
-        '2025': [1050, 1350, ...],  # distances per leg
-        '2024': [980, 1400, ...],
-        ...
-    },
-    've': {
-        ...
-    }
-}
-```
 
 - **Accessor**: `shared.leg_distance(race_type, year, leg_number)` (0-indexed leg number; in older code, this parameter may also be referred to as `ve_or_ju`)
 - **Update Frequency**: Each year after the race, distances are updated from official race data
@@ -195,7 +164,7 @@ Pre-downloaded JSON files from online.jukola.com API. To fetch new data:
 
 ```bash
 curl https://online.jukola.com/tulokset-new/online/online_j{YEAR}_{VE_OR_JU}_competitors.json \
-  > data/online-running-order/online_running_order_{YEAR}_{VE_OR_JU}.json
+   > data/online-running-order/online_running_order_{YEAR}_{VE_OR_JU}.json
 ```
 
 ### `reports/` Directory
@@ -216,13 +185,6 @@ Model prediction outputs (ngboost predictions, running order samples).
 | Online API | `https://online.jukola.com/` | Live results JSON, competitors JSON (as structured data) |
 | Results archive | `https://results.jukola.com/` | Archived XML results with full leg details |
 
-### Rate Limiting / Timeout Notes
-
-- `fetch_running_order.py`: timeout=15 seconds per request
-- `process_online_running_order.py`: timeout=30 seconds per request
-- `fetch_online_team_countries.py`: timeout=15 seconds per request
-- No explicit rate limiting between multiple requests (fetch sequentially)
-
 ---
 
 ## How to Add a New Year's Data
@@ -236,7 +198,7 @@ Model prediction outputs (ngboost predictions, running order samples).
 2. **Fetch results with distances**:
    ```bash
    curl https://results.jukola.com/tulokset/results_j{YEAR}_{VE_OR_JU}.xml \
-     > data/results_j{YEAR}_{VE_OR_JU}.xml
+      > data/results_j{YEAR}_{VE_OR_JU}.xml
    uv run python result_xml_to_csv.py {YEAR} {VE_OR_JU}
    ```
 
@@ -245,5 +207,5 @@ Model prediction outputs (ngboost predictions, running order samples).
 4. **Alternative: fetch from online JSON** (if registration site is unreliable):
    ```bash
    curl https://online.jukola.com/tulokset-new/online/online_j{YEAR}_{VE_OR_JU}_competitors.json \
-     > data/online-running-order/online_running_order_{YEAR}_{VE_OR_JU}.json
+      > data/online-running-order/online_running_order_{YEAR}_{VE_OR_JU}.json
    uv run python process_online_running_order.py
