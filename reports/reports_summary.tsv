@@ -2207,11 +2207,15 @@ execution_timestamp	kpi	value
 20260417_203048	Yksilöennusteen keskivirhe	14.56
 20260417_203048	Yksilön aikaväliennuste väärin	0.07
 20260417_203048	Yksilön aikavälin keskikoko	63.28
-opt.3_2024_1775020902	Viestin aikaväliennuste väärin	0.551
-opt.3_2024_1775020902	Yksilöennusteen keskivirhe	28.273
-opt.3_2024_1775020902	Yksilön aikaväliennuste väärin	0.23
-opt.3_2024_1775020902	Yksilön aikavälin keskikoko	71.511
-optuna_t2_2024_1775020669	Viestin aikaväliennuste väärin	0.058
-optuna_t2_2024_1775020669	Yksilöennusteen keskivirhe	10.985
-optuna_t2_2024_1775020669	Yksilön aikaväliennuste väärin	0.025
-optuna_t2_2024_1775020669	Yksilön aikavälin keskikoko	60.563
+20260418_094915	Viestin aikaväliennuste väärin	0.163
+20260418_094915	Yksilöennusteen keskivirhe	14.56
+20260418_094915	Yksilön aikaväliennuste väärin	0.07
+20260418_094915	Yksilön aikavälin keskikoko	63.28
+20260418_152603	Viestin aikaväliennuste väärin	0.13
+20260418_152603	Yksilöennusteen keskivirhe	14.767
+20260418_152603	Yksilön aikaväliennuste väärin	0.051
+20260418_152603	Yksilön aikavälin keskikoko	69.849
+20260419_001206	Viestin aikaväliennuste väärin	0.13
+20260419_001206	Yksilöennusteen keskivirhe	14.767
+20260419_001206	Yksilön aikaväliennuste väärin	0.051
+20260419_001206	Yksilön aikavälin keskikoko	69.849

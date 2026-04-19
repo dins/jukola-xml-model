@@ -86,9 +86,10 @@ def _load_ngboost_estimates_for_running_order_names():
 
     #results_dir = '~/koodi/jukola-ngboost/results/ngboost-dev'
     #results_dir = '~/koodi/jukola-ngboost/results/ngboost-student-t'
-    results_dir = '~/koodi/jukola-ngboost/results/ngboost-norm-tuned-reviewed'
+    # results_dir = '~/koodi/jukola-ngboost/results/ngboost-norm-tuned-reviewed'
     #results_dir = '~/koodi/jukola-ngboost/results/hgb_reg-dev'
     #results_dir = '~/koodi/jukola-ngboost/results/hgb-NO-BC-dev'
+    results_dir = 'results/ngboost-norm-tuned-reviewed'
     forecasts_path = f'{results_dir}/running_order_samples_v2_{shared.race_id_str()}.json'
 
     ngboost_estimates = pd.read_json(forecasts_path)
