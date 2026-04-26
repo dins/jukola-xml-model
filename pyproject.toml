@@ -23,4 +23,5 @@ dependencies = [
     "pyarrow>=23.0.1",
     "optuna>=4.8.0",
     "optuna-dashboard>=0.20.0",
+    "ruff>=0.15.11",
 ]

@@ -2,6 +2,9 @@
 Analyze and estimate Jukola Relay results
 
 ## Setup
+
+See [UV_USAGE.md](UV_USAGE.md) for a comprehensive guide on using `uv` in this project.
+
 ```bash
 uv sync
 # Enable jupyter execution time measurement extension
