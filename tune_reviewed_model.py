@@ -225,13 +225,13 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--race-type", default="ve", choices=["ju", "ve", "ke"])
     parser.add_argument(
-        "--years", nargs="+", type=int, default=[2021, 2022, 2023, 2024]
+        "--years", nargs="+", type=int, default=[2022, 2023, 2024, 2025]
     )
     parser.add_argument(
         "--study-name",
-        help="Optuna study name (default: reviewed-model-tuning-{race-type})",
+        help="Optuna study name (default: v2-tuning-{race-type})",
     )
-    parser.add_argument("--n-workers", type=int, default=4)
+    parser.add_argument("--n-workers", type=int, default=8)
     parser.add_argument(
         "--trials-per-worker",
         type=int,
@@ -252,7 +252,7 @@ def main():
         level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
     )
 
-    study_name = args.study_name or f"reviewed-model-tuning-{args.race_type}"
+    study_name = args.study_name or f"v2-tuning-{args.race_type}"
     journal_path = Path(
         args.journal_path or f".optuna/reviewed-journal-{args.race_type}.log"
     )
