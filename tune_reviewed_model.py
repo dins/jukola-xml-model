@@ -47,15 +47,15 @@ def suggest_params(trial: optuna.Trial) -> Dict[str, Any]:
 
     return {
         # Decision Tree parameters
-        "Base__max_depth": trial.suggest_int("Base__max_depth", 2, 10),
+        "Base__max_depth": trial.suggest_int("Base__max_depth", 2, 15),
         "Base__min_samples_leaf": min_samples_leaf,
         "Base__max_features": trial.suggest_float("Base__max_features", 0.3, 1.0),
         # NGBoost parameters
-        "learning_rate": trial.suggest_float("learning_rate", 0.001, 0.2, log=True),
-        "col_sample": trial.suggest_float("col_sample", 0.3, 1.0),
-        "minibatch_frac": trial.suggest_float("minibatch_frac", 0.3, 1.0),
+        "learning_rate": trial.suggest_float("learning_rate", 0.01, 0.2, log=True),
+        "col_sample": 1.0, # Fixed to avoid confounding with minibatch_frac
+        "minibatch_frac": trial.suggest_categorical("minibatch_frac", [0.7, 0.8, 1.0]),
         # Fixed or baseline parameters
-        "n_estimators": 1000,  # Notebook adds 50. Early stopping will handle the rest.
+        "n_estimators": 500,  # Notebook adds 50. Early stopping will handle the rest.
     }
 
 
@@ -207,7 +207,7 @@ def worker(worker_id: int, config: TuningConfig):
         sampler=sampler,
         # Pruning kills trials that are performing worse than the median at the same step (year).
         # This is complementary to the early stopping happening inside the notebook's NGBoost training.
-        pruner=optuna.pruners.MedianPruner(n_startup_trials=5, n_warmup_steps=1),
+        pruner=optuna.pruners.MedianPruner(n_startup_trials=10, n_warmup_steps=2),
     )
 
     timeout = None
@@ -229,7 +229,7 @@ def main():
     )
     parser.add_argument(
         "--study-name",
-        help="Optuna study name (default: v2-tuning-{race-type})",
+        help="Optuna study name (default: v3-tuning-{race-type})",
     )
     parser.add_argument("--n-workers", type=int, default=8)
     parser.add_argument(
@@ -252,7 +252,7 @@ def main():
         level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
     )
 
-    study_name = args.study_name or f"v2-tuning-{args.race_type}"
+    study_name = args.study_name or f"v3-tuning-{args.race_type}"
     journal_path = Path(
         args.journal_path or f".optuna/reviewed-journal-{args.race_type}.log"
     )

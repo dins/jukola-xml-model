@@ -74,3 +74,4 @@ Runners are grouped by their team's country to provide a "prior" for runners wit
 - **Distribution**: `Normal` (Gaussian)
 - **Loss**: Log-likelihood
 - **Metric**: CRPS (Continuous Ranked Probability Score)
+- **Output**: Alongside abstract distribution parameters (`log_mean`, `log_std`), the model explicitly generates thousands of clipped Monte Carlo samples per runner (stored in the `pace_samples` array column) which are consumed directly by the relay simulation.

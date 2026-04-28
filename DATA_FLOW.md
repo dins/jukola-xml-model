@@ -80,7 +80,7 @@ This script handles the sequential processing for a single race type and forecas
 ### 2.2 Modeling (`ngboost-norm-tuned-reviewed.ipynb`)
 - Performs internal feature engineering (Box-Cox transformations, rolling history metrics).
 - Trains the NGBoost model or loads tuned parameters.
-- Outputs individual runner pace estimates (distributions).
+- **Outputs**: `results/ngboost-norm-tuned-reviewed/running_order_samples_v2_{race_id}.json` (which contains individual runner pace distribution parameters AND explicitly generated Monte Carlo pace sample arrays in `pace_samples`).
 
 ### 2.3 Simulation Prep (`prepare_run_features.py`)
 - **Input**: `data/long_runs_and_running_order_{RACE_TYPE}_fy_{YEAR}.tsv` & `results/ngboost-norm-tuned-reviewed/running_order_samples_v2_{race_id}.json`
