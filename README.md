@@ -36,9 +36,9 @@ time RACE_TYPE=ve FORECAST_YEAR=2025 uv run python fetch_online_team_countries.p
 time RACE_TYPE=ve FORECAST_YEAR=2025 uv run python final_running_order.py && time RACE_TYPE=ju FORECAST_YEAR=2025 uv run python final_running_order.py  # Post race running order from results
 ```
 
-Then run a script.
+Then run the pipeline.
 
-### Run a single script 
+### Run the full pipeline 
 ```bash
 time ./process-recent-years.sh
 ```
