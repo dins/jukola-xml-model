@@ -74,7 +74,7 @@ def analyze_names():
     counts["is_firstname"] = counts["fn_count"] > counts["ln_count"]
 
     to_file = counts.reset_index().rename(columns={"index": "name"})
-    to_file.to_json(f'data/name_counts.json', orient="records", date_format="iso")
+    to_file.to_json('data/name_counts.json', orient="records", date_format="iso")
 
 
 if __name__ == '__main__':

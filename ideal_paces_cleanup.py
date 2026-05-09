@@ -70,7 +70,7 @@ def _cleanup_ideal_times(race_type, marked_route):
     cleaned.to_csv(f'Jukola-terrain/ideal-paces-{race_type}.tsv', sep="\t", index=False)
 
 
-marked_route = pd.read_csv(f'Jukola-terrain/viitoitus.csv', delimiter=";")
+marked_route = pd.read_csv('Jukola-terrain/viitoitus.csv', delimiter=";")
 marked_route["marking"] = marked_route["viitoitus"]
 marked_route_cleaned = marked_route[["year", "race_type", "marking"]]
 logging.info(f"marked_route_cleaned: {marked_route_cleaned}")

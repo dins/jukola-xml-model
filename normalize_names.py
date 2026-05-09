@@ -1,6 +1,5 @@
 import json
 import logging
-import re
 import sys
 import count_names
 
@@ -9,7 +8,7 @@ import count_names
 
 
 def read_first_names() -> set:
-    with open(f'data/name_counts.json') as json_file:
+    with open('data/name_counts.json') as json_file:
         name_counts = json.load(json_file)
         first_names = {count["name"] for count in name_counts if count["is_firstname"]}
         return first_names
