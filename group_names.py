@@ -12,7 +12,7 @@ import shared
 # time RACE_TYPE=ju FORECAST_YEAR=2024 uv run python group_names.py
 # To get all years use next year:
 # time RACE_TYPE=ju FORECAST_YEAR=2026 uv run python group_names.py
-def _connect_teams_by_emit(runs):
+def _connect_teams_by_emit(runs: list[dict]) -> list[frozenset[str]]:
     runs_by_team = defaultdict(list)
     for run in runs:
         runs_by_team[run["team"]].append(run)
@@ -28,7 +28,7 @@ def _connect_teams_by_emit(runs):
             unique_teams.remove(emit_run["team"])
             teams_connected_by_emit[emit_run["team"]].update(unique_teams)
 
-    def _get_connected_teams(team, found_connections):
+    def _get_connected_teams(team: str, found_connections: set[str]) -> set[str]:
         found_connections.add(team)
         for connection in teams_connected_by_emit[team]:
             if connection not in found_connections:
@@ -63,7 +63,7 @@ def _connect_teams_by_emit(runs):
     return connected_teams_sets
 
 
-def _write_individual_runs_file(grouped_runs_by_unique_name):
+def _write_individual_runs_file(grouped_runs_by_unique_name: dict[str, list[dict]]) -> None:
     records = [
         {"unique_name": unique_name, **run}
         for unique_name, runs in grouped_runs_by_unique_name.items()
@@ -129,7 +129,7 @@ def _write_individual_runs_file(grouped_runs_by_unique_name):
 
 
 
-def _first_name_stats(df):
+def _first_name_stats(df: pd.DataFrame) -> pd.DataFrame:
     # df = runs[['unique_name', 'pace', 'year', 'leg']].copy()
     df['first_name'] = df['unique_name'].str.split().str[0]
     # logging.info(df.head(50).to_string(index=False) )
@@ -178,7 +178,7 @@ def _first_name_stats(df):
     return df
 
 
-def _group_raw_runs_to_runners(raw_runs_by_name):
+def _group_raw_runs_to_runners(raw_runs_by_name: dict[str, list[dict]]) -> dict[str, list[dict]]:
     by_unique_name = {}
     for name, raw_runs in raw_runs_by_name.items():
 
@@ -190,7 +190,7 @@ def _group_raw_runs_to_runners(raw_runs_by_name):
 
         if len(years_with_multiple_teams) > 1:
             logging.info(
-                f"{name} Multiple teams, ONE: {has_multiple_teams_only_in_one_year} {years_with_multiple_teams=} {connected_teams_sets=}\n{pd.DataFrame.from_dict(raw_runs)}")
+                f"{name} Multiple teams, ONE: {has_multiple_teams_only_in_one_year} {years_with_multiple_teams=} {connected_teams_sets=}\n{pd.DataFrame(raw_runs)}")
 
         if not has_multiple_teams_at_least_in_one_year or has_multiple_teams_only_in_one_year:
             by_unique_name[name] = raw_runs
@@ -210,11 +210,11 @@ def _group_raw_runs_to_runners(raw_runs_by_name):
                 team_names = ';'.join(sorted(team_set))
                 unique_name = f"{name}:{team_names}"
                 by_unique_name[unique_name] = runs_in_teams
-                logging.info(f"{unique_name} SPLIT\n{pd.DataFrame.from_dict(runs_in_teams)}")
+                logging.info(f"{unique_name} SPLIT\n{pd.DataFrame(runs_in_teams)}")
     return by_unique_name
 
 
-def _find_years_with_multiple_teams(raw_runs):
+def _find_years_with_multiple_teams(raw_runs: list[dict]) -> list:
     qualified_runs = [run for run in raw_runs if run["pace"] != "NA"]
     # try to distinguish different people with same name from each other
     # kaima vs tuplaaja
@@ -227,7 +227,7 @@ def _find_years_with_multiple_teams(raw_runs):
     return years_with_multiple_teams
 
 
-def _get_raw_runs_by_runner_name(ve_or_ju):
+def _get_raw_runs_by_runner_name(ve_or_ju: str) -> dict[str, list[dict]]:
     by_name = defaultdict(list)
     for year in shared.history_years():
         country_by_team_id = shared.read_team_countries(year, ve_or_ju)
@@ -273,7 +273,7 @@ def _get_raw_runs_by_runner_name(ve_or_ju):
     return by_name
 
 
-def _group_runs_to_runners():
+def _group_runs_to_runners() -> None:
     ve_or_ju = shared.race_type()
 
     raw_runs_by_name = _get_raw_runs_by_runner_name(ve_or_ju)
@@ -286,7 +286,7 @@ def _group_runs_to_runners():
     _write_individual_runs_file(grouped_runs_by_unique_name)
 
 
-def _add_running_order(raw_runs_by_name):
+def _add_running_order(raw_runs_by_name: dict[str, list[dict]]) -> None:
     running_order = pd.read_csv(f"data/running_order_final_{shared.race_id_str()}.tsv", delimiter="\t")
     running_order["ro_orig_name"] = running_order["name"]
     # to lower case, trim spaces, remove double spaces
