@@ -9,3 +9,5 @@ scratch.txt
 /json_reports/*
 .aider*
 /.optuna-runs/
+/results/
+/.optuna/
