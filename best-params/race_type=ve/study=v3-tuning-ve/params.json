@@ -1,7 +1,7 @@
 {
-  "Base__min_samples_leaf": 80,
+  "Base__min_samples_leaf": 60,
   "Base__max_depth": 12,
-  "Base__max_features": 0.3863895328021223,
-  "learning_rate": 0.01939195456079418,
+  "Base__max_features": 0.42343323397572113,
+  "learning_rate": 0.013548420511171833,
   "minibatch_frac": 0.8
 }
