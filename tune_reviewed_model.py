@@ -41,21 +41,28 @@ class TuningConfig:
 # ---------------------------------------------------------------------------
 
 
-def suggest_params(trial: optuna.Trial) -> Dict[str, Any]:
+def suggest_params(trial: optuna.Trial, race_type: str) -> Dict[str, Any]:
     """Define the search space for ngboost-norm-tuned-reviewed.ipynb."""
-    min_samples_leaf = trial.suggest_int("Base__min_samples_leaf", 50, 300, step=10)
+    min_samples_leaf = trial.suggest_int("Base__min_samples_leaf", 30, 150, step=5)
+
+    # Notebook adds 50 by default (not for tuning).
+    # Early stopping should handle the rest.
+    if race_type == "ju":
+        n_estimators = trial.suggest_int("n_estimators", 400, 700, step=100)
+    else:
+        n_estimators = trial.suggest_int("n_estimators", 300, 500, step=100)
 
     return {
-        # Decision Tree parameters
-        "Base__max_depth": trial.suggest_int("Base__max_depth", 2, 15),
+        "Base__max_depth": trial.suggest_categorical(
+            "Base__max_depth", [6, 8, 10, 12, 14, 16]
+        ),
         "Base__min_samples_leaf": min_samples_leaf,
         "Base__max_features": trial.suggest_float("Base__max_features", 0.3, 1.0),
         # NGBoost parameters
-        "learning_rate": trial.suggest_float("learning_rate", 0.01, 0.2, log=True),
-        "col_sample": 1.0, # Fixed to avoid confounding with minibatch_frac
-        "minibatch_frac": trial.suggest_categorical("minibatch_frac", [0.7, 0.8, 1.0]),
-        # Fixed or baseline parameters
-        "n_estimators": 500,  # Notebook adds 50. Early stopping will handle the rest.
+        "learning_rate": trial.suggest_float("learning_rate", 0.001, 0.1, log=True),
+        "col_sample": trial.suggest_float("col_sample", 0.3, 1.0),
+        "minibatch_frac": trial.suggest_float("minibatch_frac", 0.5, 1.0),
+        "n_estimators": n_estimators,
     }
 
 
@@ -65,7 +72,7 @@ def suggest_params(trial: optuna.Trial) -> Dict[str, Any]:
 
 
 def run_notebook_trial(trial: optuna.Trial, config: TuningConfig) -> float:
-    params = suggest_params(trial)
+    params = suggest_params(trial, config.race_type)
     trial_id = f"trial-{trial.number:05d}"
     trial_root = (config.run_root / config.study_name / trial_id).resolve()
     trial_root.mkdir(parents=True, exist_ok=True)
@@ -102,6 +109,7 @@ def run_notebook_trial(trial: optuna.Trial, config: TuningConfig) -> float:
                 "FORECAST_YEAR": str(year),
                 "PROCESSING_BATCH_ID": f"optuna-{config.study_name}/{trial_id}/fy_{year}",
                 "NGB_PARAMS_JSON": str(params_path),
+                "NGB_EXTRA_ITERATIONS": "0",
                 "NGB_METRICS_JSON": str(metrics_json_path),
                 "NGB_RESULTS_DIR": str(results_dir),
                 "OPTUNA_TRIAL_NUMBER": str(trial.number),
@@ -153,15 +161,15 @@ def run_notebook_trial(trial: optuna.Trial, config: TuningConfig) -> float:
         with open(metrics_json_path, "r") as f:
             metrics = json.load(f)
 
-        # We optimize for validation CRPS
-        val_crps = metrics.get("validation_metrics", {}).get("crps")
-        if val_crps is None:
+        # We optimize for validation NLL (Negative Log-Likelihood) to ensure robust distribution tails
+        val_nll = metrics.get("validation_metrics", {}).get("nll")
+        if val_nll is None:
             logging.error(
-                "Trial %d: CRPS missing in metrics for year %d", trial.number, year
+                "Trial %d: NLL missing in metrics for year %d", trial.number, year
             )
-            raise optuna.TrialPruned(f"CRPS missing for year {year}")
+            raise optuna.TrialPruned(f"NLL missing for year {year}")
 
-        yearly_scores.append(float(val_crps))
+        yearly_scores.append(float(val_nll))
 
         # Intermediate report to Optuna for pruning
         trial.report(float(np.mean(yearly_scores)), step=len(yearly_scores) - 1)
@@ -229,7 +237,7 @@ def main():
     )
     parser.add_argument(
         "--study-name",
-        help="Optuna study name (default: v3-tuning-{race-type})",
+        help="Optuna study name (default: v6-tuning-{race-type})",
     )
     parser.add_argument("--n-workers", type=int, default=8)
     parser.add_argument(
@@ -239,6 +247,10 @@ def main():
     )
     parser.add_argument(
         "--deadline", help="Expected completion time (local time HH:MM)"
+    )
+    parser.add_argument(
+        "--enqueue-params-json",
+        help="Path to a JSON file containing initial parameters to jump-start the study.",
     )
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--run-root", default=".optuna-runs")
@@ -252,10 +264,51 @@ def main():
         level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
     )
 
-    study_name = args.study_name or f"v3-tuning-{args.race_type}"
+    study_name = args.study_name or f"v6-tuning-{args.race_type}"
     journal_path = Path(
         args.journal_path or f".optuna/reviewed-journal-{args.race_type}.log"
     )
+
+    # If enqueue params provided, load the study and enqueue BEFORE spinning up workers
+    if args.enqueue_params_json:
+        param_path = Path(args.enqueue_params_json)
+        if param_path.exists():
+            with open(param_path, "r") as f:
+                initial_params = json.load(f)
+
+            # Map parameters matching notebook formatting to Optuna's format if necessary
+            optuna_params = {}
+            for k, v in initial_params.items():
+                if k in ["max_depth", "min_samples_leaf", "max_features"]:
+                    optuna_params[f"Base__{k}"] = v
+                else:
+                    optuna_params[k] = v
+
+            journal_path.parent.mkdir(parents=True, exist_ok=True)
+            storage = JournalStorage(JournalFileBackend(str(journal_path)))
+            study = optuna.create_study(
+                study_name=study_name,
+                storage=storage,
+                load_if_exists=True,
+                direction="minimize",
+            )
+            # Avoid enqueuing multiple times if restarting the script
+            if len(study.trials) == 0:
+                try:
+                    study.enqueue_trial(optuna_params)
+                    logging.info(
+                        f"Enqueued initial parameters from {param_path} into study {study_name}"
+                    )
+                except Exception as e:
+                    logging.error(
+                        f"Failed to enqueue parameters from {param_path}: {e}"
+                    )
+            else:
+                logging.info(
+                    f"Study {study_name} already has trials. Skipping enqueue to avoid duplication."
+                )
+        else:
+            logging.warning(f"Enqueue params file not found: {param_path}. Ignoring.")
 
     deadline_timestamp = None
     if args.deadline:
