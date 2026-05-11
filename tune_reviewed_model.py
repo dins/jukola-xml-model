@@ -43,18 +43,18 @@ class TuningConfig:
 
 def suggest_params(trial: optuna.Trial, race_type: str) -> Dict[str, Any]:
     """Define the search space for ngboost-norm-tuned-reviewed.ipynb."""
-    min_samples_leaf = trial.suggest_int("Base__min_samples_leaf", 30, 150, step=5)
+    min_samples_leaf = trial.suggest_int("Base__min_samples_leaf", 50, 150, step=5)
 
     # Notebook adds 50 by default (not for tuning).
     # Early stopping should handle the rest.
     if race_type == "ju":
-        n_estimators = trial.suggest_int("n_estimators", 400, 700, step=100)
+        n_estimators = trial.suggest_int("n_estimators", 400, 800, step=100)
     else:
         n_estimators = trial.suggest_int("n_estimators", 300, 500, step=100)
 
     return {
         "Base__max_depth": trial.suggest_categorical(
-            "Base__max_depth", [6, 8, 10, 12, 14, 16]
+            "Base__max_depth", [6, 8, 10, 12]
         ),
         "Base__min_samples_leaf": min_samples_leaf,
         "Base__max_features": trial.suggest_float("Base__max_features", 0.3, 1.0),
