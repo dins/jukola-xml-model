@@ -43,7 +43,7 @@ class TuningConfig:
 
 def suggest_params(trial: optuna.Trial, race_type: str) -> Dict[str, Any]:
     """Define the search space for ngboost-norm-tuned-reviewed.ipynb."""
-    min_samples_leaf = trial.suggest_int("Base__min_samples_leaf", 50, 150, step=5)
+    min_samples_leaf = trial.suggest_int("Base__min_samples_leaf", 60, 200, step=10)
 
     # Notebook adds 50 by default (not for tuning).
     # Early stopping should handle the rest.
@@ -54,10 +54,10 @@ def suggest_params(trial: optuna.Trial, race_type: str) -> Dict[str, Any]:
 
     return {
         "Base__max_depth": trial.suggest_categorical(
-            "Base__max_depth", [6, 8, 10, 12]
+            "Base__max_depth", [4, 6, 8, 10]
         ),
         "Base__min_samples_leaf": min_samples_leaf,
-        "Base__max_features": trial.suggest_float("Base__max_features", 0.3, 1.0),
+        "Base__max_features": trial.suggest_float("Base__max_features", 0.1, 1.0),
         # NGBoost parameters
         "learning_rate": trial.suggest_float("learning_rate", 0.001, 0.1, log=True),
         "col_sample": trial.suggest_float("col_sample", 0.3, 1.0),
@@ -161,15 +161,27 @@ def run_notebook_trial(trial: optuna.Trial, config: TuningConfig) -> float:
         with open(metrics_json_path, "r") as f:
             metrics = json.load(f)
 
-        # We optimize for validation NLL (Negative Log-Likelihood) to ensure robust distribution tails
-        val_nll = metrics.get("validation_metrics", {}).get("nll")
-        if val_nll is None:
+        # We optimize for forecast year custom score: NLL (Negative Log-Likelihood) + interval penalty
+        fy_metrics = metrics.get("forecast_year_metrics")
+        if fy_metrics is None:
             logging.error(
-                "Trial %d: NLL missing in metrics for year %d", trial.number, year
+                "Trial %d: Forecast year metrics missing for year %d. "
+                "This usually means actual results for that year are missing from 'data/'.",
+                trial.number,
+                year,
             )
-            raise optuna.TrialPruned(f"NLL missing for year {year}")
+            raise optuna.TrialPruned(f"Forecast metrics missing for year {year}")
 
-        yearly_scores.append(float(val_nll))
+        fy_custom_tuning_score = fy_metrics.get("tuning_score")
+        if fy_custom_tuning_score is None:
+            logging.error(
+                "Trial %d: tuning_score missing in forecast_year_metrics for year %d",
+                trial.number,
+                year,
+            )
+            raise optuna.TrialPruned(f"tuning_score missing for year {year}")
+
+        yearly_scores.append(float(fy_custom_tuning_score))
 
         # Intermediate report to Optuna for pruning
         trial.report(float(np.mean(yearly_scores)), step=len(yearly_scores) - 1)
