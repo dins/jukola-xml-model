@@ -115,7 +115,6 @@ def run_notebook_trial(trial: optuna.Trial, config: TuningConfig) -> float:
                 "OPTUNA_TRIAL_NUMBER": str(trial.number),
                 "ENABLE_DEBUG_PLOTS": "0",
                 "BATCH_RUN_TS": f"optuna_{trial.number}_{int(time.time())}",
-                "FULL_DATA": "1",
             }
         )
 
