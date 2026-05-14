@@ -1,41 +1,7 @@
 import numpy as np
 import polars as pl
-from scipy import stats
-from dataclasses import dataclass
-import logging
-import shared
+from boxcox_transform import BoxCoxParams, fit_boxcox_and_normalize, standardize
 
-@dataclass
-class BoxCoxParams:
-    lmbda: float
-    bc_mean: float
-    bc_std: float
-
-def standardize(series: np.ndarray | pl.Series) -> tuple[np.ndarray | pl.Series, float, float]:
-    """Standardize a pandas series"""
-    mean = float(np.nanmean(series))
-    std = float(np.nanstd(series))
-    return (series - mean) / std, mean, std
-
-def boxcox_and_normalize(values: np.ndarray | pl.Series, params: BoxCoxParams) -> np.ndarray:
-    """Box-Cox transform and normalize out-of-sample values"""
-    bc_transformed = stats.boxcox(values, lmbda=params.lmbda)
-    return (bc_transformed - params.bc_mean) / params.bc_std
-
-def inverse_normalized_and_boxcox(normalized_bc_values: np.ndarray, params: BoxCoxParams) -> np.ndarray:
-    # Reverse normalization
-    data_unnormalized = normalized_bc_values * params.bc_std + params.bc_mean
-    # Reverse Box-Cox
-    if params.lmbda == 0:
-        data_untransformed = np.exp(data_unnormalized)
-    else:
-       # Calculate the term inside the power operation
-        inside = data_unnormalized * params.lmbda + 1
-        # Clip to a small positive value to avoid negatives/zero
-        inside = np.clip(inside, 1e-6, None)
-        data_untransformed = inside ** (1 / params.lmbda)
-    
-    return data_untransformed
 
 def _safe_number(value: float | int | None, fallback: float | int) -> float | int:
     if value is None:
@@ -144,34 +110,12 @@ def build_past_country_features(feature_df: pl.DataFrame, min_country_runners: i
 def build_features(runs_df: pl.DataFrame, forecast_year: int) -> tuple[pl.DataFrame, list[str], BoxCoxParams]:
     history_reference_df = runs_df.filter(pl.col("year") < forecast_year)
     
-    capped_paces = np.clip(runs_df["pace"].to_numpy(), a_min=4, a_max=40)
-    history_capped_paces = np.clip(history_reference_df["pace"].to_numpy(), a_min=4, a_max=40)
-    
-    no_nans_history_capped_paces = history_capped_paces[~np.isnan(history_capped_paces)]
-    logging.info(
-        f'history capped paces: {min(no_nans_history_capped_paces)} - {max(no_nans_history_capped_paces)}'
-    )
-    
-    _, race_specific_bc_lambda = stats.boxcox(no_nans_history_capped_paces)
-    history_bc_transformed_paces = stats.boxcox(
-        no_nans_history_capped_paces,
-        lmbda=race_specific_bc_lambda,
-    )
-    _, bc_mean, bc_std = standardize(history_bc_transformed_paces)
-    
-    bc_transformed_paces = stats.boxcox(capped_paces, lmbda=race_specific_bc_lambda)
-    normalized_bc_paces = (bc_transformed_paces - bc_mean) / bc_std
-    
+    normalized_bc_paces, boxcox_params = fit_boxcox_and_normalize(runs_df, history_reference_df)
+
     history_tc_values = history_reference_df["terrain_coefficient"].to_numpy()
     _, tc_mean, tc_std = standardize(history_tc_values)
     normalized_tc = (runs_df["terrain_coefficient"].to_numpy() - tc_mean) / tc_std
 
-    boxcox_params = BoxCoxParams(lmbda=race_specific_bc_lambda, bc_mean=bc_mean, bc_std=bc_std)
-    
-    logging.info(
-        f'{shared.race_id_str()} {race_specific_bc_lambda=}, {bc_mean=}, {bc_std=}, {tc_mean=}, {tc_std=}'
-    )
-    
     bc_df = runs_df.with_columns([
         pl.Series("bc_pace", normalized_bc_paces),
         pl.Series("normalized_tc", normalized_tc),
