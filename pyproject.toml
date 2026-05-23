@@ -25,3 +25,8 @@ dependencies = [
     "optuna-dashboard>=0.20.0",
     "ruff>=0.15.11",
 ]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.3",
+]

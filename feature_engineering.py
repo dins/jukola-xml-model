@@ -107,7 +107,49 @@ def build_past_country_features(feature_df: pl.DataFrame, min_country_runners: i
     return pl.concat(country_feature_frames, how="vertical_relaxed")
 
 
-def build_past_first_name_features(feature_df: pl.DataFrame, min_fn_runners: int = 50) -> pl.DataFrame:
+def _build_fn_features_for_year(
+    current_year_df: pl.DataFrame, 
+    past_df: pl.DataFrame, 
+    min_fn_runners: int
+) -> pl.DataFrame:
+    if past_df.height == 0:
+        return current_year_df.with_columns([
+            pl.lit("OTHER").alias("fn_bucket"),
+            pl.lit(1.0).alias("fn_scaled_pace_v2"),
+            pl.lit(0).cast(pl.Int64).alias("fn_num_runs"),
+        ])
+
+    past_fn_df = past_df.with_columns(
+        pl.when(pl.col("pace").is_not_null().sum().over("first_name") > min_fn_runners)
+        .then(pl.col("first_name"))
+        .otherwise(pl.lit("OTHER"))
+        .alias("fn_bucket")
+    )
+
+    fn_prior_df = (
+        past_fn_df
+        .group_by("fn_bucket")
+        .agg([
+            pl.col("pace_leg_ratio").drop_nulls().median().alias("fn_scaled_pace_v2"),
+            pl.col("pace_leg_ratio").is_not_null().sum().alias("fn_num_runs"),
+        ])
+    )
+
+    fn_bucket_mapping = past_fn_df.select(["first_name", "fn_bucket"]).unique()
+
+    return (
+        current_year_df
+        .join(fn_bucket_mapping, on="first_name", how="left")
+        .with_columns(pl.col("fn_bucket").fill_null("OTHER"))
+        .join(fn_prior_df, on="fn_bucket", how="left")
+        .with_columns([
+            pl.col("fn_scaled_pace_v2").fill_null(pl.lit(1.0)),
+            pl.col("fn_num_runs").fill_null(pl.lit(0)),
+        ])
+    )
+
+
+def build_past_first_name_features(feature_df: pl.DataFrame, min_fn_runners: int = 100) -> pl.DataFrame:
     fn_feature_frames = []
     year_values = sorted(feature_df["year"].drop_nulls().unique().to_list())
 
@@ -124,65 +166,8 @@ def build_past_first_name_features(feature_df: pl.DataFrame, min_fn_runners: int
         ])
         past_df = feature_df.filter(pl.col("year") < current_year)
 
-        if past_df.height == 0:
-            fn_feature_frames.append(
-                current_year_df.with_columns([
-                    pl.lit("OTHER").alias("fn_bucket"),
-                    pl.lit(1.0).alias("fn_scaled_pace"),
-                    pl.lit(0).cast(pl.Int64).alias("fn_num_runs"),
-                ])
-            )
-            continue
-
-        fn_bucket_df = (
-            past_df
-            .filter(pl.col("pace").is_not_null())
-            .group_by("first_name")
-            .agg(
-                pl.len().alias("fn_valid_results")
-            )
-            .with_columns(
-                pl.when(pl.col("fn_valid_results") > min_fn_runners)
-                .then(pl.col("first_name"))
-                .otherwise(pl.lit("OTHER"))
-                .alias("fn_bucket")
-            )
-        )
-
-        past_fn_df = past_df.join(
-            fn_bucket_df.select(["first_name", "fn_bucket"]),
-            on="first_name",
-            how="left",
-        ).with_columns(pl.col("fn_bucket").fill_null("OTHER"))
-
-        fn_prior_df = (
-            past_fn_df
-            .group_by("fn_bucket")
-            .agg([
-                pl.col("pace_leg_ratio").drop_nulls().median().alias("fn_scaled_pace"),
-                pl.col("pace_leg_ratio").is_not_null().sum().alias("fn_num_runs"),
-            ])
-        )
-
-        current_year_fn_df = (
-            current_year_df
-            .join(
-                fn_bucket_df.select([
-                    "first_name",
-                    "fn_bucket",
-                ]),
-                on="first_name",
-                how="left",
-            )
-            .with_columns(pl.col("fn_bucket").fill_null("OTHER"))
-            .join(fn_prior_df, on="fn_bucket", how="left")
-            .with_columns([
-                pl.col("fn_scaled_pace").fill_null(pl.lit(1.0)),
-                pl.col("fn_num_runs").fill_null(pl.lit(0)),
-            ])
-        )
-
-        fn_feature_frames.append(current_year_fn_df)
+        year_features = _build_fn_features_for_year(current_year_df, past_df, min_fn_runners)
+        fn_feature_frames.append(year_features)
 
     return pl.concat(fn_feature_frames, how="vertical_relaxed")
 
@@ -216,20 +201,18 @@ def build_features(runs_df: pl.DataFrame, forecast_year: int) -> tuple[pl.DataFr
         (pl.col("bc_pace") / pl.col("vertical_coef")).alias("vcn_bc_pace"),
     ])
 
-    """
-    fn_feature_df = build_past_first_name_features(bc_df)
+    fn_feature_df = build_past_first_name_features(bc_df, min_fn_runners=100)
     bc_df = bc_df.join(
         fn_feature_df.select([
             "row_id",
             "fn_bucket",
-            "fn_scaled_pace",
+            "fn_scaled_pace_v2",
             "fn_num_runs",
         ]),
         on="row_id",
         how="left",
     )
-    """
-    
+
     bc_df = bc_df.with_columns([
         #(pl.col("tcn_bc_pace") * pl.col("normalized_team_id")).alias("tcn_bcp_ti_interaction"),
         #(pl.col("tcn_bc_pace") / pl.col("run_num")).alias("tcn_bcp_run_num_interaction"),
@@ -396,9 +379,9 @@ def build_features(runs_df: pl.DataFrame, forecast_year: int) -> tuple[pl.DataFr
         (pl.col("normalized_team_id") * pl.col("c_bcp_std")).alias("c_bcp_std_nti_interaction"),
         #(pl.col("normalized_team_id") * pl.col("fn_scaled_pace")).alias("fn_scaled_pace_nti_interaction"),
         # (pl.col("terrain_coefficient") * pl.col("fn_scaled_pace") * pl.col("c_bcp_median")).alias("fn_scaled_pace_c_bcp_median_tc_interaction"),
-        (pl.col("terrain_coefficient") * pl.col("fn_scaled_pace") ).alias("fn_scaled_pace_tc_interaction"),
+        (pl.col("terrain_coefficient") * pl.col("fn_scaled_pace_v2") ).alias("fn_scaled_pace_tc_interaction"),
         #(pl.col("vertical_coef") / pl.col("roll_5y_vc_mean") ).alias("vc_to_vc_history_interaction"),
-        (pl.col("vertical_coef") * pl.col("fn_scaled_pace") * pl.col("c_bcp_median")).alias("fn_scaled_pace_c_bcp_median_vc_interaction"),
+        (pl.col("vertical_coef") * pl.col("fn_scaled_pace_v2") * pl.col("c_bcp_median")).alias("fn_scaled_pace_c_bcp_median_vc_interaction"),
     ])
     
     """
@@ -467,7 +450,7 @@ def build_features(runs_df: pl.DataFrame, forecast_year: int) -> tuple[pl.DataFr
         #"roll_5y_vc_mean",
         "roll_vcn_bcp_mean_marking_interaction",
         #"roll_5y_tcn_bcp_vertical_interaction",
-        "fn_scaled_pace",
+        "fn_scaled_pace_v2",
         #"c_bcp_median",
         #"c_bcp_std",
         "c_bcp_median_nti_interaction",
@@ -507,3 +490,4 @@ def build_features(runs_df: pl.DataFrame, forecast_year: int) -> tuple[pl.DataFr
     ]
     
     return bc_df, feature_names, boxcox_params
+
