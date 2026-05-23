@@ -28,7 +28,6 @@ class TuningConfig:
     backtest_years: tuple[int, ...]
     study_name: str
     n_workers: int
-    trials_per_worker: Optional[int]
     seed_base: int
     run_root: Path
     xml_model_root: Path
@@ -43,25 +42,29 @@ class TuningConfig:
 
 def suggest_params(trial: optuna.Trial, race_type: str) -> Dict[str, Any]:
     """Define the search space for ngboost-norm-tuned-reviewed.ipynb."""
+
+
+    # [I 2026-05-22 01:34:30,368] Trial 427 finished with value: 1.1791135697335187 and parameters:
+    # {'Base__min_samples_leaf': 70, 'n_estimators': 250, 'Base__max_depth': 10,
+    # 'Base__max_features': 0.8814660047756667, 'learning_rate': 0.007132733920820354,
+    # 'col_sample': 0.97289050032128, 'minibatch_frac': 0.5080133685253934}. Best is trial 427 with value: 1.1791135697335187.
     min_samples_leaf = trial.suggest_int("Base__min_samples_leaf", 60, 200, step=10)
 
     # Notebook adds 50 by default (not for tuning).
     # Early stopping should handle the rest.
     if race_type == "ju":
-        n_estimators = trial.suggest_int("n_estimators", 400, 800, step=100)
+        n_estimators = trial.suggest_int("n_estimators", 200, 800, step=10)
     else:
-        n_estimators = trial.suggest_int("n_estimators", 300, 500, step=100)
+        n_estimators = trial.suggest_int("n_estimators", 200, 500, step=10)
 
     return {
-        "Base__max_depth": trial.suggest_categorical(
-            "Base__max_depth", [4, 6, 8, 10]
-        ),
+        "Base__max_depth": trial.suggest_int("Base__max_depth", low=4, high=12, step=2),
         "Base__min_samples_leaf": min_samples_leaf,
-        "Base__max_features": trial.suggest_float("Base__max_features", 0.1, 1.0),
+        "Base__max_features": trial.suggest_float("Base__max_features", 0.5, 1.0),
         # NGBoost parameters
-        "learning_rate": trial.suggest_float("learning_rate", 0.001, 0.1, log=True),
-        "col_sample": trial.suggest_float("col_sample", 0.3, 1.0),
-        "minibatch_frac": trial.suggest_float("minibatch_frac", 0.5, 1.0),
+        "learning_rate": trial.suggest_float("learning_rate", 0.0005, 0.1, log=True),
+        "col_sample": trial.suggest_float("col_sample", 0.5, 1.0),
+        "minibatch_frac": trial.suggest_float("minibatch_frac", 0.3, 1.0),
         "n_estimators": n_estimators,
     }
 
@@ -224,9 +227,10 @@ def worker(worker_id: int, config: TuningConfig):
         load_if_exists=True,
         direction="minimize",
         sampler=sampler,
-        # Pruning kills trials that are performing worse than the median at the same step (year).
-        # This is complementary to the early stopping happening inside the notebook's NGBoost training.
-        pruner=optuna.pruners.MedianPruner(n_startup_trials=10, n_warmup_steps=2),
+        # Explicitly disable pruning. The default MedianPruner is suspected to be pruning trials 
+        # prematurely, as partial cross-validation results (e.g., just the first year) may not 
+        # reliably represent the overall performance across all years.
+        pruner=optuna.pruners.NopPruner(),
     )
 
     timeout = None
@@ -235,7 +239,7 @@ def worker(worker_id: int, config: TuningConfig):
 
     study.optimize(
         lambda t: run_notebook_trial(t, config),
-        n_trials=config.trials_per_worker,
+        n_trials=None,
         timeout=timeout,
     )
 
@@ -251,11 +255,6 @@ def main():
         help="Optuna study name (default: v6-tuning-{race-type})",
     )
     parser.add_argument("--n-workers", type=int, default=8)
-    parser.add_argument(
-        "--trials-per-worker",
-        type=int,
-        help="Number of trials per worker (default: 10, or unlimited if --deadline is set)",
-    )
     parser.add_argument(
         "--deadline", help="Expected completion time (local time HH:MM)"
     )
@@ -325,20 +324,11 @@ def main():
     if args.deadline:
         deadline_timestamp = parse_deadline(args.deadline)
 
-    # Logic for defaulting trials-per-worker
-    trials_per_worker = args.trials_per_worker
-    if trials_per_worker is None:
-        if args.deadline:
-            trials_per_worker = None  # Run until deadline
-        else:
-            trials_per_worker = 10  # Standard default
-
     config = TuningConfig(
         race_type=args.race_type,
         backtest_years=tuple(args.years),
         study_name=study_name,
         n_workers=args.n_workers,
-        trials_per_worker=trials_per_worker,
         seed_base=args.seed,
         run_root=Path(args.run_root),
         xml_model_root=Path(".").resolve(),
