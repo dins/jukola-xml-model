@@ -110,17 +110,18 @@ def build_past_country_features(feature_df: pl.DataFrame, min_country_runners: i
 def _build_fn_features_for_year(
     current_year_df: pl.DataFrame, 
     past_df: pl.DataFrame, 
-    min_fn_runners: int
+    min_unique_full_names: int
 ) -> pl.DataFrame:
     if past_df.height == 0:
         return current_year_df.with_columns([
             pl.lit("OTHER").alias("fn_bucket"),
             pl.lit(1.0).alias("fn_scaled_pace_v2"),
             pl.lit(0).cast(pl.Int64).alias("fn_num_runs"),
+            pl.lit(1.0).alias("fn_scaled_pace_std_v2"),
         ])
 
     past_fn_df = past_df.with_columns(
-        pl.when(pl.col("pace").is_not_null().sum().over("first_name") > min_fn_runners)
+        pl.when(pl.col("unique_name").n_unique().over("first_name") > min_unique_full_names)
         .then(pl.col("first_name"))
         .otherwise(pl.lit("OTHER"))
         .alias("fn_bucket")
@@ -131,7 +132,8 @@ def _build_fn_features_for_year(
         .group_by("fn_bucket")
         .agg([
             pl.col("pace_leg_ratio").drop_nulls().median().alias("fn_scaled_pace_v2"),
-            pl.col("pace_leg_ratio").is_not_null().sum().alias("fn_num_runs"),
+            pl.col("pace_leg_ratio").count().alias("fn_num_runs"),
+            pl.col("pace_leg_ratio").drop_nulls().std().alias("fn_scaled_pace_std_v2"),
         ])
     )
 
@@ -145,11 +147,12 @@ def _build_fn_features_for_year(
         .with_columns([
             pl.col("fn_scaled_pace_v2").fill_null(pl.lit(1.0)),
             pl.col("fn_num_runs").fill_null(pl.lit(0)),
+            pl.col("fn_scaled_pace_std_v2").fill_null(pl.lit(1.0)),
         ])
     )
 
 
-def build_past_first_name_features(feature_df: pl.DataFrame, min_fn_runners: int = 100) -> pl.DataFrame:
+def build_past_first_name_features(feature_df: pl.DataFrame, min_unique_full_names: int = 10) -> pl.DataFrame:
     fn_feature_frames = []
     year_values = sorted(feature_df["year"].drop_nulls().unique().to_list())
 
@@ -166,7 +169,7 @@ def build_past_first_name_features(feature_df: pl.DataFrame, min_fn_runners: int
         ])
         past_df = feature_df.filter(pl.col("year") < current_year)
 
-        year_features = _build_fn_features_for_year(current_year_df, past_df, min_fn_runners)
+        year_features = _build_fn_features_for_year(current_year_df, past_df, min_unique_full_names)
         fn_feature_frames.append(year_features)
 
     return pl.concat(fn_feature_frames, how="vertical_relaxed")
@@ -231,12 +234,13 @@ def build_features(runs_df: pl.DataFrame, forecast_year: int) -> tuple[pl.DataFr
         (pl.col("bc_pace") / pl.col("vertical_coef")).alias("vcn_bc_pace"),
     ])
 
-    fn_feature_df = build_past_first_name_features(bc_df, min_fn_runners=100)
+    fn_feature_df = build_past_first_name_features(bc_df, min_unique_full_names=10)
     bc_df = bc_df.join(
         fn_feature_df.select([
             "row_id",
             "fn_bucket",
             "fn_scaled_pace_v2",
+            "fn_scaled_pace_std_v2",
             "fn_num_runs",
         ]),
         on="row_id",
@@ -449,7 +453,7 @@ def build_features(runs_df: pl.DataFrame, forecast_year: int) -> tuple[pl.DataFr
         "roll_5y_years_since_results",
         "normalized_team_id",
         # "roll_tcn_bcp_mean_nti_interaction",
-        "history_bcp_median",
+        #"history_bcp_median",
         "roll_5y_tcn_bcp_mean",
         #"roll_5y_history_median_ratio",
         "history_tcn_bcp_std",
@@ -483,6 +487,7 @@ def build_features(runs_df: pl.DataFrame, forecast_year: int) -> tuple[pl.DataFr
         "roll_vcn_bcp_mean_marking_interaction",
         #"roll_5y_tcn_bcp_vertical_interaction",
         "fn_scaled_pace_v2",
+        #"fn_scaled_pace_std_v2",
         #"c_bcp_median",
         #"c_bcp_std",
         "c_bcp_median_nti_interaction",
