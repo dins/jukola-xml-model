@@ -260,7 +260,8 @@ def main():
     )
     parser.add_argument(
         "--enqueue-params-json",
-        help="Path to a JSON file containing initial parameters to jump-start the study.",
+        nargs="+",
+        help="Path(s) to JSON file(s) containing initial parameters to jump-start the study.",
     )
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--run-root", default=".optuna-runs")
@@ -281,31 +282,30 @@ def main():
 
     # If enqueue params provided, load the study and enqueue BEFORE spinning up workers
     if args.enqueue_params_json:
-        param_path = Path(args.enqueue_params_json)
-        if param_path.exists():
-            with open(param_path, "r") as f:
-                initial_params = json.load(f)
+        journal_path.parent.mkdir(parents=True, exist_ok=True)
+        storage = JournalStorage(JournalFileBackend(str(journal_path)))
+        study = optuna.create_study(
+            study_name=study_name,
+            storage=storage,
+            load_if_exists=True,
+            direction="minimize",
+        )
+        for param_file in args.enqueue_params_json:
+            param_path = Path(param_file)
+            if param_path.exists():
+                with open(param_path, "r") as f:
+                    initial_params = json.load(f)
 
-            # Map parameters matching notebook formatting to Optuna's format if necessary
-            optuna_params = {}
-            for k, v in initial_params.items():
-                if k in ["max_depth", "min_samples_leaf", "max_features"]:
-                    optuna_params[f"Base__{k}"] = v
-                else:
-                    optuna_params[k] = v
+                # Map parameters matching notebook formatting to Optuna's format if necessary
+                optuna_params = {}
+                for k, v in initial_params.items():
+                    if k in ["max_depth", "min_samples_leaf", "max_features"]:
+                        optuna_params[f"Base__{k}"] = v
+                    else:
+                        optuna_params[k] = v
 
-            journal_path.parent.mkdir(parents=True, exist_ok=True)
-            storage = JournalStorage(JournalFileBackend(str(journal_path)))
-            study = optuna.create_study(
-                study_name=study_name,
-                storage=storage,
-                load_if_exists=True,
-                direction="minimize",
-            )
-            # Avoid enqueuing multiple times if restarting the script
-            if len(study.trials) == 0:
                 try:
-                    study.enqueue_trial(optuna_params)
+                    study.enqueue_trial(optuna_params, skip_if_exists=True)
                     logging.info(
                         f"Enqueued initial parameters from {param_path} into study {study_name}"
                     )
@@ -314,11 +314,7 @@ def main():
                         f"Failed to enqueue parameters from {param_path}: {e}"
                     )
             else:
-                logging.info(
-                    f"Study {study_name} already has trials. Skipping enqueue to avoid duplication."
-                )
-        else:
-            logging.warning(f"Enqueue params file not found: {param_path}. Ignoring.")
+                logging.warning(f"Enqueue params file not found: {param_path}. Ignoring.")
 
     deadline_timestamp = None
     if args.deadline:
