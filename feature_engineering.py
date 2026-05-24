@@ -172,6 +172,28 @@ def build_past_first_name_features(feature_df: pl.DataFrame, min_fn_runners: int
     return pl.concat(fn_feature_frames, how="vertical_relaxed")
 
 
+def map_to_buckets(
+        df: pl.DataFrame,
+        input_col: str,
+        n_buckets: int,
+        output_col: str,
+        bucket_values: list[float],
+) -> pl.DataFrame:
+    assert len(bucket_values) == n_buckets, "bucket_values must have n_buckets elements"
+
+    unique_vals = df[input_col].drop_nulls().unique().sort()
+    n = len(unique_vals)
+
+    thresholds = [unique_vals[i * n // n_buckets] for i in range(1, n_buckets)]
+
+    expr = pl.when(pl.col(input_col) < thresholds[0]).then(pl.lit(bucket_values[0]))
+    for threshold, value in zip(thresholds[1:], bucket_values[1:-1]):
+        expr = expr.when(pl.col(input_col) < threshold).then(pl.lit(value))
+    expr = expr.otherwise(pl.lit(bucket_values[-1]))
+
+    return df.with_columns(expr.alias(output_col))
+
+
 def build_features(runs_df: pl.DataFrame, forecast_year: int) -> tuple[pl.DataFrame, list[str], BoxCoxParams]:
     history_reference_df = runs_df.filter(pl.col("year") < forecast_year)
     
@@ -193,7 +215,15 @@ def build_features(runs_df: pl.DataFrame, forecast_year: int) -> tuple[pl.DataFr
         (pl.col("year") - pl.col("year").shift(1).rolling_mean(window_size=5, min_samples=1).over("unique_name")).alias("roll_5y_years_since_results"),
         (pl.col("pace") / pl.col("pace").median().over(["year", "leg"])).alias("pace_leg_ratio"),
     ]).fill_nan(None)
-    
+
+    bc_df = map_to_buckets(
+        df=bc_df,
+        input_col="vertical_per_km",
+        n_buckets=5,
+        output_col="bucketed_vertical",
+        bucket_values=[0.8, 0.9, 1.0, 1.1, 1.2],
+    )
+
     bc_df = bc_df.sort(["unique_name", "run_num"]).with_row_index("row_id")
     
     bc_df = bc_df.with_columns([
@@ -440,7 +470,9 @@ def build_features(runs_df: pl.DataFrame, forecast_year: int) -> tuple[pl.DataFr
         "roll_vcn_bcp_std",
         "roll_5y_pace_leg_ratio_mean",
         "roll_pace_leg_ratio_std",
-    
+
+        # "bucketed_vertical",
+
         #"roll_5y_pace_leg_ratio_tc_interaction",
         # "uniform_tc",
     
