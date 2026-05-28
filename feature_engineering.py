@@ -221,6 +221,14 @@ def build_features(runs_df: pl.DataFrame, forecast_year: int) -> tuple[pl.DataFr
 
     bc_df = map_to_buckets(
         df=bc_df,
+        input_col="terrain_coefficient",
+        n_buckets=5,
+        output_col="bucketed_tc",
+        bucket_values=[0.8, 0.9, 1.0, 1.1, 1.2],
+    )
+
+    bc_df = map_to_buckets(
+        df=bc_df,
         input_col="vertical_per_km",
         n_buckets=5,
         output_col="bucketed_vertical",
@@ -475,6 +483,7 @@ def build_features(runs_df: pl.DataFrame, forecast_year: int) -> tuple[pl.DataFr
         "roll_5y_pace_leg_ratio_mean",
         "roll_pace_leg_ratio_std",
 
+        # "bucketed_tc",
         # "bucketed_vertical",
 
         #"roll_5y_pace_leg_ratio_tc_interaction",
