@@ -1,5 +1,5 @@
 {
-  "Base__min_samples_leaf": 250,
+  "Base__min_samples_leaf": 200,
   "n_estimators": 400,
   "Base__max_depth": 12,
   "Base__max_features": 0.94239951279975,
