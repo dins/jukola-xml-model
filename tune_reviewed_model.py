@@ -55,16 +55,16 @@ def suggest_params(trial: optuna.Trial, race_type: str) -> Dict[str, Any]:
     if race_type == "ju":
         n_estimators = trial.suggest_int("n_estimators", 400, 700, step=100)
     else:
-        n_estimators = trial.suggest_int("n_estimators", 400, 700, step=100)
+        n_estimators = trial.suggest_int("n_estimators", 300, 600, step=100)
 
     return {
         "Base__max_depth": trial.suggest_int("Base__max_depth", low=12, high=12, step=2),
         "Base__min_samples_leaf": min_samples_leaf,
-        "Base__max_features": trial.suggest_float("Base__max_features", 0.942, 0.942),
+        "Base__max_features": trial.suggest_float("Base__max_features", 0.8, 1.0),
         # NGBoost parameters
-        "learning_rate": trial.suggest_float("learning_rate", 0.004, 0.005, log=True),
-        "col_sample": trial.suggest_float("col_sample", 0.75, 0.85),
-        "minibatch_frac": trial.suggest_float("minibatch_frac", 1.0, 1.0),
+        "learning_rate": trial.suggest_float("learning_rate", 0.004, 0.02, log=True),
+        "col_sample": trial.suggest_float("col_sample", 0.3, 0.85),
+        "minibatch_frac": trial.suggest_float("minibatch_frac", 0.8, 1.0),
         "n_estimators": n_estimators,
     }
 

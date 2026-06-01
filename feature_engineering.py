@@ -25,7 +25,7 @@ def build_past_country_features(feature_df: pl.DataFrame, min_country_runners: i
             country_feature_frames.append(
                 current_year_df.with_columns([
                     pl.lit("OTHER").alias("team_country_truncated"),
-                    pl.lit(0.0).alias("c_bcp_median"),
+                    pl.lit(1.0).alias("c_bcp_median"),
                     pl.lit(1.0).alias("c_bcp_std"),
                     pl.lit(0).cast(pl.Int64).alias("c_num_runs"),
                     pl.lit(0).cast(pl.Int64).alias("c_n_unique_runners"),
@@ -61,21 +61,21 @@ def build_past_country_features(feature_df: pl.DataFrame, min_country_runners: i
             past_country_df
             .group_by("team_country_truncated")
             .agg([
-                pl.col("tcn_bc_pace").median().alias("c_bcp_median"),
-                pl.col("tcn_bc_pace").std().alias("c_bcp_std"),
+                pl.col("pace_leg_ratio").drop_nulls().median().alias("c_bcp_median"),
+                pl.col("pace_leg_ratio").drop_nulls().std().alias("c_bcp_std"),
                 pl.col("tcn_bc_pace").count().alias("c_num_runs"),
                 pl.col("unique_name").n_unique().alias("c_n_unique_runners"),
             ])
         )
 
         global_country_stats = past_df.select([
-            pl.col("tcn_bc_pace").median().alias("c_bcp_median"),
-            pl.col("tcn_bc_pace").std().alias("c_bcp_std"),
+            pl.col("pace_leg_ratio").drop_nulls().median().alias("c_bcp_median"),
+            pl.col("pace_leg_ratio").drop_nulls().std().alias("c_bcp_std"),
             pl.col("tcn_bc_pace").count().alias("c_num_runs"),
             pl.col("unique_name").n_unique().alias("c_n_unique_runners"),
         ]).to_dicts()[0]
 
-        fallback_c_bcp_median = _safe_number(global_country_stats["c_bcp_median"], 0.0)
+        fallback_c_bcp_median = _safe_number(global_country_stats["c_bcp_median"], 1.0)
         fallback_c_bcp_std = _safe_number(global_country_stats["c_bcp_std"], 1.0)
         fallback_c_num_runs = int(_safe_number(global_country_stats["c_num_runs"], 0))
         fallback_c_n_unique_runners = int(_safe_number(global_country_stats["c_n_unique_runners"], 0))
@@ -202,15 +202,13 @@ def build_features(runs_df: pl.DataFrame, forecast_year: int) -> tuple[pl.DataFr
     
     normalized_bc_paces, boxcox_params = fit_boxcox_and_normalize(runs_df, history_reference_df)
 
-    history_tc_values = history_reference_df["terrain_coefficient"].to_numpy()
-    _, tc_mean, tc_std = standardize(history_tc_values)
-    normalized_tc = (runs_df["terrain_coefficient"].to_numpy() - tc_mean) / tc_std
-
     bc_df = runs_df.with_columns([
         pl.Series("bc_pace", normalized_bc_paces),
-        pl.Series("normalized_tc", normalized_tc),
+
         (pl.col("marking_per_km") / history_reference_df["marking_per_km"].median()).alias("marking_norm"),
-        (pl.col("vertical_per_km") / history_reference_df["vertical_per_km"].median()).alias("vertical_coef"),
+        (
+            (pl.col("vertical_per_km") / history_reference_df["vertical_per_km"].median() + 2) / 3
+        ).alias("vertical_coef"),
         (pl.col("team_id") / pl.col("team_id").median().over("year") + 1).alias("normalized_team_id"),
         (pl.col("leg_dist") / pl.col("leg_dist").mean().over("year") + 1).alias("normalized_leg_dist"),
         (pl.col("run_num") / pl.col("run_num").median().over("year")).alias("run_num_norm"),
@@ -417,7 +415,7 @@ def build_features(runs_df: pl.DataFrame, forecast_year: int) -> tuple[pl.DataFr
         (pl.col("roll_vcn_bcp_mean") * pl.col("vertical_coef")).alias("roll_vcn_bcp_mean_vc_interaction"),
         #(pl.col("normalized_team_id") * pl.col("roll_tcn_bcp_std")).alias("roll_tcn_bcp_std_mean_nti_interaction"),
         #(pl.col("normalized_team_id") * pl.col("roll_tcn_bcp_mean")).alias("roll_tcn_bcp_mean_nti_interaction"),
-        (pl.col("normalized_team_id") * pl.col("c_bcp_median")).alias("c_bcp_median_nti_interaction"),
+        ( (pl.col("normalized_team_id") / 2) * pl.col("c_bcp_median")).alias("c_bcp_median_nti_interaction"),
         (pl.col("normalized_team_id") * pl.col("c_bcp_std")).alias("c_bcp_std_nti_interaction"),
         #(pl.col("normalized_team_id") * pl.col("fn_scaled_pace")).alias("fn_scaled_pace_nti_interaction"),
         # (pl.col("terrain_coefficient") * pl.col("fn_scaled_pace") * pl.col("c_bcp_median")).alias("fn_scaled_pace_c_bcp_median_tc_interaction"),
@@ -425,36 +423,17 @@ def build_features(runs_df: pl.DataFrame, forecast_year: int) -> tuple[pl.DataFr
         #(pl.col("vertical_coef") / pl.col("roll_5y_vc_mean") ).alias("vc_to_vc_history_interaction"),
         (pl.col("vertical_coef") * pl.col("fn_scaled_pace_v2") * pl.col("c_bcp_median")).alias("fn_scaled_pace_c_bcp_median_vc_interaction"),
     ])
+
     
-    """
-    cols_only_for_unknown_runners = [
-        "c_bcp_median_nti_interaction",
-        #"c_bcp_std_nti_interaction",
-        "fn_scaled_pace_nti_interaction",
-        "fn_scaled_pace_c_bcp_median_tc_interaction",
-        "fn_scaled_pace_c_bcp_median_vertical_interaction",
-    ]
-    
-    bc_df = bc_df.with_columns([
-        pl.when(pl.col("run_num") > 2)
-          .then(None)
-          .otherwise(pl.col(col))
-          .alias(col)
-        for col in cols_only_for_unknown_runners
-    ])
-    """
-    
-    
-    # Add dummy columns and keep the original 'leg' column
     bc_df = bc_df.with_columns(pl.col("leg").cast(pl.Int64))
-    
+
+    # TODO REMOVE
     leg_dummies = bc_df.select("leg").to_dummies()
     leg_dummy_cols = [col for col in leg_dummies.columns if col != "leg"]
-    
+
     bc_df = bc_df.hstack(leg_dummies.select(leg_dummy_cols))
-    
-    
-    feature_names = leg_dummy_cols + [
+    # leg_dummy_cols +
+    feature_names = [
         "leg",
         "first_time",
         "run_num_norm",
@@ -491,7 +470,7 @@ def build_features(runs_df: pl.DataFrame, forecast_year: int) -> tuple[pl.DataFr
     
         #"roll_5y_tcn_bcp_ti_interaction_mean",
         #"roll_5y_tcn_bcp_run_num_interaction_mean",
-        "roll_5y_tc_mean",
+        #"roll_5y_tc_mean",
         #"roll_5y_vc_mean",
         "roll_vcn_bcp_mean_marking_interaction",
         #"roll_5y_tcn_bcp_vertical_interaction",
@@ -513,9 +492,7 @@ def build_features(runs_df: pl.DataFrame, forecast_year: int) -> tuple[pl.DataFr
         #'team_members_total',
         
     ]
-    
-    leaky_until_rebuilt = []
-    
+
     first_pass_drops = [
         #"roll_5y_history_median_ratio",
         "roll_5y_history_std_ratio",
@@ -532,7 +509,7 @@ def build_features(runs_df: pl.DataFrame, forecast_year: int) -> tuple[pl.DataFr
     
     feature_names = [
         name for name in feature_names
-        if name not in leaky_until_rebuilt + first_pass_drops
+        if name not in first_pass_drops
     ]
     
     return bc_df, feature_names, boxcox_params

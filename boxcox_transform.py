@@ -13,9 +13,13 @@ class BoxCoxParams:
     bc_std: float
 
 def standardize(series: np.ndarray | pl.Series) -> tuple[np.ndarray | pl.Series, float, float]:
-    """Standardize a pandas series"""
     mean = float(np.nanmean(series))
     std = float(np.nanstd(series))
+    return (series - mean) / std, mean, std
+
+def fake_standardize(series: np.ndarray | pl.Series) -> tuple[np.ndarray | pl.Series, float, float]:
+    mean = 0
+    std = 1
     return (series - mean) / std, mean, std
 
 def boxcox_and_normalize(values: np.ndarray | pl.Series, params: BoxCoxParams) -> np.ndarray:
@@ -57,7 +61,7 @@ def fit_boxcox_and_normalize(
         no_nans_history_capped_paces,
         lmbda=race_specific_bc_lambda,
     )
-    _, bc_mean, bc_std = standardize(history_bc_transformed_paces)
+    _, bc_mean, bc_std = fake_standardize(history_bc_transformed_paces)
     
     bc_transformed_paces = stats.boxcox(capped_paces, lmbda=race_specific_bc_lambda)
     normalized_bc_paces = (bc_transformed_paces - bc_mean) / bc_std
