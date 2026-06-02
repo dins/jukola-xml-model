@@ -26,15 +26,17 @@ def fetch_running_order(year, ve_or_ju):
     def parse_team_base_name(team_name):
         p = "^(.+) ([0-9]+)$"
         matches = re.match(p, team_name)
-        team_base_name = matches.group(1)
-        return team_base_name
+        if matches:
+            return matches.group(1)
+        return team_name
 
     def fetch_order(url):
         logging.info("Fetching " + url)
         page = requests.get(url, timeout=15)
         # tree = html.fromstring(page.content.decode('ISO-8859-1').encode("utf-8").strip())
         tree = html.fromstring(page.content.strip())
-        rows = tree.xpath('//*[@id="site_main"]/table/tr')
+        # Use a more robust selector since the layout changed (removed #site_main)
+        rows = tree.xpath('//table/tr')
         logging.info(f'Got {len(rows)} rows')
 
         output_rows = []
@@ -45,8 +47,8 @@ def fetch_running_order(year, ve_or_ju):
         current_team_country = "NONE"
         for row in rows:
             team_id = next(iter(row.xpath('.//td[1]/text()') or []), None)
-            if team_id is not None:
-                team_name = next(iter(row.xpath('.//td[2]/text()')))
+            if team_id is not None and team_id.strip() != "":
+                team_name = next(iter(row.xpath('.//td[2]/text()') or []), "")
                 current_team_country = next(iter(row.xpath('.//img/@title') or []), "NA")
                 current_team_id = team_id
                 team_base_name = parse_team_base_name(team_name)
