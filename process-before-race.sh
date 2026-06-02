@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euf -o pipefail
 
-# time FORECAST_YEAR=2025 ./process-before-race.sh
+# time FORECAST_YEAR=2026 ./process-before-race.sh
 
 RUN_TS="br-$(date -u '+%Y%m%d_%H%M%S')"
 SECONDS=0
@@ -10,14 +10,14 @@ SECONDS=0
 RO_LOG_PATH="logs/running-order-${FORECAST_YEAR}-${RUN_TS}.log"
 echo $(date -u +"%F %T") "Starting BEFORE_RACE ${RUN_TS}, logs: ${RO_LOG_PATH}"
 
-uv run python fetch_running_order.py 2025  &> ${RO_LOG_PATH}
+uv run python fetch_running_order.py 2026  &> ${RO_LOG_PATH}
 tail -n 10 ${RO_LOG_PATH}
 
 #ORO_LOG_PATH="logs/running-order-online-${FORECAST_YEAR}-${RUN_TS}.log"
 #echo $(date -u +"%F %T") "Starting ${ORO_LOG_PATH}"
-#uv run python process_online_running_order.py 2025  &> ${ORO_LOG_PATH}
+#uv run python process_online_running_order.py 2026  &> ${ORO_LOG_PATH}
 #tail -n 10 ${ORO_LOG_PATH}
-#cp data/online_running_order_ke_fy_2025.tsv data/running_order_final_ke_fy_2025.tsv
+#cp data/online_running_order_ke_fy_2026.tsv data/running_order_final_ke_fy_2025.tsv
 #cp data/online_running_order_ve_fy_2024.tsv data/running_order_final_ve_fy_2024.tsv
 #cp data/online_running_order_ju_fy_2024.tsv data/running_order_final_ju_fy_2024.tsv
 
