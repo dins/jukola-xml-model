@@ -1,6 +1,6 @@
 import numpy as np
 import polars as pl
-from boxcox_transform import BoxCoxParams, fit_boxcox_and_normalize, standardize
+from boxcox_transform import BoxCoxParams, fit_boxcox_and_normalize
 
 
 def _safe_number(value: float | int | None, fallback: float | int) -> float | int:
@@ -415,7 +415,7 @@ def build_features(runs_df: pl.DataFrame, forecast_year: int) -> tuple[pl.DataFr
         (pl.col("roll_vcn_bcp_mean") * pl.col("vertical_coef")).alias("roll_vcn_bcp_mean_vc_interaction"),
         #(pl.col("normalized_team_id") * pl.col("roll_tcn_bcp_std")).alias("roll_tcn_bcp_std_mean_nti_interaction"),
         #(pl.col("normalized_team_id") * pl.col("roll_tcn_bcp_mean")).alias("roll_tcn_bcp_mean_nti_interaction"),
-        ( (pl.col("normalized_team_id") / 2) * pl.col("c_bcp_median")).alias("c_bcp_median_nti_interaction"),
+        ( (pl.col("normalized_team_id") / 2) + pl.col("c_bcp_median")).alias("c_bcp_median_nti_interaction"),
         (pl.col("normalized_team_id") * pl.col("c_bcp_std")).alias("c_bcp_std_nti_interaction"),
         #(pl.col("normalized_team_id") * pl.col("fn_scaled_pace")).alias("fn_scaled_pace_nti_interaction"),
         # (pl.col("terrain_coefficient") * pl.col("fn_scaled_pace") * pl.col("c_bcp_median")).alias("fn_scaled_pace_c_bcp_median_tc_interaction"),
@@ -427,12 +427,6 @@ def build_features(runs_df: pl.DataFrame, forecast_year: int) -> tuple[pl.DataFr
     
     bc_df = bc_df.with_columns(pl.col("leg").cast(pl.Int64))
 
-    # TODO REMOVE
-    leg_dummies = bc_df.select("leg").to_dummies()
-    leg_dummy_cols = [col for col in leg_dummies.columns if col != "leg"]
-
-    bc_df = bc_df.hstack(leg_dummies.select(leg_dummy_cols))
-    # leg_dummy_cols +
     feature_names = [
         "leg",
         "first_time",

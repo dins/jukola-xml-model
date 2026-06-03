@@ -85,6 +85,12 @@ def main():
         default=10,
         help="Number of top trials to export (default: 10)",
     )
+    parser.add_argument(
+        "--trial-min",
+        type=int,
+        default=None,
+        help="Consider only trials with id >= trial_min",
+    )
 
     args = parser.parse_args()
 
@@ -122,6 +128,9 @@ def main():
     completed_trials = [
         t for t in study.trials if t.state == TrialState.COMPLETE and t.value is not None
     ]
+
+    if args.trial_min is not None:
+        completed_trials = [t for t in completed_trials if t.number >= args.trial_min]
 
     if not completed_trials:
         logging.warning("No completed trials found in study.")
