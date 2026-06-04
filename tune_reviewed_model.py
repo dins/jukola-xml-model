@@ -8,7 +8,8 @@ import subprocess
 import time
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from multiprocessing import Process
+from multiprocessing import Process, Semaphore
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -33,6 +34,7 @@ class TuningConfig:
     xml_model_root: Path
     journal_path: Path
     deadline_timestamp: Optional[float]
+    backtest_semaphore: Any
 
 
 # ---------------------------------------------------------------------------
@@ -87,7 +89,7 @@ def run_notebook_trial(trial: optuna.Trial, config: TuningConfig) -> float:
 
     yearly_scores: List[float] = []
 
-    for year in config.backtest_years:
+    def run_year(year: int) -> float:
         logging.info(
             "Trial %d: Processing %s year %d", trial.number, config.race_type, year
         )
@@ -138,15 +140,16 @@ def run_notebook_trial(trial: optuna.Trial, config: TuningConfig) -> float:
         ]
 
         try:
-            with open(log_path, "w") as f:
-                subprocess.run(
-                    cmd,
-                    cwd=config.xml_model_root,
-                    env=env,
-                    stdout=f,
-                    stderr=subprocess.STDOUT,
-                    check=True,
-                )
+            with config.backtest_semaphore:
+                with open(log_path, "w") as f:
+                    subprocess.run(
+                        cmd,
+                        cwd=config.xml_model_root,
+                        env=env,
+                        stdout=f,
+                        stderr=subprocess.STDOUT,
+                        check=True,
+                    )
         except subprocess.CalledProcessError:
             logging.error(
                 "Trial %d failed for year %d. See %s", trial.number, year, log_path
@@ -183,12 +186,13 @@ def run_notebook_trial(trial: optuna.Trial, config: TuningConfig) -> float:
             )
             raise optuna.TrialPruned(f"tuning_score missing for year {year}")
 
-        yearly_scores.append(float(fy_custom_tuning_score))
+        return float(fy_custom_tuning_score)
 
-        # Intermediate report to Optuna for pruning
-        trial.report(float(np.mean(yearly_scores)), step=len(yearly_scores) - 1)
-        if trial.should_prune():
-            raise optuna.TrialPruned()
+    # Run backtests in parallel with a thread pool
+    with ThreadPoolExecutor(max_workers=len(config.backtest_years)) as executor:
+        futures = {executor.submit(run_year, year): year for year in config.backtest_years}
+        for future in as_completed(futures):
+            yearly_scores.append(future.result())
 
     return float(np.mean(yearly_scores))
 
@@ -254,7 +258,7 @@ def main():
         "--study-name",
         help="Optuna study name (default: v6-tuning-{race-type})",
     )
-    parser.add_argument("--n-workers", type=int, default=8)
+    parser.add_argument("--n-workers", type=int, default=3)
     parser.add_argument(
         "--deadline", help="Expected completion time (local time HH:MM)"
     )
@@ -320,6 +324,8 @@ def main():
     if args.deadline:
         deadline_timestamp = parse_deadline(args.deadline)
 
+    backtest_semaphore = Semaphore(8)
+
     config = TuningConfig(
         race_type=args.race_type,
         backtest_years=tuple(args.years),
@@ -330,6 +336,7 @@ def main():
         xml_model_root=Path(".").resolve(),
         journal_path=journal_path,
         deadline_timestamp=deadline_timestamp,
+        backtest_semaphore=backtest_semaphore,
     )
 
     config.journal_path.parent.mkdir(parents=True, exist_ok=True)
