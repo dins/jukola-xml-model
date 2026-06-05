@@ -150,7 +150,17 @@ def run_notebook_trial(trial: optuna.Trial, config: TuningConfig) -> float:
                         stderr=subprocess.STDOUT,
                         check=True,
                     )
-        except subprocess.CalledProcessError:
+        except subprocess.CalledProcessError as e:
+            # Check if process died due to termination signals:
+            #  130 / -2 : SIGINT (Ctrl-C)
+            # -15       : SIGTERM (Termination signal)
+            #  137 / -9 : SIGKILL (Force kill)
+            if e.returncode in (130, -2, -15, 137, -9):
+                # Process was killed/interrupted
+                logging.warning(f"Trial {trial.number} year {year} notebook execution interrupted (code {e.returncode}).")
+                # We MUST raise KeyboardInterrupt instead of TrialPruned here so the main loop aborts
+                # instead of just pruning the trial and starting a new one.
+                raise KeyboardInterrupt(f"Notebook execution interrupted for year {year}")
             logging.error(
                 "Trial %d failed for year %d. See %s", trial.number, year, log_path
             )
@@ -189,10 +199,19 @@ def run_notebook_trial(trial: optuna.Trial, config: TuningConfig) -> float:
         return float(fy_custom_tuning_score)
 
     # Run backtests in parallel with a thread pool
-    with ThreadPoolExecutor(max_workers=len(config.backtest_years)) as executor:
-        futures = {executor.submit(run_year, year): year for year in config.backtest_years}
-        for future in as_completed(futures):
-            yearly_scores.append(future.result())
+    running_years = set(config.backtest_years)
+    try:
+        with ThreadPoolExecutor(max_workers=len(config.backtest_years)) as executor:
+            futures = {executor.submit(run_year, year): year for year in config.backtest_years}
+            for future in as_completed(futures):
+                year = futures[future]
+                yearly_scores.append(future.result())
+                running_years.remove(year)
+    except KeyboardInterrupt:
+        for year in running_years:
+            logging.info("Trial %d backtest %d received signal SIGINT. Terminating.", trial.number, year)
+        # Re-raise so Optuna can catch it, mark the trial as FAIL/INTERRUPTED, and exit gracefully
+        raise
 
     return float(np.mean(yearly_scores))
 
@@ -355,8 +374,35 @@ def main():
         p.start()
         processes.append(p)
 
-    for p in processes:
-        p.join()
+    try:
+        for p in processes:
+            p.join()
+    except KeyboardInterrupt:
+        print() # Print a newline so the log doesn't end up on the same line as ^C
+        logging.info("Interrupted by user. Waiting for workers to shut down gracefully and mark trials as failed (up to 15s)...")
+        # Give workers time to catch the SIGINT, fail their Optuna trials in the DB, and exit cleanly
+        deadline = time.time() + 15.0
+        for p in processes:
+            timeout = max(0.0, deadline - time.time())
+            p.join(timeout=timeout)
+            
+        # If any workers are STILL stuck after 15 seconds, forcefully kill them
+        killed_any = False
+        for p in processes:
+            if p.is_alive():
+                logging.warning(f"Worker {p.pid} did not terminate gracefully in time. Force killing.")
+                p.terminate() # SIGTERM is safer than SIGKILL
+                p.join(timeout=1.0)
+                if p.is_alive():
+                    p.kill() # SIGKILL if it ignores SIGTERM
+                killed_any = True
+                
+        if killed_any:
+            for p in processes:
+                p.join()
+                
+        logging.info("Tuning interrupted and workers terminated.")
+        return
 
     logging.info("Tuning complete.")
 
