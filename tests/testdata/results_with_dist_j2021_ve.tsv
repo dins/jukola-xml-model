@@ -1,0 +1,7 @@
+team-id	placement	team-time	team-name	team-nro	leg-nro	emit	leg-time	competitor-name	weighted_log_mean_pace	weighted_log_pace_std	disqualified	leg_distance
+22	3	11307	Järla Orientering	1	4	2515578	3050	Karolin Ohlsson	1.750587327437499	0.24255345320773794	False	8.5
+13	11	11581	Stora Tuna OK	1	1	1500542	2818	Magdalena Olsson	1.851444423682898	0.21581478437174173	False	7.3
+51	38	12645	OK Linne	1	4	1516653	3318	Johanna Öberg	1.8377135906663187	0.2314383045656771	False	8.5
+80	70	13583	Kouvolan Suunnistajat	1	4	1515634	4194	Kaisa Vainikka	2.0552899424692153	0.29502121758463434	False	8.5
+247	152	15986	Espoon Suunta	10	2	1503263	2817	Eija Rantala	2.131207984837176	0.23240090575265612	False	5.4
+877	637	26071	RastiStrutsit	1	4	1235392	5216	Kaisa Vainikka	2.259340709327896	0.32405825478830724	False	8.5
