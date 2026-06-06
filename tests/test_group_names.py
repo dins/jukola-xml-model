@@ -5,38 +5,48 @@ import pandas as pd
 import shared
 import group_names
 
+
 @pytest.fixture
 def mock_environment(monkeypatch):
-    monkeypatch.setattr(shared, "history_years", lambda: ["2018", "2019", "2021", "2022"])
+    monkeypatch.setattr(
+        shared, "history_years", lambda: ["2018", "2019", "2021", "2022"]
+    )
     monkeypatch.setattr(shared, "race_type", lambda default="ve": "ve")
     monkeypatch.setattr(shared, "forecast_year", lambda: 2026)
     monkeypatch.setattr(shared, "race_id_str", lambda: "ve_fy_test")
 
     original_open = builtins.open
+
     def mocked_open(file, *args, **kwargs):
         if str(file).startswith("data/results_with_dist_j"):
             file = str(file).replace("data/", "tests/testdata/")
         return original_open(file, *args, **kwargs)
+
     monkeypatch.setattr(builtins, "open", mocked_open)
 
     original_read_csv = pd.read_csv
+
     def mocked_read_csv(filepath_or_buffer, *args, **kwargs):
         if str(filepath_or_buffer).startswith("data/running_order_final_"):
             filepath_or_buffer = "tests/testdata/running_order_final_ve_fy_test.tsv"
         return original_read_csv(filepath_or_buffer, *args, **kwargs)
+
     monkeypatch.setattr(pd, "read_csv", mocked_read_csv)
 
     captured_dfs = {}
     original_to_csv = pd.DataFrame.to_csv
+
     def mocked_to_csv(self, path_or_buf=None, *args, **kwargs):
         if path_or_buf and str(path_or_buf).startswith("data/long_runs_"):
             captured_dfs["output"] = self.copy()
             # We don't actually write to disk to avoid polluting data/
             return None
         return original_to_csv(self, path_or_buf, *args, **kwargs)
+
     monkeypatch.setattr(pd.DataFrame, "to_csv", mocked_to_csv)
 
     return captured_dfs
+
 
 @pytest.fixture
 def grouped_dataframe(mock_environment):
@@ -51,39 +61,59 @@ def grouped_dataframe(mock_environment):
 def test_kaima_is_split(grouped_dataframe):
     # Kaima: "kaisa vainikka"
     # Should be split into multiple unique_name variations
-    kaisa_runs = grouped_dataframe[grouped_dataframe["unique_name"].str.startswith("kaisa vainikka", na=False)]
+    kaisa_runs = grouped_dataframe[
+        grouped_dataframe["unique_name"].str.startswith("kaisa vainikka", na=False)
+    ]
     unique_kaisas = kaisa_runs["unique_name"].nunique()
-    assert unique_kaisas > 1, f"Expected kaisa vainikka to be split, found {unique_kaisas} unique names"
+    assert unique_kaisas > 1, (
+        f"Expected kaisa vainikka to be split, found {unique_kaisas} unique names"
+    )
 
 
 def test_tuplaaja_remains_grouped(grouped_dataframe):
     # Tuplaaja: "johanna öberg"
     # Runs multiple legs in the same year, should remain grouped
-    johanna_runs = grouped_dataframe[grouped_dataframe["unique_name"].str.startswith("johanna öberg", na=False)]
+    johanna_runs = grouped_dataframe[
+        grouped_dataframe["unique_name"].str.startswith("johanna öberg", na=False)
+    ]
     unique_johannas = johanna_runs["unique_name"].nunique()
-    assert unique_johannas == 1, f"Expected johanna öberg to be grouped together, found {unique_johannas}"
+    assert unique_johannas == 1, (
+        f"Expected johanna öberg to be grouped together, found {unique_johannas}"
+    )
 
 
 def test_emit_connection_merges_teams(grouped_dataframe):
     # Emit Connection: "eija rantala"
     # She has two namesakes: One in Ounasvaaran Hiihtoseura.
     # The other runs for Helsingin Suunnistajat and Espoon Suunta, connected by Emit.
-    eija_runs = grouped_dataframe[grouped_dataframe["unique_name"].str.startswith("eija rantala", na=False)]
+    eija_runs = grouped_dataframe[
+        grouped_dataframe["unique_name"].str.startswith("eija rantala", na=False)
+    ]
     unique_eijas = eija_runs["unique_name"].nunique()
-    assert unique_eijas == 2, f"Expected eija rantala to be split into 2 people, found {unique_eijas}"
-    
+    assert unique_eijas == 2, (
+        f"Expected eija rantala to be split into 2 people, found {unique_eijas}"
+    )
+
     # Check that the emit connection worked: Helsingin Suunnistajat and Espoon Suunta are merged
-    hs_es_eija = eija_runs[eija_runs["team"].isin(["HELSINGIN SUUNNISTAJAT", "ESPOON SUUNTA"])]
-    assert hs_es_eija["unique_name"].nunique() == 1, "Emit connection failed to merge HS and ES!"
+    hs_es_eija = eija_runs[
+        eija_runs["team"].isin(["HELSINGIN SUUNNISTAJAT", "ESPOON SUUNTA"])
+    ]
+    assert hs_es_eija["unique_name"].nunique() == 1, (
+        "Emit connection failed to merge HS and ES!"
+    )
 
 
 def test_normal_runner_accumulates_run_num(grouped_dataframe):
     # Normal Runner: "magdalena olsson"
     # Runs in the same team across all years. Should be fully sequential.
-    magdalena_runs = grouped_dataframe[grouped_dataframe["unique_name"].str.startswith("magdalena olsson", na=False)]
+    magdalena_runs = grouped_dataframe[
+        grouped_dataframe["unique_name"].str.startswith("magdalena olsson", na=False)
+    ]
     assert magdalena_runs["unique_name"].nunique() == 1, "Normal runner got split!"
-    assert len(magdalena_runs) == 5, "Magdalena should have 4 history runs + 1 running order run"
-    
+    assert len(magdalena_runs) == 5, (
+        "Magdalena should have 4 history runs + 1 running order run"
+    )
+
     # Check that run_num is correctly accumulated (1, 2, 3, 4, 5)
     run_nums = magdalena_runs.sort_values("year")["run_num"].tolist()
     assert run_nums == [1, 2, 3, 4, 5], f"run_num sequential count failed: {run_nums}"
@@ -91,9 +121,11 @@ def test_normal_runner_accumulates_run_num(grouped_dataframe):
 
 def test_running_order_is_merged_with_null_pace(grouped_dataframe):
     # Running Order (Future Year) Merge
-    # In running order, pace is NaN/missing. 
+    # In running order, pace is NaN/missing.
     # The 2026 run for Magdalena should be present and pace should be null.
-    magdalena_runs = grouped_dataframe[grouped_dataframe["unique_name"].str.startswith("magdalena olsson", na=False)]
+    magdalena_runs = grouped_dataframe[
+        grouped_dataframe["unique_name"].str.startswith("magdalena olsson", na=False)
+    ]
     ro_magdalena = magdalena_runs[magdalena_runs["year"] == 2026]
     assert len(ro_magdalena) == 1, "Failed to merge running order data"
     assert pd.isna(ro_magdalena["pace"].iloc[0]), "Running order pace should be null"
@@ -101,13 +133,19 @@ def test_running_order_is_merged_with_null_pace(grouped_dataframe):
 
 def test_rare_first_name_gets_fallback(grouped_dataframe):
     # Rare First Name Fallback
-    # "karolin ohlsson" has a rare first name (<5 occurrences). 
+    # "karolin ohlsson" has a rare first name (<5 occurrences).
     # She should receive the fallback 'OTHER' fn_scaled_pace value.
-    karolin = grouped_dataframe[grouped_dataframe["unique_name"].str.startswith("karolin ohlsson", na=False)]
+    karolin = grouped_dataframe[
+        grouped_dataframe["unique_name"].str.startswith("karolin ohlsson", na=False)
+    ]
     assert not karolin.empty, "Rare first name runner missing"
-    
-    eija = grouped_dataframe[grouped_dataframe["unique_name"].str.startswith("eija rantala", na=False)]
-    assert karolin["fn_scaled_pace"].iloc[0] == eija["fn_scaled_pace"].iloc[0], "Rare first names should get the same fallback fn_scaled_pace"
+
+    eija = grouped_dataframe[
+        grouped_dataframe["unique_name"].str.startswith("eija rantala", na=False)
+    ]
+    assert karolin["fn_scaled_pace"].iloc[0] == eija["fn_scaled_pace"].iloc[0], (
+        "Rare first names should get the same fallback fn_scaled_pace"
+    )
 
 
 def test_statistics_and_ideals_are_calculated(grouped_dataframe):
@@ -115,19 +153,27 @@ def test_statistics_and_ideals_are_calculated(grouped_dataframe):
     # Check that median_pace and log_stdev are calculated
     assert "median_pace" in grouped_dataframe.columns
     assert "log_stdev" in grouped_dataframe.columns
-    magdalena_runs = grouped_dataframe[grouped_dataframe["unique_name"].str.startswith("magdalena olsson", na=False)]
+    magdalena_runs = grouped_dataframe[
+        grouped_dataframe["unique_name"].str.startswith("magdalena olsson", na=False)
+    ]
     assert pd.notna(magdalena_runs["median_pace"].iloc[0]), "median_pace not calculated"
     # Check ideals merge (e.g. terrain_coefficient)
     assert "terrain_coefficient" in grouped_dataframe.columns
-    assert pd.notna(magdalena_runs["terrain_coefficient"].iloc[0]), "Ideals merge failed"
+    assert pd.notna(magdalena_runs["terrain_coefficient"].iloc[0]), (
+        "Ideals merge failed"
+    )
 
 
 def test_run_id_format(grouped_dataframe):
     # Check run_id composite key
-    assert "run_id" in grouped_dataframe.columns, "run_id was not added to the output dataframe"
+    assert "run_id" in grouped_dataframe.columns, (
+        "run_id was not added to the output dataframe"
+    )
     sample_run = grouped_dataframe.iloc[0]
     expected_run_id = f"{int(sample_run['year'])}-ve-{int(sample_run['team_id'])}-{int(sample_run['leg'])}"
-    assert sample_run["run_id"] == expected_run_id, f"run_id format incorrect. Expected {expected_run_id}, got {sample_run['run_id']}"
+    assert sample_run["run_id"] == expected_run_id, (
+        f"run_id format incorrect. Expected {expected_run_id}, got {sample_run['run_id']}"
+    )
 
 
 def test_team_changes_without_overlaps(grouped_dataframe):
@@ -136,7 +182,9 @@ def test_team_changes_without_overlaps(grouped_dataframe):
     # We assume team changes are likely, so if there is only one run per full name per year,
     # there is no reason to assume namesakes. They remain grouped.
     agata_runs = grouped_dataframe[grouped_dataframe["name"] == "agata olejnik"]
-    assert agata_runs["unique_name"].nunique() == 1, "Expected runner changing teams without overlapping years to remain grouped"
+    assert agata_runs["unique_name"].nunique() == 1, (
+        "Expected runner changing teams without overlapping years to remain grouped"
+    )
 
 
 def test_missing_pace_does_not_trigger_split(grouped_dataframe):
@@ -146,7 +194,9 @@ def test_missing_pace_does_not_trigger_split(grouped_dataframe):
     # Because NA paces do not count towards the overlapping years threshold, she only has 1 overlap year (2022).
     # Thus, according to the Tuplaaja heuristic, she is not split.
     heidi_runs = grouped_dataframe[grouped_dataframe["name"] == "heidi nevalainen"]
-    assert heidi_runs["unique_name"].nunique() == 1, "Expected missing pace (NA) to not count towards namesake split threshold"
+    assert heidi_runs["unique_name"].nunique() == 1, (
+        "Expected missing pace (NA) to not count towards namesake split threshold"
+    )
 
 
 def test_partial_emit_linking_during_split(grouped_dataframe):
@@ -156,9 +206,15 @@ def test_partial_emit_linking_during_split(grouped_dataframe):
     # Therefore, she should split into exactly 2 personas.
     jonna_runs = grouped_dataframe[grouped_dataframe["name"] == "jonna virtanen"]
     jonna_personas = jonna_runs["unique_name"].unique()
-    assert len(jonna_personas) == 2, f"Expected Jonna to split into 2 people, got {len(jonna_personas)}"
-    linked_persona_runs = jonna_runs[jonna_runs["team"].isin(["HUIKKA RASTILLA", "ÅBO KLYX"])]
-    assert linked_persona_runs["unique_name"].nunique() == 1, "Emit connection failed to link teams during a split"
+    assert len(jonna_personas) == 2, (
+        f"Expected Jonna to split into 2 people, got {len(jonna_personas)}"
+    )
+    linked_persona_runs = jonna_runs[
+        jonna_runs["team"].isin(["HUIKKA RASTILLA", "ÅBO KLYX"])
+    ]
+    assert linked_persona_runs["unique_name"].nunique() == 1, (
+        "Emit connection failed to link teams during a split"
+    )
 
 
 def test_short_name_filtering(grouped_dataframe):
@@ -173,4 +229,3 @@ def test_basic_data_integrity(grouped_dataframe):
     assert "pace" in grouped_dataframe.columns
     assert "unique_name" in grouped_dataframe.columns
     assert len(grouped_dataframe) > 0
-

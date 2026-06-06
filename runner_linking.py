@@ -109,7 +109,9 @@ class LinkingState:
     def _cached_name_groups(self) -> dict[str, tuple[Run, ...]]:
         return _runs_by_normalized_name(self.all_runs)
 
-    def name_groups(self, include_closed: bool = False) -> tuple[tuple[str, tuple[Run, ...]], ...]:
+    def name_groups(
+        self, include_closed: bool = False
+    ) -> tuple[tuple[str, tuple[Run, ...]], ...]:
         """Return runs grouped by normalized full name."""
         return tuple(
             (normalized_name, name_runs)
@@ -181,7 +183,9 @@ class LinkingState:
             )
         )
 
-    def refresh_linked_runners(self, *, include_unlinked_singletons: bool = False) -> None:
+    def refresh_linked_runners(
+        self, *, include_unlinked_singletons: bool = False
+    ) -> None:
         """Recompute current LinkedRunners from all CandidateLinks collected so far."""
         self.linked_runners = resolve_links(
             runs=self.all_runs,
@@ -195,9 +199,7 @@ class LinkingState:
             for run in linked_runner.runs
         }
         self.unlinked_runs = tuple(
-            run
-            for run in self.all_runs
-            if run.run_id not in linked_run_ids
+            run for run in self.all_runs if run.run_id not in linked_run_ids
         )
 
 
@@ -274,8 +276,12 @@ class ManualExceptionRule:
 
     rule_name = "manual_exception"
 
-    def __init__(self, run_id_groups: Sequence[Sequence[str]], priority: int = 1000) -> None:
-        self.run_id_groups = tuple(tuple(run_id_group) for run_id_group in run_id_groups)
+    def __init__(
+        self, run_id_groups: Sequence[Sequence[str]], priority: int = 1000
+    ) -> None:
+        self.run_id_groups = tuple(
+            tuple(run_id_group) for run_id_group in run_id_groups
+        )
         self.priority = priority
 
     def apply(self, state: LinkingState) -> None:
@@ -313,7 +319,12 @@ def resolve_links(
 
     same_runner_links = sorted(
         (link for link in links if link.relation == LinkRelation.SAME_RUNNER),
-        key=lambda link: (-link.priority, link.rule_name, link.left_run_id, link.right_run_id),
+        key=lambda link: (
+            -link.priority,
+            link.rule_name,
+            link.left_run_id,
+            link.right_run_id,
+        ),
     )
 
     for link in same_runner_links:
@@ -336,7 +347,12 @@ def resolve_links(
         if include_unlinked_singletons or has_label or has_multiple_runs:
             linked_runners.append(_make_linked_runner(run_tuple, labels))
 
-    return tuple(sorted(linked_runners, key=lambda runner: (runner.unique_name, runner.linked_runner_id)))
+    return tuple(
+        sorted(
+            linked_runners,
+            key=lambda runner: (runner.unique_name, runner.linked_runner_id),
+        )
+    )
 
 
 class UnionFind:
@@ -390,7 +406,10 @@ def link_runs_with_state(
     state = LinkingState.from_runs(runs)
     active_rules = tuple(rules or default_legacy_rules())
 
-    for rule in sorted(active_rules, key=lambda active_rule: (-active_rule.priority, active_rule.rule_name)):
+    for rule in sorted(
+        active_rules,
+        key=lambda active_rule: (-active_rule.priority, active_rule.rule_name),
+    ):
         rule.apply(state)
         state.refresh_linked_runners(include_unlinked_singletons=False)
 
@@ -476,14 +495,14 @@ def _years_with_multiple_result_teams(runs: tuple[Run, ...]) -> tuple[int, ...]:
 
     return tuple(
         sorted(
-            year
-            for year, team_names in teams_by_year.items()
-            if len(team_names) > 1
+            year for year, team_names in teams_by_year.items() if len(team_names) > 1
         )
     )
 
 
-def _split_runs_by_emit_connected_teams(runs: tuple[Run, ...]) -> tuple[tuple[Run, ...], ...]:
+def _split_runs_by_emit_connected_teams(
+    runs: tuple[Run, ...],
+) -> tuple[tuple[Run, ...], ...]:
     team_union = UnionFind()
 
     for run in runs:
@@ -558,6 +577,7 @@ def _raise_if_duplicate_run_ids(runs: tuple[Run, ...]) -> None:
         return
 
     from collections import Counter
+
     counts = Counter(run_ids)
     duplicate_run_ids = sorted(run_id for run_id, count in counts.items() if count > 1)
 
