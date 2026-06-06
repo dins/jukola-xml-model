@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import functools
 import hashlib
 from collections import defaultdict
 from dataclasses import dataclass, field
@@ -99,17 +100,20 @@ class LinkingState:
         _raise_if_duplicate_run_ids(all_runs)
         return cls(all_runs=all_runs, unlinked_runs=all_runs)
 
-    @property
+    @functools.cached_property
     def runs_by_id(self) -> dict[str, Run]:
         """Return all runs keyed by stable run_id."""
         return {run.run_id: run for run in self.all_runs}
 
+    @functools.cached_property
+    def _cached_name_groups(self) -> dict[str, tuple[Run, ...]]:
+        return _runs_by_normalized_name(self.all_runs)
+
     def name_groups(self, include_closed: bool = False) -> tuple[tuple[str, tuple[Run, ...]], ...]:
         """Return runs grouped by normalized full name."""
-        groups = _runs_by_normalized_name(self.all_runs)
         return tuple(
             (normalized_name, name_runs)
-            for normalized_name, name_runs in groups.items()
+            for normalized_name, name_runs in self._cached_name_groups.items()
             if include_closed or normalized_name not in self.closed_name_groups
         )
 
@@ -179,7 +183,7 @@ class LinkingState:
 
     def refresh_linked_runners(self, *, include_unlinked_singletons: bool = False) -> None:
         """Recompute current LinkedRunners from all CandidateLinks collected so far."""
-        self.linked_runners = LinkResolver().resolve(
+        self.linked_runners = resolve_links(
             runs=self.all_runs,
             candidate_links=self.candidate_links,
             unique_name_by_run_id=self.unique_name_by_run_id,
@@ -288,59 +292,55 @@ class ManualExceptionRule:
             )
 
 
-class LinkResolver:
-    """Builds LinkedRunners from SAME_RUNNER CandidateLinks."""
+def resolve_links(
+    runs: Iterable[Run],
+    candidate_links: Iterable[CandidateLink],
+    unique_name_by_run_id: Mapping[str, str] | None = None,
+    *,
+    include_unlinked_singletons: bool = False,
+) -> tuple[LinkedRunner, ...]:
+    """Return inferred linked runners from the currently known candidate links."""
+    all_runs = tuple(sorted(runs, key=lambda run: run.run_id))
+    links = tuple(candidate_links)
+    labels = unique_name_by_run_id or {}
 
-    def resolve(
-        self,
-        runs: Iterable[Run],
-        candidate_links: Iterable[CandidateLink],
-        unique_name_by_run_id: Mapping[str, str] | None = None,
-        *,
-        include_unlinked_singletons: bool = False,
-    ) -> tuple[LinkedRunner, ...]:
-        """Return inferred linked runners from the currently known candidate links."""
-        all_runs = tuple(sorted(runs, key=lambda run: run.run_id))
-        links = tuple(candidate_links)
-        labels = unique_name_by_run_id or {}
+    _raise_if_duplicate_run_ids(all_runs)
+    run_ids = {run.run_id for run in all_runs}
 
-        _raise_if_duplicate_run_ids(all_runs)
-        run_ids = {run.run_id for run in all_runs}
+    union_find = UnionFind()
+    for run in all_runs:
+        union_find.add(run.run_id)
 
-        union_find = UnionFind()
-        for run in all_runs:
-            union_find.add(run.run_id)
+    same_runner_links = sorted(
+        (link for link in links if link.relation == LinkRelation.SAME_RUNNER),
+        key=lambda link: (-link.priority, link.rule_name, link.left_run_id, link.right_run_id),
+    )
 
-        same_runner_links = sorted(
-            (link for link in links if link.relation == LinkRelation.SAME_RUNNER),
-            key=lambda link: (-link.priority, link.rule_name, link.left_run_id, link.right_run_id),
-        )
+    for link in same_runner_links:
+        if link.left_run_id not in run_ids or link.right_run_id not in run_ids:
+            raise KeyError(f"CandidateLink references unknown run_id: {link}")
 
-        for link in same_runner_links:
-            if link.left_run_id not in run_ids or link.right_run_id not in run_ids:
-                raise KeyError(f"CandidateLink references unknown run_id: {link}")
+        union_find.union(link.left_run_id, link.right_run_id)
 
-            union_find.union(link.left_run_id, link.right_run_id)
+    runs_by_component: dict[str, list[Run]] = defaultdict(list)
+    for run in all_runs:
+        runs_by_component[union_find.find(run.run_id)].append(run)
 
-        runs_by_component: dict[str, list[Run]] = defaultdict(list)
-        for run in all_runs:
-            runs_by_component[union_find.find(run.run_id)].append(run)
+    linked_runners: list[LinkedRunner] = []
 
-        linked_runners: list[LinkedRunner] = []
+    for component_runs in runs_by_component.values():
+        run_tuple = tuple(sorted(component_runs, key=lambda run: run.run_id))
+        has_label = any(run.run_id in labels for run in run_tuple)
+        has_multiple_runs = len(run_tuple) > 1
 
-        for component_runs in runs_by_component.values():
-            run_tuple = tuple(sorted(component_runs, key=lambda run: run.run_id))
-            has_label = any(run.run_id in labels for run in run_tuple)
-            has_multiple_runs = len(run_tuple) > 1
+        if include_unlinked_singletons or has_label or has_multiple_runs:
+            linked_runners.append(_make_linked_runner(run_tuple, labels))
 
-            if include_unlinked_singletons or has_label or has_multiple_runs:
-                linked_runners.append(_make_linked_runner(run_tuple, labels))
-
-        return tuple(sorted(linked_runners, key=lambda runner: (runner.unique_name, runner.linked_runner_id)))
+    return tuple(sorted(linked_runners, key=lambda runner: (runner.unique_name, runner.linked_runner_id)))
 
 
 class UnionFind:
-    """Small deterministic union-find used by LinkResolver."""
+    """Small deterministic union-find used by resolve_links."""
 
     def __init__(self) -> None:
         self._parent: dict[str, str] = {}
@@ -548,7 +548,7 @@ def _fallback_unique_name(runs: tuple[Run, ...]) -> str:
 
 def _make_linked_runner_id(runs: tuple[Run, ...]) -> str:
     run_ids = "|".join(sorted(run.run_id for run in runs))
-    digest = hashlib.sha1(run_ids.encode("utf-8")).hexdigest()[:12]
+    digest = hashlib.sha1(run_ids.encode("utf-8")).hexdigest()[:16]
     return f"linked-runner-{digest}"
 
 

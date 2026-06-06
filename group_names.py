@@ -1,6 +1,6 @@
-from __future__ import annotations
-
 """Drop-in adapter that converts current project files into runner_linking.Run objects."""
+
+from __future__ import annotations
 
 import csv
 import logging
