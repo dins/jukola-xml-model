@@ -267,6 +267,7 @@ def build_features(runs_df: pl.DataFrame, forecast_year: int) -> tuple[pl.DataFr
     
         #pl.col("bc_pace").shift(1).rolling_mean(window_size=5, min_samples=1).over("unique_name").alias("roll_5y_bcp_mean"),
         
+        #pl.col("pace").shift(1).rolling_median(window_size=10, min_samples=6).over("unique_name").alias("roll_pace_median"),
         pl.col("bc_pace").shift(1).rolling_median(window_size=15, min_samples=6).over("unique_name").alias("history_bcp_median"),
 
         pl.col("tcn_bc_pace").shift(1).rolling_mean(window_size=10, min_samples=1).over("unique_name").alias("roll_tcn_bcp_mean"),
@@ -281,7 +282,6 @@ def build_features(runs_df: pl.DataFrame, forecast_year: int) -> tuple[pl.DataFr
         pl.col("bc_pace").shift(1).cumulative_eval(pl.element().std()).over("unique_name").alias("history_bcp_std"),
         pl.col("tcn_bc_pace").shift(1).cumulative_eval(pl.element().std()).over("unique_name").alias("history_tcn_bcp_std"),
         pl.col("tcn_bc_pace").shift(1).rolling_skew(window_size=15, min_samples=5).over("unique_name").alias("roll_tcn_bcp_skew"),
-        pl.col("tcn_bc_pace").shift(1).rolling_kurtosis(window_size=15, min_samples=5).over("unique_name").alias("roll_tcn_bcp_kurtosis"),
         pl.col("pace").shift(1).rolling_skew(window_size=15, min_samples=5).over("unique_name").alias("roll_pace_skew"),
         (
             pl.col("tcn_bc_pace").shift(1).rolling_mean(10, min_samples=3).over("unique_name")
@@ -441,7 +441,6 @@ def build_features(runs_df: pl.DataFrame, forecast_year: int) -> tuple[pl.DataFr
         "roll_5y_tcn_bcp_std",
         "history_tcn_bcp_std_diff",
         #"roll_tcn_bcp_std_mean_nti_interaction",
-        "roll_tcn_bcp_kurtosis",
         "roll_tcn_bcp_skew",
         "roll_tcn_bcp_med_mean_diff",
         "roll_tcn_bcp_iqr",
@@ -457,7 +456,7 @@ def build_features(runs_df: pl.DataFrame, forecast_year: int) -> tuple[pl.DataFr
         "roll_pace_leg_ratio_std",
 
         # "bucketed_tc",
-        # "bucketed_vertical",
+        "bucketed_vertical",
 
         #"roll_5y_pace_leg_ratio_tc_interaction",
         # "uniform_tc",
@@ -472,7 +471,7 @@ def build_features(runs_df: pl.DataFrame, forecast_year: int) -> tuple[pl.DataFr
         #"fn_scaled_pace_std_v2",
         #"c_bcp_median",
         #"c_bcp_std",
-        "c_bcp_median_nti_interaction",
+        #"c_bcp_median_nti_interaction",
         # "c_bcp_std_nti_interaction",
         #"fn_scaled_pace_nti_interaction",
         #"fn_scaled_pace_c_bcp_median_tc_interaction",
@@ -491,7 +490,6 @@ def build_features(runs_df: pl.DataFrame, forecast_year: int) -> tuple[pl.DataFr
         #"roll_5y_history_median_ratio",
         "roll_5y_history_std_ratio",
         #"roll_tcn_bcp_skew",
-        "roll_tcn_bcp_kurtosis",
         "roll_tcn_bcp_iqr",
         "roll_tcn_bcp_med_mean_diff",
         "roll_tcn_bcp_med_mean_diff_tc_interaction",
