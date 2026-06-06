@@ -48,7 +48,6 @@ class CandidateLink:
     left_run_id: str
     right_run_id: str
     relation: LinkRelation
-    priority: int
     rule_name: str
     reason: str = ""
 
@@ -72,10 +71,9 @@ class LinkingLogEntry:
 
 
 class LinkingRule(ABC):
-    """A priority-ordered pipeline step that may add CandidateLinks to LinkingState."""
+    """A pipeline step that may add CandidateLinks to LinkingState."""
 
     rule_name: str
-    priority: int
 
     @abstractmethod
     def update_run_links(self, state: "LinkingState") -> None:
@@ -126,7 +124,6 @@ class LinkingState:
         runs: Iterable[Run],
         *,
         unique_name: str | None,
-        priority: int,
         rule_name: str,
         reason: str,
     ) -> None:
@@ -143,7 +140,6 @@ class LinkingState:
         candidate_links = _candidate_links_to_anchor(
             runs=grouped_runs,
             relation=LinkRelation.SAME_RUNNER,
-            priority=priority,
             rule_name=rule_name,
             reason=reason,
         )
@@ -209,7 +205,6 @@ class UniqueFullNameOneRunPerYearRule(LinkingRule):
     """Links a normalized full-name group when that name has at most one run in each year."""
 
     rule_name = "unique_full_name_one_run_per_year"
-    priority = 100
 
     def update_run_links(self, state: LinkingState) -> None:
         for normalized_name, name_runs in state.name_groups():
@@ -219,7 +214,6 @@ class UniqueFullNameOneRunPerYearRule(LinkingRule):
             state.add_same_runner_group(
                 name_runs,
                 unique_name=normalized_name,
-                priority=self.priority,
                 rule_name=self.rule_name,
                 reason="same normalized full name and at most one run per year",
             )
@@ -230,7 +224,6 @@ class LegacyAtMostOneMultiTeamYearRule(LinkingRule):
     """Preserves current group_names.py behavior for names with at most one multi-team result year."""
 
     rule_name = "legacy_at_most_one_multi_team_year"
-    priority = 90
 
     def update_run_links(self, state: LinkingState) -> None:
         for normalized_name, name_runs in state.name_groups():
@@ -242,7 +235,6 @@ class LegacyAtMostOneMultiTeamYearRule(LinkingRule):
             state.add_same_runner_group(
                 name_runs,
                 unique_name=normalized_name,
-                priority=self.priority,
                 rule_name=self.rule_name,
                 reason="legacy rule: at most one result year has multiple teams for this name",
             )
@@ -253,7 +245,6 @@ class SameNameEmitConnectedTeamRule(LinkingRule):
     """Splits an unresolved same-name group by teams connected through shared Emit ids."""
 
     rule_name = "same_name_emit_connected_team"
-    priority = 80
 
     def update_run_links(self, state: LinkingState) -> None:
         for normalized_name, name_runs in state.name_groups():
@@ -265,7 +256,6 @@ class SameNameEmitConnectedTeamRule(LinkingRule):
                 state.add_same_runner_group(
                     runs,
                     unique_name=unique_name,
-                    priority=self.priority,
                     rule_name=self.rule_name,
                     reason="same name split by Emit-connected team components",
                 )
@@ -278,13 +268,10 @@ class ManualExceptionRule(LinkingRule):
 
     rule_name = "manual_exception"
 
-    def __init__(
-        self, run_id_groups: Sequence[Sequence[str]], priority: int = 1000
-    ) -> None:
+    def __init__(self, run_id_groups: Sequence[Sequence[str]]) -> None:
         self.run_id_groups = tuple(
             tuple(run_id_group) for run_id_group in run_id_groups
         )
-        self.priority = priority
 
     def update_run_links(self, state: LinkingState) -> None:
         runs_by_id = state.runs_by_id
@@ -294,7 +281,6 @@ class ManualExceptionRule(LinkingRule):
             state.add_same_runner_group(
                 runs,
                 unique_name=None,
-                priority=self.priority,
                 rule_name=self.rule_name,
                 reason="manual configured run_id group",
             )
@@ -319,14 +305,8 @@ def resolve_links(
     for run in all_runs:
         union_find.add(run.run_id)
 
-    same_runner_links = sorted(
-        (link for link in links if link.relation == LinkRelation.SAME_RUNNER),
-        key=lambda link: (
-            -link.priority,
-            link.rule_name,
-            link.left_run_id,
-            link.right_run_id,
-        ),
+    same_runner_links = (
+        link for link in links if link.relation == LinkRelation.SAME_RUNNER
     )
 
     for link in same_runner_links:
@@ -404,14 +384,11 @@ def link_runs_with_state(
     runs: Iterable[Run],
     rules: Sequence[LinkingRule] | None = None,
 ) -> LinkingState:
-    """Run the priority pipeline and return final state for diagnostics."""
+    """Run the pipeline and return final state for diagnostics."""
     state = LinkingState.from_runs(runs)
     active_rules = tuple(rules or default_legacy_rules())
 
-    for rule in sorted(
-        active_rules,
-        key=lambda active_rule: (-active_rule.priority, active_rule.rule_name),
-    ):
+    for rule in active_rules:
         rule.update_run_links(state)
         state.refresh_linked_runners(include_unlinked_singletons=False)
 
@@ -439,7 +416,6 @@ def default_strict_rules() -> tuple[LinkingRule, ...]:
 def _candidate_links_to_anchor(
     runs: tuple[Run, ...],
     relation: LinkRelation,
-    priority: int,
     rule_name: str,
     reason: str,
 ) -> tuple[CandidateLink, ...]:
@@ -454,7 +430,6 @@ def _candidate_links_to_anchor(
             left_run_id=anchor_run.run_id,
             right_run_id=run.run_id,
             relation=relation,
-            priority=priority,
             rule_name=rule_name,
             reason=reason,
         )
