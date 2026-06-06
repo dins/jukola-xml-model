@@ -14,9 +14,9 @@ import normalize_names
 import runner_linking
 import shared
 
-# time RACE_TYPE=ju FORECAST_YEAR=2024 uv run python group_names_v2.py
+# time RACE_TYPE=ju FORECAST_YEAR=2024 uv run python group_names.py
 # To get all years use next year:
-# time RACE_TYPE=ju FORECAST_YEAR=2026 uv run python group_names_v2.py
+# time RACE_TYPE=ju FORECAST_YEAR=2026 uv run python group_names.py
 
 
 def _group_runs_to_runners() -> None:
@@ -26,8 +26,7 @@ def _group_runs_to_runners() -> None:
     running_order_runs = _read_running_order_runs(race_type)
 
     linked_runners = runner_linking.link_runs(
-        runs=tuple(result_runs + running_order_runs),
-        rules=runner_linking.default_legacy_rules(),
+        runs=result_runs + running_order_runs,
     )
 
     grouped_runs_by_unique_name = _to_grouped_runs_by_unique_name(linked_runners)

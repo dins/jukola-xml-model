@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import functools
 import hashlib
+import logging
 from collections import defaultdict
 from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
@@ -94,10 +95,22 @@ class LinkingState:
         """Return all runs keyed by stable run_id."""
         return {run.run_id: run for run in self.all_runs}
 
+    @staticmethod
+    def _runs_by_normalized_name(runs: Iterable[Run]) -> dict[str, tuple[Run, ...]]:
+        runs_by_name: dict[str, list[Run]] = defaultdict(list)
+
+        for run in runs:
+            runs_by_name[run.normalized_name].append(run)
+
+        return {
+            name: tuple(sorted(name_runs, key=lambda run: run.run_id))
+            for name, name_runs in sorted(runs_by_name.items())
+        }
+
     @functools.cached_property
     def unlinked_runs_by_name(self) -> dict[str, tuple[Run, ...]]:
         """Return unlinked runs grouped by normalized full name."""
-        return _runs_by_normalized_name(self.unlinked_runs)
+        return self._runs_by_normalized_name(self.unlinked_runs)
 
     def add_same_runner_group(
         self,
@@ -163,9 +176,18 @@ class UniqueFullNameOneRunPerYearRule(LinkingRule):
 
     rule_name = "unique_full_name_one_run_per_year"
 
+    @staticmethod
+    def _has_at_most_one_run_per_year(runs: tuple[Run, ...]) -> bool:
+        run_count_by_year: dict[int, int] = defaultdict(int)
+
+        for run in runs:
+            run_count_by_year[run.year] += 1
+
+        return all(run_count <= 1 for run_count in run_count_by_year.values())
+
     def update_run_links(self, state: LinkingState) -> None:
         for normalized_name, name_runs in state.unlinked_runs_by_name.items():
-            if not _has_at_most_one_run_per_year(name_runs):
+            if not self._has_at_most_one_run_per_year(name_runs):
                 continue
 
             state.add_same_runner_group(
@@ -183,7 +205,7 @@ class LegacyAtMostOneMultiTeamYearRule(LinkingRule):
 
     def update_run_links(self, state: LinkingState) -> None:
         for normalized_name, name_runs in state.unlinked_runs_by_name.items():
-            years_with_multiple_teams = _years_with_multiple_result_teams(name_runs)
+            years_with_multiple_teams = self._years_with_multiple_result_teams(name_runs)
 
             if len(years_with_multiple_teams) > 1:
                 continue
@@ -195,6 +217,25 @@ class LegacyAtMostOneMultiTeamYearRule(LinkingRule):
                 reason="legacy rule: at most one result year has multiple teams for this name",
             )
 
+    @staticmethod
+    def _years_with_multiple_result_teams(runs: tuple[Run, ...]) -> tuple[int, ...]:
+        teams_by_year: dict[int, set[str]] = defaultdict(set)
+
+        for run in runs:
+            if run.source != RunSource.RESULT:
+                continue
+
+            if run.pace is None:
+                continue
+
+            teams_by_year[run.year].add(run.team_name)
+
+        return tuple(
+            sorted(
+                year for year, team_names in teams_by_year.items() if len(team_names) > 1
+            )
+        )
+
 
 class SameNameEmitConnectedTeamRule(LinkingRule):
     """Splits an unresolved same-name group by teams connected through shared Emit ids."""
@@ -203,7 +244,7 @@ class SameNameEmitConnectedTeamRule(LinkingRule):
 
     def update_run_links(self, state: LinkingState) -> None:
         for normalized_name, name_runs in state.unlinked_runs_by_name.items():
-            grouped_runs = _split_runs_by_emit_connected_teams(name_runs)
+            grouped_runs = self._split_runs_by_emit_connected_teams(name_runs)
 
             for runs in grouped_runs:
                 team_names = ";".join(sorted({run.team_name for run in runs}))
@@ -214,6 +255,40 @@ class SameNameEmitConnectedTeamRule(LinkingRule):
                     rule_name=self.rule_name,
                     reason="same name split by Emit-connected team components",
                 )
+
+    @staticmethod
+    def _split_runs_by_emit_connected_teams(
+        runs: tuple[Run, ...],
+    ) -> tuple[tuple[Run, ...], ...]:
+        team_union = UnionFind()
+
+        for run in runs:
+            team_union.add(run.team_name)
+
+        runs_by_emit: dict[str, list[Run]] = defaultdict(list)
+        for run in runs:
+            if run.emit_id is not None:
+                runs_by_emit[run.emit_id].append(run)
+
+        for emit_runs in runs_by_emit.values():
+            team_names = tuple(sorted({run.team_name for run in emit_runs}))
+
+            if len(team_names) < 2:
+                continue
+
+            first_team_name = team_names[0]
+            for team_name in team_names[1:]:
+                team_union.union(first_team_name, team_name)
+
+        runs_by_component: dict[str, list[Run]] = defaultdict(list)
+        for run in runs:
+            component_id = team_union.find(run.team_name)
+            runs_by_component[component_id].append(run)
+
+        return tuple(
+            tuple(sorted(component_runs, key=lambda run: run.run_id))
+            for _, component_runs in sorted(runs_by_component.items())
+        )
 
 
 class ManualExceptionRule(LinkingRule):
@@ -326,36 +401,41 @@ class UnionFind:
 
 
 def link_runs(
-    runs: Iterable[Run],
-    rules: Sequence[LinkingRule] | None = None,
+    runs: list[Run],
 ) -> tuple[LinkedRunner, ...]:
     """Run the default priority pipeline and return final linked runners."""
-    return link_runs_with_state(runs=runs, rules=rules).linked_runners
+    return link_runs_with_state(runs=runs).linked_runners
 
 
 def link_runs_with_state(
-    runs: Iterable[Run],
-    rules: Sequence[LinkingRule] | None = None,
+    runs: list[Run],
 ) -> LinkingState:
     """Run the pipeline and return final state for diagnostics."""
     state = LinkingState.from_runs(runs)
-    active_rules = tuple(rules or default_legacy_rules())
+    active_rules = default_legacy_rules()
 
+    logging.info(f"Starting to group {len(runs)} runs with {len(active_rules)} linking rules")
     for rule in active_rules:
+        # Before rule runs, count current runners
+        old_linked = len(state.linked_runners)
+        logging.info(f"Starting rule {rule.rule_name}")
         rule.update_run_links(state)
         state.refresh_linked_runners(include_unlinked_singletons=False)
+        # After rule runs, count and report new runners
+        new_linked = len(state.linked_runners) - old_linked
+        logging.info(f"Rule {rule.rule_name} linked {new_linked} new runners")
 
     state.refresh_linked_runners(include_unlinked_singletons=True)
     return state
 
 
-def default_legacy_rules() -> tuple[LinkingRule, ...]:
+def default_legacy_rules() -> list[LinkingRule]:
     """Return rules that aim to preserve current group_names.py behavior first."""
-    return (
+    return [
         UniqueFullNameOneRunPerYearRule(),
         LegacyAtMostOneMultiTeamYearRule(),
         SameNameEmitConnectedTeamRule(),
-    )
+    ]
 
 
 def default_strict_rules() -> tuple[LinkingRule, ...]:
@@ -387,80 +467,6 @@ def _candidate_links_to_anchor(
             reason=reason,
         )
         for run in sorted_runs[1:]
-    )
-
-
-def _runs_by_normalized_name(runs: Iterable[Run]) -> dict[str, tuple[Run, ...]]:
-    runs_by_name: dict[str, list[Run]] = defaultdict(list)
-
-    for run in runs:
-        runs_by_name[run.normalized_name].append(run)
-
-    return {
-        name: tuple(sorted(name_runs, key=lambda run: run.run_id))
-        for name, name_runs in sorted(runs_by_name.items())
-    }
-
-
-def _has_at_most_one_run_per_year(runs: tuple[Run, ...]) -> bool:
-    run_count_by_year: dict[int, int] = defaultdict(int)
-
-    for run in runs:
-        run_count_by_year[run.year] += 1
-
-    return all(run_count <= 1 for run_count in run_count_by_year.values())
-
-
-def _years_with_multiple_result_teams(runs: tuple[Run, ...]) -> tuple[int, ...]:
-    teams_by_year: dict[int, set[str]] = defaultdict(set)
-
-    for run in runs:
-        if run.source != RunSource.RESULT:
-            continue
-
-        if run.pace is None:
-            continue
-
-        teams_by_year[run.year].add(run.team_name)
-
-    return tuple(
-        sorted(
-            year for year, team_names in teams_by_year.items() if len(team_names) > 1
-        )
-    )
-
-
-def _split_runs_by_emit_connected_teams(
-    runs: tuple[Run, ...],
-) -> tuple[tuple[Run, ...], ...]:
-    team_union = UnionFind()
-
-    for run in runs:
-        team_union.add(run.team_name)
-
-    runs_by_emit: dict[str, list[Run]] = defaultdict(list)
-    for run in runs:
-        if run.emit_id is not None:
-            runs_by_emit[run.emit_id].append(run)
-
-    for emit_runs in runs_by_emit.values():
-        team_names = tuple(sorted({run.team_name for run in emit_runs}))
-
-        if len(team_names) < 2:
-            continue
-
-        first_team_name = team_names[0]
-        for team_name in team_names[1:]:
-            team_union.union(first_team_name, team_name)
-
-    runs_by_component: dict[str, list[Run]] = defaultdict(list)
-    for run in runs:
-        component_id = team_union.find(run.team_name)
-        runs_by_component[component_id].append(run)
-
-    return tuple(
-        tuple(sorted(component_runs, key=lambda run: run.run_id))
-        for _, component_runs in sorted(runs_by_component.items())
     )
 
 
