@@ -114,6 +114,36 @@ def test_group_names_e2e(mock_environment):
     expected_run_id = f"{int(sample_run['year'])}-ve-{int(sample_run['team_id'])}-{int(sample_run['leg'])}"
     assert sample_run["run_id"] == expected_run_id, f"run_id format incorrect. Expected {expected_run_id}, got {sample_run['run_id']}"
 
+    # 9. Team changes without overlaps: "agata olejnik"
+    # Runs in multiple teams but never more than one team per year.
+    # We assume team changes are likely, so if there is only one run per full name per year,
+    # there is no reason to assume namesakes. They remain grouped.
+    agata_runs = df[df["name"] == "agata olejnik"]
+    assert agata_runs["unique_name"].nunique() == 1, "Expected runner changing teams without overlapping years to remain grouped"
+
+    # 10. Missing Pace Handling: "heidi nevalainen"
+    # In 2018, she has a valid run and a DNF (NA pace) run in two different teams.
+    # In 2022, she has two valid runs in different teams.
+    # Because NA paces do not count towards the overlapping years threshold, she only has 1 overlap year (2022).
+    # Thus, according to the Tuplaaja heuristic, she is not split.
+    heidi_runs = df[df["name"] == "heidi nevalainen"]
+    assert heidi_runs["unique_name"].nunique() == 1, "Expected missing pace (NA) to not count towards namesake split threshold"
+
+    # 11. Partial Emit Linking: "jonna virtanen"
+    # Overlaps in 2018, 2019, 2022 across 3 teams ("HUIKKA RASTILLA", "ÅBO KLYX", "NOSTARS").
+    # Emit connects "HUIKKA RASTILLA" and "ÅBO KLYX", but "NOSTARS" has distinct emits.
+    # Therefore, she should split into exactly 2 personas.
+    jonna_runs = df[df["name"] == "jonna virtanen"]
+    jonna_personas = jonna_runs["unique_name"].unique()
+    assert len(jonna_personas) == 2, f"Expected Jonna to split into 2 people, got {len(jonna_personas)}"
+    linked_persona_runs = jonna_runs[jonna_runs["team"].isin(["HUIKKA RASTILLA", "ÅBO KLYX"])]
+    assert linked_persona_runs["unique_name"].nunique() == 1, "Emit connection failed to link teams during a split"
+
+    # 12. Short Name Filtering: "n n"
+    # Should be entirely dropped because length <= 5 characters.
+    n_n_runs = df[df["name"] == "n n"]
+    assert len(n_n_runs) == 0, "Expected 'n n' to be dropped due to short length"
+
     # Verify basic data integrity
     assert "pace" in df.columns
     assert "unique_name" in df.columns

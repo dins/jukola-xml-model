@@ -51,8 +51,8 @@ uv run jupyter notebook
 ## Static checks
 
 ```bash
-uv run ruff check *.py *.ipynb
-uv run ty check *.py 
+uv run ruff check *.py *.ipynb tests 
+uv run ty check *.py tests/
 PYTHONPATH=. uv run pytest -v
 ```
 
