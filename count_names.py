@@ -56,7 +56,7 @@ def analyze_names():
         _append_names(year, "ju", all_names)
 
     all_names = [cleanup_name(name) for name in all_names]
-    runs = pd.DataFrame(all_names, columns=["name"])
+    runs = pd.DataFrame(all_names, columns=["name"])  # ty: ignore[invalid-argument-type]
 
     runs = runs[runs.name.str.count(" ") >= 1]
     names = runs["name"].str.split(" ", n=1, expand=True)

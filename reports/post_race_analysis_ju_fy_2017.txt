@@ -16,7 +16,7 @@ Yksilön aikavälin mediaani koko kertaa virhe: 1.1 minuuttia
           ind_interval  ind_interval_error  ind_crps  ind_nll  ind_interval_error_size
 num_runs                                                                              
 0               116.44                0.03     13.82     4.51                     3.08
-1                95.23                0.02     10.34     4.26                     1.78
+1                95.23                0.02     10.35     4.26                     1.78
 2                91.54                0.01      9.32     4.15                     1.26
 3                89.83                0.01      9.20     4.16                     1.32
 4                88.46                0.01      8.71     4.11                     0.69
@@ -44,7 +44,7 @@ num_runs
                  mean  median      mean median               mean count             mean median
 num_runs                                                                                       
 0              116.44  117.58     19.10  14.09               0.03  1816             0.25  -4.09
-1               95.23   93.16     14.12  10.22               0.02  1125            -1.00  -3.12
+1               95.23   93.16     14.12  10.22               0.02  1125            -1.01  -3.12
 2               91.54   88.26     12.64   9.40               0.01   869            -2.83  -4.16
 3               89.83   87.86     12.33   9.09               0.01   748            -2.45  -3.06
 4               88.46   86.33     11.75   8.59               0.01   642            -3.06  -3.87
@@ -70,7 +70,7 @@ num_runs
 24              28.40   28.40      7.38   7.38               0.00     1             7.38   7.38
 Viestiennusteen keskivirhe: 33.6 minuuttia
 Viestiennusteen virheen mediaani: 24.0 minuuttia
-Viestiennusteen keskimääräinen CRPS (otosarvio): 23.644
+Viestiennusteen keskimääräinen CRPS (otosarvio): 23.645
 Viestiennusteen keskimääräinen NLL: 4.982
     relay_error             
            mean median count
@@ -93,8 +93,8 @@ leg
 3         172.740               0.036                    0.033                    0.003
 4         187.960               0.041                    0.038                    0.003
 5         204.824               0.049                    0.046                    0.004
-6         229.047               0.058                    0.052                    0.006
-7         254.173               0.061                    0.057                    0.004
+6         229.048               0.058                    0.052                    0.006
+7         254.174               0.061                    0.057                    0.004
               real_interval real_interval_error real_interval_error_fast real_interval_error_slow
                        mean                mean                     mean                     mean
 mean_num_runs                                                                                    

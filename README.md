@@ -45,7 +45,15 @@ time ./process-recent-years.sh
 
 Start jupyter:
 ```bash
-nice uv run jupyter notebook
+uv run jupyter notebook
+```
+
+## Static checks
+
+```bash
+uv run ruff check *.py *.ipynb
+uv run ty check *.py 
+PYTHONPATH=. uv run pytest -v
 ```
 
 

@@ -46,7 +46,7 @@ def _load_pymc_history_values_for_running_order_names():
     assert len(missing_estimate_0) == 0, "All should have estiamte pace"
 
     running_order_with_estimates = pd.merge(running_order, history_estimates, on='unique_name', how='left',
-                                            suffixes=['_ro', '_history']).reset_index()
+                                            suffixes=('_ro', '_history')).reset_index()
 
     shared.log_df(running_order_with_estimates[['unique_name', 'num_runs', 'log_mean']])
 
@@ -107,7 +107,7 @@ def _load_ngboost_estimates_for_running_order_names():
     assert len(missing_estimate_0) == 0, "All should have estimate pace"
 
     running_order_with_estimates = pd.merge(running_order, ngboost_estimates, on=['team_id', 'leg', 'unique_name'], how='left',
-                                            suffixes=['_ro', '_history']).reset_index()
+                                            suffixes=('_ro', '_history')).reset_index()
 
     shared.log_df(running_order_with_estimates[['unique_name', 'num_runs', 'log_mean']])
 

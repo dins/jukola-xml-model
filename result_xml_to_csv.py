@@ -69,13 +69,13 @@ def weighted_avg_and_std(values, weights):
 for team in root.iter('team'):
     for leg in team.iter('leg'):
         row = []
-        row.append(team.find("teamid").text)
+        row.append(team.find("teamid").text)  # ty: ignore[unresolved-attribute]
         row.append(team.findtext("placement", "NA"))
         row.append(team.findtext("tsecs", "NA"))
-        row.append(team.find("teamname").text)
-        row.append(team.find("teamnro").text)
+        row.append(team.find("teamname").text)  # ty: ignore[unresolved-attribute]
+        row.append(team.find("teamnro").text)  # ty: ignore[unresolved-attribute]
 
-        leg_nro = leg.find("legnro").text
+        leg_nro = leg.find("legnro").text  # ty: ignore[unresolved-attribute]
         row.append(leg_nro)
         row.append(leg.findtext("emit", "NA"))
 
@@ -83,14 +83,14 @@ for team in root.iter('team'):
         default_leg_time = "NA"
         row.append(leg.findtext("tsecs", default_leg_time))
 
-        competitor_name = leg.find("nm").text
+        competitor_name = leg.find("nm").text  # ty: ignore[unresolved-attribute]
         row.append(competitor_name)
 
         control_paces = []
         control_distances = []
         disqualified = False
         for control in leg.iter('control'):
-            cd_text = control.find("cd").text
+            cd_text = control.find("cd").text  # ty: ignore[unresolved-attribute]
             if cd_text == "-" or cd_text is None:
                 disqualified = True  # Top teams have these but are not disqualified
 
@@ -100,7 +100,7 @@ for team in root.iter('team'):
                                                  seconds=struct_time.tm_sec).total_seconds())
                 distance_element = control.find("cl")
                 if distance_element is not None:
-                    distance_meters = int(distance_element.text)
+                    distance_meters = int(distance_element.text)  # ty: ignore[invalid-argument-type]
                     control_pace = (cd_secs / 60.0) / (distance_meters / 1000.0)
 
                     control_paces.append(control_pace)
@@ -118,7 +118,7 @@ for team in root.iter('team'):
         row.append(weighted_log_mean_pace)
         row.append(weighted_log_pace_std)
         row.append(disqualified)
-        leg_distance = shared.leg_distance(ve_or_ju, year, int(leg_nro))
+        leg_distance = shared.leg_distance(ve_or_ju, year, int(leg_nro))  # ty: ignore[invalid-argument-type]
         row.append(leg_distance)
         csvwriter.writerow(row)
 

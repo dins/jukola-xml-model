@@ -23,7 +23,7 @@ def fetch_running_order(year, ve_or_ju):
     def parse_team_base_name(team_name):
         p = "^(.+) ([0-9]+)$"
         matches = re.match(p, team_name)
-        team_base_name = matches.group(1)
+        team_base_name = matches.group(1)  # ty: ignore[unresolved-attribute]
         return team_base_name
 
     # out_file_name = f"data/running_order_final_{ve_or_ju}_fy_{year}.tsv"
