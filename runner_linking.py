@@ -4,8 +4,9 @@ import functools
 import hashlib
 from collections import defaultdict
 from dataclasses import dataclass, field
+from abc import ABC, abstractmethod
 from enum import Enum
-from typing import Iterable, Mapping, Protocol, Sequence
+from typing import Iterable, Mapping, Sequence
 
 
 class RunSource(Enum):
@@ -70,13 +71,14 @@ class LinkingLogEntry:
     run_ids: tuple[str, ...] = ()
 
 
-class LinkingRule(Protocol):
+class LinkingRule(ABC):
     """A priority-ordered pipeline step that may add CandidateLinks to LinkingState."""
 
     rule_name: str
     priority: int
 
-    def apply(self, state: "LinkingState") -> None:
+    @abstractmethod
+    def update_run_links(self, state: "LinkingState") -> None:
         """Inspect current state and add linking evidence through state methods."""
         ...
 
@@ -203,13 +205,13 @@ class LinkingState:
         )
 
 
-class UniqueFullNameOneRunPerYearRule:
+class UniqueFullNameOneRunPerYearRule(LinkingRule):
     """Links a normalized full-name group when that name has at most one run in each year."""
 
     rule_name = "unique_full_name_one_run_per_year"
     priority = 100
 
-    def apply(self, state: LinkingState) -> None:
+    def update_run_links(self, state: LinkingState) -> None:
         for normalized_name, name_runs in state.name_groups():
             if not _has_at_most_one_run_per_year(name_runs):
                 continue
@@ -224,13 +226,13 @@ class UniqueFullNameOneRunPerYearRule:
             state.close_name_group(normalized_name, rule_name=self.rule_name)
 
 
-class LegacyAtMostOneMultiTeamYearRule:
+class LegacyAtMostOneMultiTeamYearRule(LinkingRule):
     """Preserves current group_names.py behavior for names with at most one multi-team result year."""
 
     rule_name = "legacy_at_most_one_multi_team_year"
     priority = 90
 
-    def apply(self, state: LinkingState) -> None:
+    def update_run_links(self, state: LinkingState) -> None:
         for normalized_name, name_runs in state.name_groups():
             years_with_multiple_teams = _years_with_multiple_result_teams(name_runs)
 
@@ -247,13 +249,13 @@ class LegacyAtMostOneMultiTeamYearRule:
             state.close_name_group(normalized_name, rule_name=self.rule_name)
 
 
-class SameNameEmitConnectedTeamRule:
+class SameNameEmitConnectedTeamRule(LinkingRule):
     """Splits an unresolved same-name group by teams connected through shared Emit ids."""
 
     rule_name = "same_name_emit_connected_team"
     priority = 80
 
-    def apply(self, state: LinkingState) -> None:
+    def update_run_links(self, state: LinkingState) -> None:
         for normalized_name, name_runs in state.name_groups():
             grouped_runs = _split_runs_by_emit_connected_teams(name_runs)
 
@@ -271,7 +273,7 @@ class SameNameEmitConnectedTeamRule:
             state.close_name_group(normalized_name, rule_name=self.rule_name)
 
 
-class ManualExceptionRule:
+class ManualExceptionRule(LinkingRule):
     """Links configured run_id groups before normal automatic rules run."""
 
     rule_name = "manual_exception"
@@ -284,7 +286,7 @@ class ManualExceptionRule:
         )
         self.priority = priority
 
-    def apply(self, state: LinkingState) -> None:
+    def update_run_links(self, state: LinkingState) -> None:
         runs_by_id = state.runs_by_id
 
         for run_id_group in self.run_id_groups:
@@ -410,7 +412,7 @@ def link_runs_with_state(
         active_rules,
         key=lambda active_rule: (-active_rule.priority, active_rule.rule_name),
     ):
-        rule.apply(state)
+        rule.update_run_links(state)
         state.refresh_linked_runners(include_unlinked_singletons=False)
 
     state.refresh_linked_runners(include_unlinked_singletons=True)
