@@ -1,8 +1,6 @@
 import pytest
-import os
 import builtins
 import pandas as pd
-from unittest import mock
 
 import shared
 import group_names
@@ -109,6 +107,12 @@ def test_group_names_e2e(mock_environment):
     # Check ideals merge (e.g. terrain_coefficient)
     assert "terrain_coefficient" in df.columns
     assert pd.notna(magdalena_runs["terrain_coefficient"].iloc[0]), "Ideals merge failed"
+
+    # 8. Check run_id composite key
+    assert "run_id" in df.columns, "run_id was not added to the output dataframe"
+    sample_run = df.iloc[0]
+    expected_run_id = f"{int(sample_run['year'])}-ve-{int(sample_run['team_id'])}-{int(sample_run['leg'])}"
+    assert sample_run["run_id"] == expected_run_id, f"run_id format incorrect. Expected {expected_run_id}, got {sample_run['run_id']}"
 
     # Verify basic data integrity
     assert "pace" in df.columns

@@ -268,6 +268,7 @@ def _get_raw_runs_by_runner_name(ve_or_ju: str) -> dict[str, list[dict]]:
                     run["pace"] = leg_pace
                     run["emit"] = emit_str
                     run["leg"] = leg
+                    run["run_id"] = f"{year}-{ve_or_ju}-{team_id}-{leg}"
                     by_name[normalized_name].append(run)
             csvfile.close()
     return by_name
@@ -304,9 +305,11 @@ def _add_running_order(raw_runs_by_name: dict[str, list[dict]]) -> None:
     running_order["year"] = shared.forecast_year()
     running_order["pace"] = 'NA'
     running_order["emit"] = 'NA'
+    ve_or_ju = shared.race_type()
+    running_order["run_id"] = running_order.apply(lambda row: f"{row['year']}-{ve_or_ju}-{row['team_id']}-{row['leg']}", axis=1)
     #
     running_order = running_order[
-        ['name', 'ro_orig_name', 'team_id', 'team', 'team_country', 'year', 'pace', 'emit', 'leg']]
+        ['name', 'ro_orig_name', 'team_id', 'team', 'team_country', 'year', 'pace', 'emit', 'leg', 'run_id']]
     for running_order_rec in running_order.to_dict(orient='records'):
         logging.info(running_order_rec)
         raw_runs_by_name[running_order_rec['name']].append(running_order_rec)
