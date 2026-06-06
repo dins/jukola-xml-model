@@ -11,3 +11,4 @@ scratch.txt
 /.optuna-runs/
 /results/
 /.optuna/
+/archive/
