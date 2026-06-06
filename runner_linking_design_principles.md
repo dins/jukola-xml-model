@@ -1,0 +1,22 @@
+# Runner linking design principles
+
+- A `Run` is one observed year/race/team/leg slot.
+- A `run_id` is the stable identifier for one run and is derived from year, race type, team id, and leg.
+- Linking rules run in explicit priority order.
+- A rule should propose evidence by adding `CandidateLink` objects instead of directly editing final identities.
+- `CandidateLink` is the shared boundary for deterministic rules and possible future probabilistic methods.
+- The resolver is the only component that builds `LinkedRunner` objects.
+- The pipeline refreshes `LinkedRunner` and `unlinked_runs` after each rule so later rules can inspect the current state.
+- `unlinked_runs` is a derived view of the current state, not an independent source of truth.
+- A closed name group only means lower-priority local name rules should skip that normalized name.
+- A closed name group may still be merged later by a cross-name rule.
+- `unique_name` exists for compatibility with current output and should not be treated as a permanent identity.
+- `linked_runner_id` is the inferred identity key produced by the current linkage method.
+- The candidate graph should stay sparse and contain only links that some rule had a reason to propose.
+- Emit is optional evidence and must not be treated as a guaranteed person id.
+- Running-order rows are normal `Run` objects with missing Emit and missing pace.
+- Runtime human review should not be required by the linking pipeline.
+- Manual corrections should refer to stable `run_id` values, not derived `linked_runner_id` values.
+- Compatibility with current `group_names.py` behavior should be established before adding new linkage behavior.
+- Rare but possible cases, such as one person running multiple legs in one year, should not be hard-coded as impossible.
+- Project file reading and writing belong in `group_names_v2.py`, not in `runner_linking.py`.
