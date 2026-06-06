@@ -11,7 +11,6 @@ logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s')
 
 num_pace_years = 20
-# pace_columns = [f"pace_{i}" for i in range(1, num_pace_years + 1)]
 
 np.random.seed(2019)
 
@@ -73,7 +72,6 @@ def history_years():
 # 2000 https://web.archive.org/web/20000511173546/http://www.kalevanrasti.fi/jukola2000/kilp/FI/85kutsu.htm
 # 2001 https://web.archive.org/web/20010511091625/http://www.kolumbus.fi/nikkari-jukola/kilpailuinfo/ratatiedot.html
 
-# time for year in $(seq 1992 2019); do ./parse-leg-distances.sh $year ve; done
 distances = {
     "ke": {
         2024: [8.0, 7.9, 6.8, 9.0],

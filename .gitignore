@@ -12,3 +12,4 @@ scratch.txt
 /results/
 /.optuna/
 /archive/
+/exploration/.ipynb_checkpoints/
