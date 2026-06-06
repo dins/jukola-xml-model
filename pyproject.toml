@@ -17,16 +17,17 @@ dependencies = [
     "xmltodict>=0.13.0,<1",
     "pandas>=2.3.3,<3",
     "polars>=1.39.3",
-    "ty>=0.0.26",
     "ngboost>=0.5.10",
     "properscoring>=0.1",
     "pyarrow>=23.0.1",
     "optuna>=4.8.0",
     "optuna-dashboard>=0.20.0",
-    "ruff>=0.15.11",
+    "rapidfuzz>=3.14.5",
 ]
 
 [dependency-groups]
 dev = [
     "pytest>=9.0.3",
+    "ruff>=0.15.16",
+    "ty>=0.0.44",
 ]
