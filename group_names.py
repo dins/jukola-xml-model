@@ -293,7 +293,7 @@ def _add_running_order(raw_runs_by_name: dict[str, list[dict]]) -> None:
     # to lower case, trim spaces, remove double spaces
 
     running_order["name"] = running_order["name"].str.lower().str.strip().str.replace(' +', ' ')
-    running_order["name"] = running_order["name"].astype(str).apply(normalize_names.normalize_name, convert_dtype=False)
+    running_order["name"] = running_order["name"].astype(str).apply(normalize_names.normalize_name)
     running_order.replace('', pd.NA, inplace=True)
     running_order.replace('nan', pd.NA, inplace=True)
     logging.info(f'Name missing in {sum(running_order.name.isna())} rows')
