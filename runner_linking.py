@@ -61,15 +61,6 @@ class LinkedRunner:
     runs: tuple[Run, ...]
 
 
-@dataclass(frozen=True)
-class LinkingLogEntry:
-    """A short trace entry explaining what a rule added to the linking state."""
-
-    rule_name: str
-    message: str
-    run_ids: tuple[str, ...] = ()
-
-
 class LinkingRule(ABC):
     """A pipeline step that may add CandidateLinks to LinkingState."""
 
@@ -88,10 +79,8 @@ class LinkingState:
     all_runs: tuple[Run, ...]
     candidate_links: list[CandidateLink] = field(default_factory=list)
     unique_name_by_run_id: dict[str, str] = field(default_factory=dict)
-    closed_name_groups: set[str] = field(default_factory=set)
     linked_runners: tuple[LinkedRunner, ...] = ()
     unlinked_runs: tuple[Run, ...] = ()
-    log_entries: list[LinkingLogEntry] = field(default_factory=list)
 
     @classmethod
     def from_runs(cls, runs: Iterable[Run]) -> "LinkingState":
@@ -106,18 +95,9 @@ class LinkingState:
         return {run.run_id: run for run in self.all_runs}
 
     @functools.cached_property
-    def _cached_name_groups(self) -> dict[str, tuple[Run, ...]]:
-        return _runs_by_normalized_name(self.all_runs)
-
-    def name_groups(
-        self, include_closed: bool = False
-    ) -> tuple[tuple[str, tuple[Run, ...]], ...]:
-        """Return runs grouped by normalized full name."""
-        return tuple(
-            (normalized_name, name_runs)
-            for normalized_name, name_runs in self._cached_name_groups.items()
-            if include_closed or normalized_name not in self.closed_name_groups
-        )
+    def unlinked_runs_by_name(self) -> dict[str, tuple[Run, ...]]:
+        """Return unlinked runs grouped by normalized full name."""
+        return _runs_by_normalized_name(self.unlinked_runs)
 
     def add_same_runner_group(
         self,
@@ -144,13 +124,6 @@ class LinkingState:
             reason=reason,
         )
         self.candidate_links.extend(candidate_links)
-        self.log_entries.append(
-            LinkingLogEntry(
-                rule_name=rule_name,
-                message=f"added {len(candidate_links)} same-runner candidate links",
-                run_ids=tuple(run.run_id for run in grouped_runs),
-            )
-        )
 
     def add_candidate_link(self, candidate_link: CandidateLink) -> None:
         """Add one CandidateLink after checking that both run ids exist."""
@@ -163,23 +136,6 @@ class LinkingState:
             raise KeyError(f"Unknown right_run_id: {candidate_link.right_run_id}")
 
         self.candidate_links.append(candidate_link)
-        self.log_entries.append(
-            LinkingLogEntry(
-                rule_name=candidate_link.rule_name,
-                message=f"added {candidate_link.relation.value} candidate link",
-                run_ids=(candidate_link.left_run_id, candidate_link.right_run_id),
-            )
-        )
-
-    def close_name_group(self, normalized_name: str, *, rule_name: str) -> None:
-        """Mark a normalized-name group as handled by a higher-priority local rule."""
-        self.closed_name_groups.add(normalized_name)
-        self.log_entries.append(
-            LinkingLogEntry(
-                rule_name=rule_name,
-                message=f"closed name group: {normalized_name}",
-            )
-        )
 
     def refresh_linked_runners(
         self, *, include_unlinked_singletons: bool = False
@@ -199,6 +155,7 @@ class LinkingState:
         self.unlinked_runs = tuple(
             run for run in self.all_runs if run.run_id not in linked_run_ids
         )
+        self.__dict__.pop("unlinked_runs_by_name", None)
 
 
 class UniqueFullNameOneRunPerYearRule(LinkingRule):
@@ -207,7 +164,7 @@ class UniqueFullNameOneRunPerYearRule(LinkingRule):
     rule_name = "unique_full_name_one_run_per_year"
 
     def update_run_links(self, state: LinkingState) -> None:
-        for normalized_name, name_runs in state.name_groups():
+        for normalized_name, name_runs in state.unlinked_runs_by_name.items():
             if not _has_at_most_one_run_per_year(name_runs):
                 continue
 
@@ -217,7 +174,6 @@ class UniqueFullNameOneRunPerYearRule(LinkingRule):
                 rule_name=self.rule_name,
                 reason="same normalized full name and at most one run per year",
             )
-            state.close_name_group(normalized_name, rule_name=self.rule_name)
 
 
 class LegacyAtMostOneMultiTeamYearRule(LinkingRule):
@@ -226,7 +182,7 @@ class LegacyAtMostOneMultiTeamYearRule(LinkingRule):
     rule_name = "legacy_at_most_one_multi_team_year"
 
     def update_run_links(self, state: LinkingState) -> None:
-        for normalized_name, name_runs in state.name_groups():
+        for normalized_name, name_runs in state.unlinked_runs_by_name.items():
             years_with_multiple_teams = _years_with_multiple_result_teams(name_runs)
 
             if len(years_with_multiple_teams) > 1:
@@ -238,7 +194,6 @@ class LegacyAtMostOneMultiTeamYearRule(LinkingRule):
                 rule_name=self.rule_name,
                 reason="legacy rule: at most one result year has multiple teams for this name",
             )
-            state.close_name_group(normalized_name, rule_name=self.rule_name)
 
 
 class SameNameEmitConnectedTeamRule(LinkingRule):
@@ -247,7 +202,7 @@ class SameNameEmitConnectedTeamRule(LinkingRule):
     rule_name = "same_name_emit_connected_team"
 
     def update_run_links(self, state: LinkingState) -> None:
-        for normalized_name, name_runs in state.name_groups():
+        for normalized_name, name_runs in state.unlinked_runs_by_name.items():
             grouped_runs = _split_runs_by_emit_connected_teams(name_runs)
 
             for runs in grouped_runs:
@@ -259,8 +214,6 @@ class SameNameEmitConnectedTeamRule(LinkingRule):
                     rule_name=self.rule_name,
                     reason="same name split by Emit-connected team components",
                 )
-
-            state.close_name_group(normalized_name, rule_name=self.rule_name)
 
 
 class ManualExceptionRule(LinkingRule):
