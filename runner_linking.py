@@ -77,16 +77,16 @@ class LinkingRule(ABC):
 class LinkingState:
     """Mutable pipeline state passed through all linking rules."""
 
-    all_runs: tuple[Run, ...]
+    all_runs: list[Run]
     candidate_links: list[CandidateLink] = field(default_factory=list)
     unique_name_by_run_id: dict[str, str] = field(default_factory=dict)
-    linked_runners: tuple[LinkedRunner, ...] = ()
-    unlinked_runs: tuple[Run, ...] = ()
+    linked_runners: list[LinkedRunner] = field(default_factory=list)
+    unlinked_runs: list[Run] = field(default_factory=list)
 
     @classmethod
     def from_runs(cls, runs: Iterable[Run]) -> "LinkingState":
         """Create initial state where no rules have linked any runs yet."""
-        all_runs = tuple(sorted(runs, key=lambda run: run.run_id))
+        all_runs = sorted(runs, key=lambda run: run.run_id)
         _raise_if_duplicate_run_ids(all_runs)
         return cls(all_runs=all_runs, unlinked_runs=all_runs)
 
@@ -96,19 +96,19 @@ class LinkingState:
         return {run.run_id: run for run in self.all_runs}
 
     @staticmethod
-    def _runs_by_normalized_name(runs: Iterable[Run]) -> dict[str, tuple[Run, ...]]:
+    def _runs_by_normalized_name(runs: Iterable[Run]) -> dict[str, list[Run]]:
         runs_by_name: dict[str, list[Run]] = defaultdict(list)
 
         for run in runs:
             runs_by_name[run.normalized_name].append(run)
 
         return {
-            name: tuple(sorted(name_runs, key=lambda run: run.run_id))
+            name: sorted(name_runs, key=lambda run: run.run_id)
             for name, name_runs in sorted(runs_by_name.items())
         }
 
     @functools.cached_property
-    def unlinked_runs_by_name(self) -> dict[str, tuple[Run, ...]]:
+    def unlinked_runs_by_name(self) -> dict[str, list[Run]]:
         """Return unlinked runs grouped by normalized full name."""
         return self._runs_by_normalized_name(self.unlinked_runs)
 
@@ -121,7 +121,7 @@ class LinkingState:
         reason: str,
     ) -> None:
         """Add SAME_RUNNER candidate links and optional compatibility labels for a group of runs."""
-        grouped_runs = tuple(sorted(runs, key=lambda run: run.run_id))
+        grouped_runs = sorted(runs, key=lambda run: run.run_id)
 
         if not grouped_runs:
             return
@@ -165,9 +165,9 @@ class LinkingState:
             for linked_runner in self.linked_runners
             for run in linked_runner.runs
         }
-        self.unlinked_runs = tuple(
+        self.unlinked_runs = [
             run for run in self.all_runs if run.run_id not in linked_run_ids
-        )
+        ]
         self.__dict__.pop("unlinked_runs_by_name", None)
 
 
@@ -177,7 +177,7 @@ class UniqueFullNameOneRunPerYearRule(LinkingRule):
     rule_name = "unique_full_name_one_run_per_year"
 
     @staticmethod
-    def _has_at_most_one_run_per_year(runs: tuple[Run, ...]) -> bool:
+    def _has_at_most_one_run_per_year(runs: Sequence[Run]) -> bool:
         run_count_by_year: dict[int, int] = defaultdict(int)
 
         for run in runs:
@@ -218,7 +218,7 @@ class LegacyAtMostOneMultiTeamYearRule(LinkingRule):
             )
 
     @staticmethod
-    def _years_with_multiple_result_teams(runs: tuple[Run, ...]) -> tuple[int, ...]:
+    def _years_with_multiple_result_teams(runs: Sequence[Run]) -> list[int]:
         teams_by_year: dict[int, set[str]] = defaultdict(set)
 
         for run in runs:
@@ -230,10 +230,8 @@ class LegacyAtMostOneMultiTeamYearRule(LinkingRule):
 
             teams_by_year[run.year].add(run.team_name)
 
-        return tuple(
-            sorted(
-                year for year, team_names in teams_by_year.items() if len(team_names) > 1
-            )
+        return sorted(
+            year for year, team_names in teams_by_year.items() if len(team_names) > 1
         )
 
 
@@ -258,8 +256,8 @@ class SameNameEmitConnectedTeamRule(LinkingRule):
 
     @staticmethod
     def _split_runs_by_emit_connected_teams(
-        runs: tuple[Run, ...],
-    ) -> tuple[tuple[Run, ...], ...]:
+        runs: Sequence[Run],
+    ) -> list[list[Run]]:
         team_union = UnionFind()
 
         for run in runs:
@@ -271,7 +269,7 @@ class SameNameEmitConnectedTeamRule(LinkingRule):
                 runs_by_emit[run.emit_id].append(run)
 
         for emit_runs in runs_by_emit.values():
-            team_names = tuple(sorted({run.team_name for run in emit_runs}))
+            team_names = sorted({run.team_name for run in emit_runs})
 
             if len(team_names) < 2:
                 continue
@@ -285,10 +283,10 @@ class SameNameEmitConnectedTeamRule(LinkingRule):
             component_id = team_union.find(run.team_name)
             runs_by_component[component_id].append(run)
 
-        return tuple(
-            tuple(sorted(component_runs, key=lambda run: run.run_id))
+        return [
+            sorted(component_runs, key=lambda run: run.run_id)
             for _, component_runs in sorted(runs_by_component.items())
-        )
+        ]
 
 
 class ManualExceptionRule(LinkingRule):
@@ -297,15 +295,15 @@ class ManualExceptionRule(LinkingRule):
     rule_name = "manual_exception"
 
     def __init__(self, run_id_groups: Sequence[Sequence[str]]) -> None:
-        self.run_id_groups = tuple(
-            tuple(run_id_group) for run_id_group in run_id_groups
-        )
+        self.run_id_groups = [
+            list(run_id_group) for run_id_group in run_id_groups
+        ]
 
     def update_run_links(self, state: LinkingState) -> None:
         runs_by_id = state.runs_by_id
 
         for run_id_group in self.run_id_groups:
-            runs = tuple(runs_by_id[run_id] for run_id in run_id_group)
+            runs = [runs_by_id[run_id] for run_id in run_id_group]
             state.add_same_runner_group(
                 runs,
                 unique_name=None,
@@ -320,10 +318,10 @@ def resolve_links(
     unique_name_by_run_id: Mapping[str, str] | None = None,
     *,
     include_unlinked_singletons: bool = False,
-) -> tuple[LinkedRunner, ...]:
+) -> list[LinkedRunner]:
     """Return inferred linked runners from the currently known candidate links."""
-    all_runs = tuple(sorted(runs, key=lambda run: run.run_id))
-    links = tuple(candidate_links)
+    all_runs = sorted(runs, key=lambda run: run.run_id)
+    links = list(candidate_links)
     labels = unique_name_by_run_id or {}
 
     _raise_if_duplicate_run_ids(all_runs)
@@ -350,18 +348,16 @@ def resolve_links(
     linked_runners: list[LinkedRunner] = []
 
     for component_runs in runs_by_component.values():
-        run_tuple = tuple(sorted(component_runs, key=lambda run: run.run_id))
-        has_label = any(run.run_id in labels for run in run_tuple)
-        has_multiple_runs = len(run_tuple) > 1
+        run_list = sorted(component_runs, key=lambda run: run.run_id)
+        has_label = any(run.run_id in labels for run in run_list)
+        has_multiple_runs = len(run_list) > 1
 
         if include_unlinked_singletons or has_label or has_multiple_runs:
-            linked_runners.append(_make_linked_runner(run_tuple, labels))
+            linked_runners.append(_make_linked_runner(run_list, labels))
 
-    return tuple(
-        sorted(
-            linked_runners,
-            key=lambda runner: (runner.unique_name, runner.linked_runner_id),
-        )
+    return sorted(
+        linked_runners,
+        key=lambda runner: (runner.unique_name, runner.linked_runner_id),
     )
 
 
@@ -402,7 +398,7 @@ class UnionFind:
 
 def link_runs(
     runs: list[Run],
-) -> tuple[LinkedRunner, ...]:
+) -> list[LinkedRunner]:
     """Run the default priority pipeline and return final linked runners."""
     return link_runs_with_state(runs=runs).linked_runners
 
@@ -438,27 +434,27 @@ def default_legacy_rules() -> list[LinkingRule]:
     ]
 
 
-def default_strict_rules() -> tuple[LinkingRule, ...]:
+def default_strict_rules() -> list[LinkingRule]:
     """Return a smaller rule set that avoids the broad legacy multi-team rule."""
-    return (
+    return [
         UniqueFullNameOneRunPerYearRule(),
         SameNameEmitConnectedTeamRule(),
-    )
+    ]
 
 
 def _candidate_links_to_anchor(
-    runs: tuple[Run, ...],
+    runs: Sequence[Run],
     relation: LinkRelation,
     rule_name: str,
     reason: str,
-) -> tuple[CandidateLink, ...]:
-    sorted_runs = tuple(sorted(runs, key=lambda run: run.run_id))
+) -> list[CandidateLink]:
+    sorted_runs = sorted(runs, key=lambda run: run.run_id)
 
     if len(sorted_runs) < 2:
-        return ()
+        return []
 
     anchor_run = sorted_runs[0]
-    return tuple(
+    return [
         CandidateLink(
             left_run_id=anchor_run.run_id,
             right_run_id=run.run_id,
@@ -467,11 +463,11 @@ def _candidate_links_to_anchor(
             reason=reason,
         )
         for run in sorted_runs[1:]
-    )
+    ]
 
 
 def _make_linked_runner(
-    runs: tuple[Run, ...],
+    runs: Sequence[Run],
     unique_name_by_run_id: Mapping[str, str],
 ) -> LinkedRunner:
     unique_names = {
@@ -492,7 +488,7 @@ def _make_linked_runner(
     )
 
 
-def _fallback_unique_name(runs: tuple[Run, ...]) -> str:
+def _fallback_unique_name(runs: Sequence[Run]) -> str:
     names = sorted({run.normalized_name for run in runs})
 
     if len(names) == 1:
@@ -501,13 +497,13 @@ def _fallback_unique_name(runs: tuple[Run, ...]) -> str:
     return ";".join(names)
 
 
-def _make_linked_runner_id(runs: tuple[Run, ...]) -> str:
+def _make_linked_runner_id(runs: Sequence[Run]) -> str:
     run_ids = "|".join(sorted(run.run_id for run in runs))
     digest = hashlib.sha1(run_ids.encode("utf-8")).hexdigest()[:16]
     return f"linked-runner-{digest}"
 
 
-def _raise_if_duplicate_run_ids(runs: tuple[Run, ...]) -> None:
+def _raise_if_duplicate_run_ids(runs: Iterable[Run]) -> None:
     run_ids = [run.run_id for run in runs]
     if len(run_ids) == len(set(run_ids)):
         return
