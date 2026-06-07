@@ -9,9 +9,10 @@ from typing import Optional
 
 # time uv run python ideal_paces_cleanup.py
 
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s')
-
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s",
+)
 
 
 def parse_distance(distance_str: str) -> Optional[float]:
@@ -24,29 +25,28 @@ def parse_distance(distance_str: str) -> Optional[float]:
     Returns:
         The average distance as a float, or None if no valid distance is found.
     """
-    numbers = re.findall(r'(\d+,\d+)', distance_str)
+    numbers = re.findall(r"(\d+,\d+)", distance_str)
     if not numbers:
         return None
     # Convert comma to dot and then to float
-    numbers = [float(num.replace(',', '.')) for num in numbers]
+    numbers = [float(num.replace(",", ".")) for num in numbers]
     average = round(sum(numbers) / len(numbers), 2)
-    print(f'{average},    {numbers=}')
+    print(f"{average},    {numbers=}")
     return average
 
 
-
 def _cleanup_ideal_times(race_type, marked_route):
-    raw = pd.read_csv(f'Jukola-terrain/{race_type}-ideal-times.csv', delimiter=";")
+    raw = pd.read_csv(f"Jukola-terrain/{race_type}-ideal-times.csv", delimiter=";")
     raw["year"] = raw["Vuosi"]
     cleaned = raw[["year"]].copy()  # make a copy to avoid SettingWithCopy warnings
 
     cleaned["leg"] = raw["Osuus"].astype(int)
-    cleaned["ideal_time"] = raw["Aika"].str.extract(r'(\d+)').astype(int)
-    cleaned["vertical"] = raw["Nousu"].str.extract(r'(\d+)').astype(float)
+    cleaned["ideal_time"] = raw["Aika"].str.extract(r"(\d+)").astype(int)
+    cleaned["vertical"] = raw["Nousu"].str.extract(r"(\d+)").astype(float)
 
     # raw['Osuuspituus_str'] = raw['Osuuspituus'].str.extract(r'(\d+,\d+)')
     # cleaned["leg_distance"] = raw['Osuuspituus_str'].str.replace(",", ".").astype(float)
-    cleaned['leg_distance'] = raw['Osuuspituus'].apply(parse_distance)
+    cleaned["leg_distance"] = raw["Osuuspituus"].apply(parse_distance)
     logging.info(f"Osuuspituudet:\n{cleaned[['year', 'leg_distance']]}")
 
     # def _resolve_leg_distance(row):
@@ -67,10 +67,10 @@ def _cleanup_ideal_times(race_type, marked_route):
     cleaned["leg_avg"] = leg_means["log_ideal_pace"][cleaned["leg"]].values
     cleaned["terrain_coefficient"] = cleaned["log_ideal_pace"] / cleaned["leg_avg"]
 
-    cleaned.to_csv(f'Jukola-terrain/ideal-paces-{race_type}.tsv', sep="\t", index=False)
+    cleaned.to_csv(f"Jukola-terrain/ideal-paces-{race_type}.tsv", sep="\t", index=False)
 
 
-marked_route = pd.read_csv('Jukola-terrain/viitoitus.csv', delimiter=";")
+marked_route = pd.read_csv("Jukola-terrain/viitoitus.csv", delimiter=";")
 marked_route["marking"] = marked_route["viitoitus"]
 marked_route_cleaned = marked_route[["year", "race_type", "marking"]]
 logging.info(f"marked_route_cleaned: {marked_route_cleaned}")

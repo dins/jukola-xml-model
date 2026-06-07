@@ -8,7 +8,7 @@ import count_names
 
 
 def read_first_names() -> set:
-    with open('data/name_counts.json') as json_file:
+    with open("data/name_counts.json") as json_file:
         name_counts = json.load(json_file)
         first_names = {count["name"] for count in name_counts if count["is_firstname"]}
         return first_names
@@ -42,8 +42,10 @@ def normalize_name(orig_name):
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO,
-                        format='%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s')
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s",
+    )
     orig_name = sys.argv[1]
     normalized = normalize_name(orig_name)
     logging.info(f'orig_name: "{orig_name}"  -->  normalized: "{normalized}"')

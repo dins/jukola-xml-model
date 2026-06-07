@@ -12,8 +12,10 @@ import shared
 
 # time uv run python fetch_running_order.py 2023 && wc data/running_order_final_ju_fy_2023.tsv
 
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s')
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s",
+)
 
 
 # Fetches running order from registration site. It will become outdated on the race day.
@@ -36,8 +38,8 @@ def fetch_running_order(year, ve_or_ju):
         # tree = html.fromstring(page.content.decode('ISO-8859-1').encode("utf-8").strip())
         tree = html.fromstring(page.content.strip())
         # Use a more robust selector since the layout changed (removed #site_main)
-        rows = tree.xpath('//table/tr')
-        logging.info(f'Got {len(rows)} rows')
+        rows = tree.xpath("//table/tr")
+        logging.info(f"Got {len(rows)} rows")
 
         output_rows = []
 
@@ -46,37 +48,70 @@ def fetch_running_order(year, ve_or_ju):
         current_team_name = ""
         current_team_country = "NONE"
         for row in rows:
-            team_id = next(iter(row.xpath('.//td[1]/text()') or []), None)
+            team_id = next(iter(row.xpath(".//td[1]/text()") or []), None)
             if team_id is not None and team_id.strip() != "":
-                team_name = next(iter(row.xpath('.//td[2]/text()') or []), "")
-                current_team_country = next(iter(row.xpath('.//img/@title') or []), "NA")
+                team_name = next(iter(row.xpath(".//td[2]/text()") or []), "")
+                current_team_country = next(
+                    iter(row.xpath(".//img/@title") or []), "NA"
+                )
                 current_team_id = team_id
                 team_base_name = parse_team_base_name(team_name)
                 current_team_name = team_name
                 current_team_base_name = team_base_name
                 logging.info(
-                    "Team line: " + current_team_country + " " + team_id + " " + team_name + " -> " + team_base_name)
+                    "Team line: "
+                    + current_team_country
+                    + " "
+                    + team_id
+                    + " "
+                    + team_name
+                    + " -> "
+                    + team_base_name
+                )
             else:
-                leg = next(iter(row.xpath('.//td[2]/text()') or []), None)
-                name = next(iter(row.xpath('.//td[3]/text()') or []), None)
-                if name is not None and name.strip() != "" and name != " " and leg is not None:
+                leg = next(iter(row.xpath(".//td[2]/text()") or []), None)
+                name = next(iter(row.xpath(".//td[3]/text()") or []), None)
+                if (
+                    name is not None
+                    and name.strip() != ""
+                    and name != " "
+                    and leg is not None
+                ):
                     leg = int(leg.strip())
                     name = normalize_names.normalize_name(name)
                     if current_team_id:
                         output_rows.append(
-                            [current_team_id, current_team_name, current_team_base_name, current_team_country, leg,
-                             leg_dist(leg), name])
+                            [
+                                current_team_id,
+                                current_team_name,
+                                current_team_base_name,
+                                current_team_country,
+                                leg,
+                                leg_dist(leg),
+                                name,
+                            ]
+                        )
                     else:
-                        logging.warning(f"Will not add: {current_team_id=} '{current_team_name=}' {leg=} '{name=}'")
+                        logging.warning(
+                            f"Will not add: {current_team_id=} '{current_team_name=}' {leg=} '{name=}'"
+                        )
 
         return output_rows
 
     # out_file_name = f'data/running_order_j{year}_{ve_or_ju}.tsv'
     out_file_name = f"data/running_order_final_{ve_or_ju}_fy_{year}.tsv"
-    csv_file = open(out_file_name, 'w')
+    csv_file = open(out_file_name, "w")
 
     csvwriter = csv.writer(csv_file, delimiter="\t", quoting=csv.QUOTE_ALL)
-    header = ["team_id", "team", "team_base_name", "team_country", "leg", "leg_dist", "name"]
+    header = [
+        "team_id",
+        "team",
+        "team_base_name",
+        "team_country",
+        "leg",
+        "leg_dist",
+        "name",
+    ]
 
     csvwriter.writerow(header)
 
@@ -90,8 +125,12 @@ def fetch_running_order(year, ve_or_ju):
 
     # Write team_countries file also
     ro = pd.read_csv(out_file_name, delimiter="\t")
-    team_countries = ro[["team_id", "team_base_name", "team_country"]].sort_values("team_id").drop_duplicates()
-    tc_file = f'data/team_countries_j{year}_{ve_or_ju}.tsv'
+    team_countries = (
+        ro[["team_id", "team_base_name", "team_country"]]
+        .sort_values("team_id")
+        .drop_duplicates()
+    )
+    tc_file = f"data/team_countries_j{year}_{ve_or_ju}.tsv"
     team_countries.to_csv(tc_file, sep="\t", index=False)
     logging.info("Wrote " + tc_file)
 
@@ -100,7 +139,9 @@ def fetch_running_order(year, ve_or_ju):
 
 def _summarize(running_order_file):
     df = pd.read_csv(running_order_file, delimiter="\t")
-    summary = df.agg({"team_id": ["count", "nunique"], "team_country": ["count", "nunique"]})
+    summary = df.agg(
+        {"team_id": ["count", "nunique"], "team_country": ["count", "nunique"]}
+    )
     shared.log_df(summary)
 
 
