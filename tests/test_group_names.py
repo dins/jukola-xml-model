@@ -25,6 +25,7 @@ def mock_environment(monkeypatch):
     monkeypatch.setattr(builtins, "open", mocked_open)
 
     import polars as pl
+
     original_pl_read_csv = pl.read_csv
 
     def mocked_pl_read_csv(source, *args, **kwargs):

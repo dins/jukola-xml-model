@@ -19,8 +19,6 @@ import shared
 # time RACE_TYPE=ju FORECAST_YEAR=2026 uv run python group_names.py
 
 
-
-
 def _group_runs_to_runners() -> None:
     """Read result/running-order rows, link them, and write the current long output file."""
     race_type = shared.race_type()
@@ -94,7 +92,11 @@ def _read_result_runs_df(race_type: str) -> pl.DataFrame:
             # 0.001 min/km from the legacy Python round(x, 3). The drift is well
             # below measurement resolution and is accepted to keep this fully
             # vectorized (no per-row Python callback just for rounding).
-            (pl.col("leg_time").cast(pl.Int64, strict=False) / 60 / pl.col("leg_distance")).round(3)
+            (
+                pl.col("leg_time").cast(pl.Int64, strict=False)
+                / 60
+                / pl.col("leg_distance")
+            ).round(3)
         )
         .cast(pl.Float64),
     )
@@ -195,9 +197,7 @@ def _runs_from_df(runs_df: pl.DataFrame) -> list[runner_linking.Run]:
     return runs
 
 
-def _attach_team_countries(
-    df: pl.DataFrame, year: int, race_type: str
-) -> pl.DataFrame:
+def _attach_team_countries(df: pl.DataFrame, year: int, race_type: str) -> pl.DataFrame:
     """Left-join team -> country, defaulting missing teams to 'NA'."""
     country_by_team_id = shared.read_team_countries(year, race_type)
     country_df = pl.DataFrame(
@@ -273,7 +273,10 @@ def _select_standard_run_columns(df: pl.DataFrame) -> pl.DataFrame:
     )
 
     return df.select(
-        [pl.col(name).cast(dtype) for name, dtype in schema_common_to_history_and_running_order.items()]
+        [
+            pl.col(name).cast(dtype)
+            for name, dtype in schema_common_to_history_and_running_order.items()
+        ]
     )
 
 
