@@ -31,3 +31,8 @@ dev = [
     "ruff>=0.15.16",
     "ty>=0.0.44",
 ]
+
+[tool.pytest.ini_options]
+markers = [
+    "testdata: mark test with a test data fixture name",
+]

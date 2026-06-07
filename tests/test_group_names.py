@@ -3,7 +3,6 @@ import builtins
 import os
 import re
 import pandas as pd
-
 import shared
 import group_names
 
@@ -251,3 +250,20 @@ def test_basic_data_integrity(grouped_dataframe):
     assert "pace" in grouped_dataframe.columns
     assert "unique_name" in grouped_dataframe.columns
     assert len(grouped_dataframe) > 0
+
+
+@pytest.mark.testdata("typo_emit_connection")
+def test_typo_rule_merges_kriktila_via_emit(grouped_dataframe: pd.DataFrame):
+    # Typo connection: "leena-maija kriktilä" and "leena-maija kriktillä"
+    # Should be grouped together because they share the Emit ID "1237164".
+    # Uses isolated testdata to test linking previously linked identities.
+    leena_runs = grouped_dataframe[
+        grouped_dataframe["name"].str.startswith("leena-maija krikti", na=False)
+    ]
+    unique_leenas = leena_runs["unique_name"].nunique()
+    
+    assert unique_leenas == 1, (
+        f"Expected leena-maija kriktilä and leena-maija kriktillä to be merged into 1 person, found {unique_leenas}"
+    )
+
+    assert list(sorted(leena_runs["name"].unique())) == ["leena-maija kriktillä", "leena-maija kriktilä"]
