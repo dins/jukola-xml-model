@@ -1,16 +1,53 @@
 import pytest
 import builtins
+import os
+import re
 import pandas as pd
 
 import shared
 import group_names
 
 
-@pytest.fixture
-def mock_environment(monkeypatch):
-    monkeypatch.setattr(
-        shared, "history_years", lambda: ["2018", "2019", "2021", "2022"]
+TESTDATA_ROOT = "tests/testdata"
+DEFAULT_TESTDATA_SUBDIR = "default-set"
+
+
+def pytest_configure(config):
+    config.addinivalue_line(
+        "markers",
+        f"testdata(subdir): use '{TESTDATA_ROOT}/<subdir>' as the pipeline input "
+        f"directory. Defaults to '{TESTDATA_ROOT}/{DEFAULT_TESTDATA_SUBDIR}'.",
     )
+
+
+def _resolve_testdata_dir(request) -> str:
+    marker = request.node.get_closest_marker("testdata")
+    subdir = marker.args[0] if marker and marker.args else DEFAULT_TESTDATA_SUBDIR
+    return os.path.join(TESTDATA_ROOT, subdir)
+
+
+def _detect_history_years(testdata_dir: str, race_type: str) -> list[str]:
+    """Return sorted YYYY strings parsed from `results_with_dist_jYYYY_<race_type>.tsv` files."""
+    pattern = re.compile(rf"^results_with_dist_j(\d{{4}})_{race_type}\.tsv$")
+    years = []
+    for filename in os.listdir(testdata_dir):
+        match = pattern.match(filename)
+        if match:
+            years.append(match.group(1))
+    if not years:
+        raise FileNotFoundError(
+            f"No 'results_with_dist_jYYYY_{race_type}.tsv' files found in "
+            f"{testdata_dir}. Add at least one result fixture file."
+        )
+    return sorted(years)
+
+
+@pytest.fixture
+def mock_environment(monkeypatch, request):
+    testdata_dir = _resolve_testdata_dir(request)
+    history_years = _detect_history_years(testdata_dir, race_type="ve")
+
+    monkeypatch.setattr(shared, "history_years", lambda: history_years)
     monkeypatch.setattr(shared, "race_type", lambda default="ve": "ve")
     monkeypatch.setattr(shared, "forecast_year", lambda: 2026)
     monkeypatch.setattr(shared, "race_id_str", lambda: "ve_fy_test")
@@ -19,7 +56,7 @@ def mock_environment(monkeypatch):
 
     def mocked_open(file, *args, **kwargs):
         if str(file).startswith("data/results_with_dist_j"):
-            file = str(file).replace("data/", "tests/testdata/")
+            file = str(file).replace("data/", f"{testdata_dir}/")
         return original_open(file, *args, **kwargs)
 
     monkeypatch.setattr(builtins, "open", mocked_open)
@@ -30,7 +67,7 @@ def mock_environment(monkeypatch):
 
     def mocked_pl_read_csv(source, *args, **kwargs):
         if str(source).startswith("data/running_order_final_"):
-            source = "tests/testdata/running_order_final_ve_fy_test.tsv"
+            source = f"{testdata_dir}/running_order_final_ve_fy_test.tsv"
         return original_pl_read_csv(source, *args, **kwargs)
 
     monkeypatch.setattr(pl, "read_csv", mocked_pl_read_csv)
