@@ -48,6 +48,7 @@ def _read_result_runs_df(race_type: str) -> pl.DataFrame:
         result_year = int(year_str)
         in_file_name = f"data/results_with_dist_j{result_year}_{race_type}.tsv"
 
+        logging.info(f"Reading {in_file_name}")
         raw_df = pl.read_csv(
             in_file_name,
             separator="\t",
