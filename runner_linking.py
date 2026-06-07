@@ -316,7 +316,6 @@ def resolve_links(
     runs: Iterable[Run],
     candidate_links: Iterable[CandidateLink],
     unique_name_by_run_id: Mapping[str, str] | None = None,
-    *,
     include_unlinked_singletons: bool = False,
 ) -> list[LinkedRunner]:
     """Return inferred linked runners from the currently known candidate links."""
@@ -408,7 +407,11 @@ def link_runs_with_state(
 ) -> LinkingState:
     """Run the pipeline and return final state for diagnostics."""
     state = LinkingState.from_runs(runs)
-    active_rules = default_legacy_rules()
+    active_rules = [
+        UniqueFullNameOneRunPerYearRule(),
+        LegacyAtMostOneMultiTeamYearRule(),
+        SameNameEmitConnectedTeamRule(),
+    ]
 
     logging.info(f"Starting to group {len(runs)} runs with {len(active_rules)} linking rules")
     for rule in active_rules:
@@ -423,23 +426,6 @@ def link_runs_with_state(
 
     state.refresh_linked_runners(include_unlinked_singletons=True)
     return state
-
-
-def default_legacy_rules() -> list[LinkingRule]:
-    """Return rules that aim to preserve current group_names.py behavior first."""
-    return [
-        UniqueFullNameOneRunPerYearRule(),
-        LegacyAtMostOneMultiTeamYearRule(),
-        SameNameEmitConnectedTeamRule(),
-    ]
-
-
-def default_strict_rules() -> list[LinkingRule]:
-    """Return a smaller rule set that avoids the broad legacy multi-team rule."""
-    return [
-        UniqueFullNameOneRunPerYearRule(),
-        SameNameEmitConnectedTeamRule(),
-    ]
 
 
 def _candidate_links_to_anchor(
