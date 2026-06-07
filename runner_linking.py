@@ -337,7 +337,9 @@ class TypoConnectedEmitRule(LinkingRule):
                 if similarity_score >= self.threshold:
                     runs_to_link = runs_by_name[name_a] + runs_by_name[name_b]
                     if similarity_score < 0.97:
-                        logging.info(f"Linking from [{len(names)}] names {similarity_score:.3f} {name_a} ~ {name_b} ")
+                        logging.info(
+                            f"Linking from [{len(names)}] names {similarity_score:.3f} {name_a} ~ {name_b} "
+                        )
                     state.add_same_runner_group(
                         runs_to_link,
                         unique_name=None,
@@ -379,17 +381,23 @@ class ChangedLastNameConnectedByFirstNameAndEmitRule(LinkingRule):
                     years_b = {run.year for run in runs_by_name[name_b]}
                     common_years = years_a.intersection(years_b)
 
-                    year_ranges_dont_overlap = min(years_a) > max(years_b) or min(years_b) > max(years_a)
+                    year_ranges_dont_overlap = min(years_a) > max(years_b) or min(
+                        years_b
+                    ) > max(years_a)
                     teams_a = {run.team_id for run in runs_by_name[name_a]}
                     teams_b = {run.team_id for run in runs_by_name[name_b]}
 
                     # This rule combines also some typoed last names,
                     # typos happen without year range guarantee
                     only_in_one_team = len(teams_a | teams_b) == 1
-                    
-                    if not common_years and (year_ranges_dont_overlap or only_in_one_team):
+
+                    if not common_years and (
+                        year_ranges_dont_overlap or only_in_one_team
+                    ):
                         runs_to_link = runs_by_name[name_a] + runs_by_name[name_b]
-                        logging.info(f"Linking by emit {emit_id} with {len(names)} names: {name_a} -> {name_b}, one team: {only_in_one_team}")
+                        logging.info(
+                            f"Linking by emit {emit_id} with {len(names)} names: {name_a} -> {name_b}, one team: {only_in_one_team}"
+                        )
                         state.add_same_runner_group(
                             runs_to_link,
                             unique_name=None,
@@ -397,7 +405,9 @@ class ChangedLastNameConnectedByFirstNameAndEmitRule(LinkingRule):
                             reason="shared Emit ID, exact same first name, and non-overlapping years",
                         )
                     else:
-                        logging.info(f"NOT Linking by emit {emit_id} with {len(names)} names: {name_a} -> {name_b}, years overlap: {years_a} / {years_b}")
+                        logging.info(
+                            f"NOT Linking by emit {emit_id} with {len(names)} names: {name_a} -> {name_b}, years overlap: {years_a} / {years_b}"
+                        )
 
 
 class ManualExceptionRule(LinkingRule):
@@ -405,20 +415,40 @@ class ManualExceptionRule(LinkingRule):
 
     rule_name = "manual_exception"
 
-    def __init__(self, run_id_groups: Sequence[Sequence[str]]) -> None:
-        self.run_id_groups = [list(run_id_group) for run_id_group in run_id_groups]
+    manually_connected_run_id_groups: list[list[str]] = [
+        [  # Milja Kallio
+            "2024-ju-810-5",
+            "2026-ju-350-5",
+        ],
+        [  # Saku Laine
+            "2021-ju-925-1",
+            "2023-ju-685-6",
+            "2021-ju-938-4",
+            "2026-ju-350-3",
+        ],
+    ]
 
     def update_run_links(self, state: LinkingState) -> None:
         runs_by_id = state.runs_by_id
 
-        for run_id_group in self.run_id_groups:
-            runs = [runs_by_id[run_id] for run_id in run_id_group]
-            state.add_same_runner_group(
-                runs,
-                unique_name=None,
-                rule_name=self.rule_name,
-                reason="manual configured run_id group",
+        for run_id_group in self.manually_connected_run_id_groups:
+            valid_run_ids = sorted(
+                list(set(runs_by_id.keys()).intersection(run_id_group))
             )
+            if valid_run_ids != sorted(run_id_group):
+                logging.warning(
+                    f"Not all configured run_ids ({run_id_group} != {valid_run_ids}) are valid."
+                )
+            if valid_run_ids:
+                runs = [runs_by_id[run_id] for run_id in valid_run_ids]
+                nammes = {run.normalized_name for run in runs}
+                logging.info(f"Manually linking names {nammes}")
+                state.add_same_runner_group(
+                    runs,
+                    unique_name=None,
+                    rule_name=self.rule_name,
+                    reason="manual configured run_id group",
+                )
 
 
 def resolve_links(
@@ -538,6 +568,7 @@ def link_runs_with_state(
         SameNameEmitConnectedTeamRule(),
         TypoConnectedEmitRule(),
         ChangedLastNameConnectedByFirstNameAndEmitRule(),
+        ManualExceptionRule(),
     ]
 
     logging.info(
@@ -615,7 +646,7 @@ def _fallback_unique_name(runs: Sequence[Run]) -> str:
 def _make_linked_runner_id(runs: Sequence[Run]) -> str:
     run_ids = "|".join(sorted(run.run_id for run in runs))
     digest = hashlib.sha1(run_ids.encode("utf-8")).hexdigest()[:16]
-    return f"linked-runner-{digest}"
+    return digest
 
 
 def _raise_if_duplicate_run_ids(runs: Iterable[Run]) -> None:

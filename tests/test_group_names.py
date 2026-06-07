@@ -47,7 +47,7 @@ _GROUPING_CACHE: dict[str, pd.DataFrame] = {}
 @pytest.fixture
 def grouped_dataframe(monkeypatch, request):
     testdata_dir = _resolve_testdata_dir(request)
-    
+
     # Return a copy from cache if we already ran name_grouping for this test directory
     if testdata_dir in _GROUPING_CACHE:
         return _GROUPING_CACHE[testdata_dir].copy()
@@ -97,7 +97,7 @@ def grouped_dataframe(monkeypatch, request):
 
     # The name_grouping process should have captured the final dataframe
     assert "output" in captured_dfs, "Output dataframe was not saved!"
-    
+
     # Store in cache and return a safe copy
     _GROUPING_CACHE[testdata_dir] = captured_dfs["output"]
     return _GROUPING_CACHE[testdata_dir].copy()
