@@ -3,7 +3,7 @@
   "Base__min_samples_leaf": 300,
   "Base__max_depth": 12,
   "Base__max_features": 1.0,
-  "learning_rate": 0.04175478832721392,
-  "col_sample": 0.8465646180502127,
+  "learning_rate": 0.04438792247909264,
+  "col_sample": 0.6751135568976931,
   "minibatch_frac": 1.0
 }
