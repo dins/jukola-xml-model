@@ -8,6 +8,8 @@ from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 from enum import Enum
 from typing import Iterable, Mapping, Sequence
+from rapidfuzz.distance import JaroWinkler
+from itertools import combinations
 
 
 class RunSource(Enum):
@@ -295,15 +297,62 @@ class SameNameEmitConnectedTeamRule(LinkingRule):
         ]
 
 
+class TypoConnectedEmitRule(LinkingRule):
+    """Links runners with similar names that share Emit ID."""
+
+    rule_name = "typo_connected_emit"
+
+    def __init__(self, jaro_winkler_threshold: float = 0.96) -> None:
+        self.threshold = jaro_winkler_threshold
+
+    def update_run_links(self, state: LinkingState) -> None:
+        runs_by_emit: dict[str, list[Run]] = defaultdict(list)
+
+        # To connect typo groups that have already been grouped internally,
+        # we must look at all runs, not just unlinked_runs.
+        # But we only need to link names that haven't been linked together yet.
+        for run in state.all_runs:
+            if run.emit_id is not None:
+                runs_by_emit[run.emit_id].append(run)
+
+        self._link_similar_names_in_groups(
+            state, runs_by_emit.values(), "shared Emit ID and similar name"
+        )
+
+    def _link_similar_names_in_groups(
+        self, state: LinkingState, groups: Iterable[list[Run]], reason: str
+    ) -> None:
+        for group_runs in groups:
+            runs_by_name: dict[str, list[Run]] = defaultdict(list)
+            for run in group_runs:
+                runs_by_name[run.normalized_name].append(run)
+
+            names = list(runs_by_name.keys())
+            if len(names) < 2 or len(names) > 10:
+                # Skip if emit has more than 10 names. Likely rental or team emit.
+                continue
+
+            for name_a, name_b in combinations(names, 2):
+                similarity_score = JaroWinkler.similarity(name_a, name_b)
+                if similarity_score >= self.threshold:
+                    runs_to_link = runs_by_name[name_a] + runs_by_name[name_b]
+                    if similarity_score < 0.97:
+                        logging.info(f"Linking from [{len(names)}] names {similarity_score:.3f} {name_a} ~ {name_b} ")
+                    state.add_same_runner_group(
+                        runs_to_link,
+                        unique_name=None,
+                        rule_name=self.rule_name,
+                        reason=reason,
+                    )
+
+
 class ManualExceptionRule(LinkingRule):
     """Links configured run_id groups before normal automatic rules run."""
 
     rule_name = "manual_exception"
 
     def __init__(self, run_id_groups: Sequence[Sequence[str]]) -> None:
-        self.run_id_groups = [
-            list(run_id_group) for run_id_group in run_id_groups
-        ]
+        self.run_id_groups = [list(run_id_group) for run_id_group in run_id_groups]
 
     def update_run_links(self, state: LinkingState) -> None:
         runs_by_id = state.runs_by_id
@@ -433,9 +482,12 @@ def link_runs_with_state(
         UniqueFullNameOneRunPerYearRule(),
         AllowOneOverlapYearRule(),
         SameNameEmitConnectedTeamRule(),
+        TypoConnectedEmitRule(),
     ]
 
-    logging.info(f"Starting to group {len(runs)} runs with {len(active_rules)} linking rules")
+    logging.info(
+        f"Starting to group {len(runs)} runs with {len(active_rules)} linking rules"
+    )
     for rule in active_rules:
         # Before rule runs, count current runners
         old_linked = len(state.linked_runners)
