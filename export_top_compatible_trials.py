@@ -30,7 +30,9 @@ class MockTrial:
         return choices[0]
 
 
-def coerce_params(params: Dict[str, Any], expected_ranges: Dict[str, Any]) -> Dict[str, Any]:
+def coerce_params(
+    params: Dict[str, Any], expected_ranges: Dict[str, Any]
+) -> Dict[str, Any]:
     coerced = {}
     for name, range_info in expected_ranges.items():
         type_ = range_info[0]
@@ -126,7 +128,9 @@ def main():
     logging.info(f"Expected parameter ranges for {args.race_type}: {expected_ranges}")
 
     completed_trials = [
-        t for t in study.trials if t.state == TrialState.COMPLETE and t.value is not None
+        t
+        for t in study.trials
+        if t.state == TrialState.COMPLETE and t.value is not None
     ]
 
     if args.trial_min is not None:
@@ -156,11 +160,13 @@ def main():
 
     for i, t in enumerate(top_trials):
         coerced_params = coerce_params(t.params, expected_ranges)
-        file_path = out_base / f"rank_{i+1}_trial_{t.number}.json"
+        file_path = out_base / f"rank_{i + 1}_trial_{t.number}.json"
         with open(file_path, "w") as f:
             json.dump(coerced_params, f, indent=2)
-        
-        logging.info(f"Rank {i+1}: Trial {t.number} (Value: {t.value:.4f}) -> {file_path}")
+
+        logging.info(
+            f"Rank {i + 1}: Trial {t.number} (Value: {t.value:.4f}) -> {file_path}"
+        )
         # Log if any parameter was coerced
         for k, v in t.params.items():
             if k in coerced_params and coerced_params[k] != v:

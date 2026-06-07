@@ -9,17 +9,18 @@ import shared
 
 # time uv run python count_names.py
 
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s')
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s",
+)
 
 
 def _correct_hyphen_spacing_in_names(name):
     # Remove extra spaces around hyphens
-    corrected_name = re.sub(r'\s*-\s*', '-', name)
+    corrected_name = re.sub(r"\s*-\s*", "-", name)
     # Ensure only one space between words
-    corrected_name = re.sub(r'\s+', ' ', corrected_name)
+    corrected_name = re.sub(r"\s+", " ", corrected_name)
     return corrected_name
-
 
 
 def cleanup_name(orig_name):
@@ -27,16 +28,15 @@ def cleanup_name(orig_name):
     name = _correct_hyphen_spacing_in_names(name)
     if "  " in name:
         logging.info(f"Trimming DOUBLE or multiple spaces '{orig_name}'")
-        name = ' '.join(name.split())
+        name = " ".join(name.split())
     if "|" in name:
         logging.info(f"Trimming pipes '{orig_name}'")
         name = name.replace("|", "")
     return name
 
 
-
 def _append_names(year, ve_or_ju, all_names):
-    in_file_name = f'data/results_with_dist_j{year}_{ve_or_ju}.tsv'
+    in_file_name = f"data/results_with_dist_j{year}_{ve_or_ju}.tsv"
     with open(in_file_name) as csvfile:
         csvreader = csv.reader(csvfile, delimiter="\t")
         next(csvreader, None)  # skip the headers
@@ -64,18 +64,30 @@ def analyze_names():
     runs["lastname"] = names[1]
     logging.info(runs)
 
-    fn_counts = runs.groupby("firstname").count().reset_index()[["firstname", "name"]].rename(
-        columns={"name": "fn_count"})
-    ln_counts = runs.groupby("lastname").count().reset_index()[["lastname", "name"]].rename(
-        columns={"name": "ln_count"})
-    counts = fn_counts.set_index('firstname').join(ln_counts.set_index('lastname'), how="outer").fillna(0)
+    fn_counts = (
+        runs.groupby("firstname")
+        .count()
+        .reset_index()[["firstname", "name"]]
+        .rename(columns={"name": "fn_count"})
+    )
+    ln_counts = (
+        runs.groupby("lastname")
+        .count()
+        .reset_index()[["lastname", "name"]]
+        .rename(columns={"name": "ln_count"})
+    )
+    counts = (
+        fn_counts.set_index("firstname")
+        .join(ln_counts.set_index("lastname"), how="outer")
+        .fillna(0)
+    )
     logging.info(counts)
 
     counts["is_firstname"] = counts["fn_count"] > counts["ln_count"]
 
     to_file = counts.reset_index().rename(columns={"index": "name"})
-    to_file.to_json('data/name_counts.json', orient="records", date_format="iso")
+    to_file.to_json("data/name_counts.json", orient="records", date_format="iso")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     analyze_names()
