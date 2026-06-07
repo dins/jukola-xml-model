@@ -14,7 +14,7 @@ DEFAULT_TESTDATA_SUBDIR = "default-set"
 def pytest_configure(config):
     config.addinivalue_line(
         "markers",
-        f"testdata(subdir): use '{TESTDATA_ROOT}/<subdir>' as the pipeline input "
+        f"testdata(subdir): use '{TESTDATA_ROOT}/<subdir>' as the name_grouping input "
         f"directory. Defaults to '{TESTDATA_ROOT}/{DEFAULT_TESTDATA_SUBDIR}'.",
     )
 
@@ -41,9 +41,18 @@ def _detect_history_years(testdata_dir: str, race_type: str) -> list[str]:
     return sorted(years)
 
 
+_GROUPING_CACHE: dict[str, pd.DataFrame] = {}
+
+
 @pytest.fixture
-def mock_environment(monkeypatch, request):
+def grouped_dataframe(monkeypatch, request):
     testdata_dir = _resolve_testdata_dir(request)
+    
+    # Return a copy from cache if we already ran name_grouping for this test directory
+    if testdata_dir in _GROUPING_CACHE:
+        return _GROUPING_CACHE[testdata_dir].copy()
+
+    # Otherwise, set up the mock environment and run name_grouping
     history_years = _detect_history_years(testdata_dir, race_type="ve")
 
     monkeypatch.setattr(shared, "history_years", lambda: history_years)
@@ -83,17 +92,15 @@ def mock_environment(monkeypatch, request):
 
     monkeypatch.setattr(pd.DataFrame, "to_csv", mocked_to_csv)
 
-    return captured_dfs
-
-
-@pytest.fixture
-def grouped_dataframe(mock_environment):
-    # Execute the entire grouping pipeline
+    # Execute the entire name_grouping process
     group_names._group_runs_to_runners()
 
-    # The pipeline should have captured the final dataframe
-    assert "output" in mock_environment, "Output dataframe was not saved!"
-    return mock_environment["output"]
+    # The name_grouping process should have captured the final dataframe
+    assert "output" in captured_dfs, "Output dataframe was not saved!"
+    
+    # Store in cache and return a safe copy
+    _GROUPING_CACHE[testdata_dir] = captured_dfs["output"]
+    return _GROUPING_CACHE[testdata_dir].copy()
 
 
 def test_kaima_is_split(grouped_dataframe):
