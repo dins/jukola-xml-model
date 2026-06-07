@@ -7,7 +7,10 @@ import shared
 
 # RACE_TYPE=ve FORECAST_YEAR=2022 time uv run python fetch_online_team_countries.py && wc data/team_countries_j2022_ve.tsv
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s')
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s",
+)
 
 
 def _fetch_and_parse_rows(url):
@@ -24,15 +27,23 @@ def _fetch_and_parse_rows(url):
         club_index = competitor[1]
         team_country = competitor[2]
         team_base_name = club_names_by_index[club_index]
-        logging.info("Team line: " + " " + str(team_id) + " " + team_country + " " + team_base_name)
+        logging.info(
+            "Team line: "
+            + " "
+            + str(team_id)
+            + " "
+            + team_country
+            + " "
+            + team_base_name
+        )
         output_rows.append([team_id, team_base_name, team_country])
 
     return output_rows
 
 
 def fetch_team_countries(year, race_type):
-    out_file_name = f'data/team_countries_j{year}_{race_type}.tsv'
-    csv_file = open(out_file_name, 'w')
+    out_file_name = f"data/team_countries_j{year}_{race_type}.tsv"
+    csv_file = open(out_file_name, "w")
 
     csvwriter = csv.writer(csv_file, delimiter="\t", quoting=csv.QUOTE_ALL)
     header = ["team_id", "team_base_name", "team_country"]
