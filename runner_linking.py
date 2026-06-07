@@ -367,42 +367,54 @@ def resolve_links(
 
 
 class GroupMerger:
-    """Small deterministic disjoint-set that merges values into groups.
+    """Merges values into groups and reports which group each value is in.
 
-    Used to merge runs (or teams) that belong together and to report the stable
-    group each value ended up in.
+    Each value belongs to a group that is identified by one of its members, the
+    "group representative". Initially every value is alone in its own group and
+    is therefore its own representative. ``union`` merges the groups of two
+    values so they share one representative; ``find`` returns the representative
+    of a value's group, so two values are in the same group exactly when they
+    have the same representative. The representative is chosen deterministically
+    (the smallest member) so results do not depend on insertion order.
+
+    This is the classic disjoint-set / union-find structure, used here to merge
+    runs (or teams) that belong together.
     """
 
     def __init__(self) -> None:
-        self._parent: dict[str, str] = {}
+        # Maps each value to another member of its group; following these links
+        # repeatedly always ends at the group representative (a value that maps
+        # to itself).
+        self._group_rep: dict[str, str] = {}
 
     def add(self, value: str) -> None:
         """Add a value as its own group if it is not already present."""
-        self._parent.setdefault(value, value)
+        self._group_rep.setdefault(value, value)
 
     def find(self, value: str) -> str:
-        """Return the stable group representative for a value."""
-        if value not in self._parent:
+        """Return the representative of the group the value belongs to."""
+        if value not in self._group_rep:
             raise KeyError(f"Unknown group value: {value}")
 
-        parent = self._parent[value]
-        if parent != value:
-            self._parent[value] = self.find(parent)
+        linked_value = self._group_rep[value]
+        if linked_value != value:
+            # Point straight at the representative so future lookups are fast.
+            self._group_rep[value] = self.find(linked_value)
 
-        return self._parent[value]
+        return self._group_rep[value]
 
     def union(self, left: str, right: str) -> None:
-        """Merge two groups using deterministic representative ordering."""
-        left_parent = self.find(left)
-        right_parent = self.find(right)
+        """Merge the groups of two values, keeping the smaller representative."""
+        left_rep = self.find(left)
+        right_rep = self.find(right)
 
-        if left_parent == right_parent:
+        if left_rep == right_rep:
             return
 
-        if right_parent < left_parent:
-            left_parent, right_parent = right_parent, left_parent
+        if right_rep < left_rep:
+            left_rep, right_rep = right_rep, left_rep
 
-        self._parent[right_parent] = left_parent
+        self._group_rep[right_rep] = left_rep
 
 
 def link_runs(
