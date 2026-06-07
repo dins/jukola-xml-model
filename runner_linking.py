@@ -120,7 +120,7 @@ class LinkingState:
         rule_name: str,
         reason: str,
     ) -> None:
-        """Add SAME_RUNNER candidate links and optional compatibility labels for a group of runs."""
+        """Add SAME_RUNNER candidate links and an optional unique_name for a group of runs."""
         grouped_runs = sorted(runs, key=lambda run: run.run_id)
 
         if not grouped_runs:
@@ -151,14 +151,14 @@ class LinkingState:
         self.candidate_links.append(candidate_link)
 
     def refresh_linked_runners(
-        self, *, include_unlinked_singletons: bool = False
+        self, *, include_single_run_runners: bool = False
     ) -> None:
         """Recompute current LinkedRunners from all CandidateLinks collected so far."""
         self.linked_runners = resolve_links(
             runs=self.all_runs,
             candidate_links=self.candidate_links,
             unique_name_by_run_id=self.unique_name_by_run_id,
-            include_unlinked_singletons=include_unlinked_singletons,
+            include_single_run_runners=include_single_run_runners,
         )
         linked_run_ids = {
             run.run_id
@@ -198,27 +198,33 @@ class UniqueFullNameOneRunPerYearRule(LinkingRule):
             )
 
 
-class LegacyAtMostOneMultiTeamYearRule(LinkingRule):
-    """Preserves current group_names.py behavior for names with at most one multi-team result year."""
+class AllowOneOverlapYearRule(LinkingRule):
+    """Groups a same-name set unless it has more than one overlap year.
 
-    rule_name = "legacy_at_most_one_multi_team_year"
+    An overlap year is a year where the name appears in more than one team's
+    results, which suggests two different runners (namesakes) rather than one
+    runner changing teams. A single overlap year is tolerated and the runs stay
+    grouped as one runner.
+    """
+
+    rule_name = "allow_one_overlap_year"
 
     def update_run_links(self, state: LinkingState) -> None:
         for normalized_name, name_runs in state.unlinked_runs_by_name.items():
-            years_with_multiple_teams = self._years_with_multiple_result_teams(name_runs)
+            overlap_years = self._overlap_years(name_runs)
 
-            if len(years_with_multiple_teams) > 1:
+            if len(overlap_years) > 1:
                 continue
 
             state.add_same_runner_group(
                 name_runs,
                 unique_name=normalized_name,
                 rule_name=self.rule_name,
-                reason="legacy rule: at most one result year has multiple teams for this name",
+                reason="at most one result year has multiple teams for this name",
             )
 
     @staticmethod
-    def _years_with_multiple_result_teams(runs: Sequence[Run]) -> list[int]:
+    def _overlap_years(runs: Sequence[Run]) -> list[int]:
         teams_by_year: dict[int, set[str]] = defaultdict(set)
 
         for run in runs:
@@ -258,10 +264,10 @@ class SameNameEmitConnectedTeamRule(LinkingRule):
     def _split_runs_by_emit_connected_teams(
         runs: Sequence[Run],
     ) -> list[list[Run]]:
-        team_union = UnionFind()
+        team_groups = GroupMerger()
 
         for run in runs:
-            team_union.add(run.team_name)
+            team_groups.add(run.team_name)
 
         runs_by_emit: dict[str, list[Run]] = defaultdict(list)
         for run in runs:
@@ -276,16 +282,16 @@ class SameNameEmitConnectedTeamRule(LinkingRule):
 
             first_team_name = team_names[0]
             for team_name in team_names[1:]:
-                team_union.union(first_team_name, team_name)
+                team_groups.union(first_team_name, team_name)
 
-        runs_by_component: dict[str, list[Run]] = defaultdict(list)
+        runs_by_team_group: dict[str, list[Run]] = defaultdict(list)
         for run in runs:
-            component_id = team_union.find(run.team_name)
-            runs_by_component[component_id].append(run)
+            team_group_id = team_groups.find(run.team_name)
+            runs_by_team_group[team_group_id].append(run)
 
         return [
-            sorted(component_runs, key=lambda run: run.run_id)
-            for _, component_runs in sorted(runs_by_component.items())
+            sorted(team_group_runs, key=lambda run: run.run_id)
+            for _, team_group_runs in sorted(runs_by_team_group.items())
         ]
 
 
@@ -316,43 +322,43 @@ def resolve_links(
     runs: Iterable[Run],
     candidate_links: Iterable[CandidateLink],
     unique_name_by_run_id: Mapping[str, str] | None = None,
-    include_unlinked_singletons: bool = False,
+    include_single_run_runners: bool = False,
 ) -> list[LinkedRunner]:
     """Return inferred linked runners from the currently known candidate links."""
     all_runs = sorted(runs, key=lambda run: run.run_id)
-    links = list(candidate_links)
-    labels = unique_name_by_run_id or {}
+    candidate_links = list(candidate_links)
+    unique_name_by_run_id = unique_name_by_run_id or {}
 
     _raise_if_duplicate_run_ids(all_runs)
     run_ids = {run.run_id for run in all_runs}
 
-    union_find = UnionFind()
+    group_merger = GroupMerger()
     for run in all_runs:
-        union_find.add(run.run_id)
+        group_merger.add(run.run_id)
 
     same_runner_links = (
-        link for link in links if link.relation == LinkRelation.SAME_RUNNER
+        link for link in candidate_links if link.relation == LinkRelation.SAME_RUNNER
     )
 
     for link in same_runner_links:
         if link.left_run_id not in run_ids or link.right_run_id not in run_ids:
             raise KeyError(f"CandidateLink references unknown run_id: {link}")
 
-        union_find.union(link.left_run_id, link.right_run_id)
+        group_merger.union(link.left_run_id, link.right_run_id)
 
-    runs_by_component: dict[str, list[Run]] = defaultdict(list)
+    runs_by_group: dict[str, list[Run]] = defaultdict(list)
     for run in all_runs:
-        runs_by_component[union_find.find(run.run_id)].append(run)
+        runs_by_group[group_merger.find(run.run_id)].append(run)
 
     linked_runners: list[LinkedRunner] = []
 
-    for component_runs in runs_by_component.values():
-        run_list = sorted(component_runs, key=lambda run: run.run_id)
-        has_label = any(run.run_id in labels for run in run_list)
+    for group_runs in runs_by_group.values():
+        run_list = sorted(group_runs, key=lambda run: run.run_id)
+        has_unique_name = any(run.run_id in unique_name_by_run_id for run in run_list)
         has_multiple_runs = len(run_list) > 1
 
-        if include_unlinked_singletons or has_label or has_multiple_runs:
-            linked_runners.append(_make_linked_runner(run_list, labels))
+        if include_single_run_runners or has_unique_name or has_multiple_runs:
+            linked_runners.append(_make_linked_runner(run_list, unique_name_by_run_id))
 
     return sorted(
         linked_runners,
@@ -360,20 +366,24 @@ def resolve_links(
     )
 
 
-class UnionFind:
-    """Small deterministic union-find used by resolve_links."""
+class GroupMerger:
+    """Small deterministic disjoint-set that merges values into groups.
+
+    Used to merge runs (or teams) that belong together and to report the stable
+    group each value ended up in.
+    """
 
     def __init__(self) -> None:
         self._parent: dict[str, str] = {}
 
     def add(self, value: str) -> None:
-        """Add a value as its own component if it is not already present."""
+        """Add a value as its own group if it is not already present."""
         self._parent.setdefault(value, value)
 
     def find(self, value: str) -> str:
-        """Return the stable component representative for a value."""
+        """Return the stable group representative for a value."""
         if value not in self._parent:
-            raise KeyError(f"Unknown union-find value: {value}")
+            raise KeyError(f"Unknown group value: {value}")
 
         parent = self._parent[value]
         if parent != value:
@@ -382,7 +392,7 @@ class UnionFind:
         return self._parent[value]
 
     def union(self, left: str, right: str) -> None:
-        """Merge two components using deterministic representative ordering."""
+        """Merge two groups using deterministic representative ordering."""
         left_parent = self.find(left)
         right_parent = self.find(right)
 
@@ -409,7 +419,7 @@ def link_runs_with_state(
     state = LinkingState.from_runs(runs)
     active_rules = [
         UniqueFullNameOneRunPerYearRule(),
-        LegacyAtMostOneMultiTeamYearRule(),
+        AllowOneOverlapYearRule(),
         SameNameEmitConnectedTeamRule(),
     ]
 
@@ -419,12 +429,12 @@ def link_runs_with_state(
         old_linked = len(state.linked_runners)
         logging.info(f"Starting rule {rule.rule_name}")
         rule.update_run_links(state)
-        state.refresh_linked_runners(include_unlinked_singletons=False)
+        state.refresh_linked_runners(include_single_run_runners=False)
         # After rule runs, count and report new runners
         new_linked = len(state.linked_runners) - old_linked
         logging.info(f"Rule {rule.rule_name} linked {new_linked} new runners")
 
-    state.refresh_linked_runners(include_unlinked_singletons=True)
+    state.refresh_linked_runners(include_single_run_runners=True)
     return state
 
 
