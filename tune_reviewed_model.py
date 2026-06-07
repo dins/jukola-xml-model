@@ -45,7 +45,6 @@ class TuningConfig:
 def suggest_params(trial: optuna.Trial, race_type: str) -> Dict[str, Any]:
     """Define the search space for ngboost-norm-tuned-reviewed.ipynb."""
 
-
     # [I 2026-05-22 01:34:30,368] Trial 427 finished with value: 1.1791135697335187 and parameters:
     # {'Base__min_samples_leaf': 70, 'n_estimators': 250, 'Base__max_depth': 10,
     # 'Base__max_features': 0.8814660047756667, 'learning_rate': 0.007132733920820354,
@@ -55,15 +54,23 @@ def suggest_params(trial: optuna.Trial, race_type: str) -> Dict[str, Any]:
     # Early stopping should handle the rest.
     if race_type == "ju":
         n_estimators = trial.suggest_int("n_estimators", 300, 400, step=100)
-        min_samples_leaf = trial.suggest_int("Base__min_samples_leaf", 300, 300, step=50)
+        min_samples_leaf = trial.suggest_int(
+            "Base__min_samples_leaf", 300, 300, step=50
+        )
     else:
         n_estimators = trial.suggest_int("n_estimators", 300, 300, step=100)
-        min_samples_leaf = trial.suggest_int("Base__min_samples_leaf", 200, 200, step=50)
+        min_samples_leaf = trial.suggest_int(
+            "Base__min_samples_leaf", 200, 200, step=50
+        )
 
     return {
-        "Base__max_depth": trial.suggest_int("Base__max_depth", low=12, high=12, step=2),
+        "Base__max_depth": trial.suggest_int(
+            "Base__max_depth", low=12, high=12, step=2
+        ),
         "Base__min_samples_leaf": min_samples_leaf,
-        "Base__max_features": trial.suggest_float("Base__max_features", 0.8, 1.0, step=0.1),
+        "Base__max_features": trial.suggest_float(
+            "Base__max_features", 0.8, 1.0, step=0.1
+        ),
         # NGBoost parameters
         "learning_rate": trial.suggest_float("learning_rate", 0.01, 0.05),
         "col_sample": trial.suggest_float("col_sample", 0.1, 1.0),
@@ -158,10 +165,14 @@ def run_notebook_trial(trial: optuna.Trial, config: TuningConfig) -> float:
             #  137 / -9 : SIGKILL (Force kill)
             if e.returncode in (130, -2, -15, 137, -9):
                 # Process was killed/interrupted
-                logging.warning(f"Trial {trial.number} year {year} notebook execution interrupted (code {e.returncode}).")
+                logging.warning(
+                    f"Trial {trial.number} year {year} notebook execution interrupted (code {e.returncode})."
+                )
                 # We MUST raise KeyboardInterrupt instead of TrialPruned here so the main loop aborts
                 # instead of just pruning the trial and starting a new one.
-                raise KeyboardInterrupt(f"Notebook execution interrupted for year {year}")
+                raise KeyboardInterrupt(
+                    f"Notebook execution interrupted for year {year}"
+                )
             logging.error(
                 "Trial %d failed for year %d. See %s", trial.number, year, log_path
             )
@@ -203,14 +214,20 @@ def run_notebook_trial(trial: optuna.Trial, config: TuningConfig) -> float:
     running_years = set(config.backtest_years)
     try:
         with ThreadPoolExecutor(max_workers=len(config.backtest_years)) as executor:
-            futures = {executor.submit(run_year, year): year for year in config.backtest_years}
+            futures = {
+                executor.submit(run_year, year): year for year in config.backtest_years
+            }
             for future in as_completed(futures):
                 year = futures[future]
                 yearly_scores.append(future.result())
                 running_years.remove(year)
     except KeyboardInterrupt:
         for year in running_years:
-            logging.info("Trial %d backtest %d received signal SIGINT. Terminating.", trial.number, year)
+            logging.info(
+                "Trial %d backtest %d received signal SIGINT. Terminating.",
+                trial.number,
+                year,
+            )
         # Re-raise so Optuna can catch it, mark the trial as FAIL/INTERRUPTED, and exit gracefully
         raise
 
@@ -251,8 +268,8 @@ def worker(worker_id: int, config: TuningConfig):
         load_if_exists=True,
         direction="minimize",
         sampler=sampler,
-        # Explicitly disable pruning. The default MedianPruner is suspected to be pruning trials 
-        # prematurely, as partial cross-validation results (e.g., just the first year) may not 
+        # Explicitly disable pruning. The default MedianPruner is suspected to be pruning trials
+        # prematurely, as partial cross-validation results (e.g., just the first year) may not
         # reliably represent the overall performance across all years.
         pruner=optuna.pruners.NopPruner(),
     )
@@ -338,7 +355,9 @@ def main():
                         f"Failed to enqueue parameters from {param_path}: {e}"
                     )
             else:
-                logging.warning(f"Enqueue params file not found: {param_path}. Ignoring.")
+                logging.warning(
+                    f"Enqueue params file not found: {param_path}. Ignoring."
+                )
 
     deadline_timestamp = None
     if args.deadline:
@@ -379,29 +398,33 @@ def main():
         for p in processes:
             p.join()
     except KeyboardInterrupt:
-        print() # Print a newline so the log doesn't end up on the same line as ^C
-        logging.info("Interrupted by user. Waiting for workers to shut down gracefully and mark trials as failed (up to 15s)...")
+        print()  # Print a newline so the log doesn't end up on the same line as ^C
+        logging.info(
+            "Interrupted by user. Waiting for workers to shut down gracefully and mark trials as failed (up to 15s)..."
+        )
         # Give workers time to catch the SIGINT, fail their Optuna trials in the DB, and exit cleanly
         deadline = time.time() + 15.0
         for p in processes:
             timeout = max(0.0, deadline - time.time())
             p.join(timeout=timeout)
-            
+
         # If any workers are STILL stuck after 15 seconds, forcefully kill them
         killed_any = False
         for p in processes:
             if p.is_alive():
-                logging.warning(f"Worker {p.pid} did not terminate gracefully in time. Force killing.")
-                p.terminate() # SIGTERM is safer than SIGKILL
+                logging.warning(
+                    f"Worker {p.pid} did not terminate gracefully in time. Force killing."
+                )
+                p.terminate()  # SIGTERM is safer than SIGKILL
                 p.join(timeout=1.0)
                 if p.is_alive():
-                    p.kill() # SIGKILL if it ignores SIGTERM
+                    p.kill()  # SIGKILL if it ignores SIGTERM
                 killed_any = True
-                
+
         if killed_any:
             for p in processes:
                 p.join()
-                
+
         logging.info("Tuning interrupted and workers terminated.")
         return
 

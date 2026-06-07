@@ -18,37 +18,53 @@ import numpy as np
 # Archived results well after race
 # curl https://results.jukola.com/tulokset/results_j2025_ju.xml > data/results_j2025_ju.xml
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s')
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s",
+)
 
 year = int(sys.argv[1])
 ve_or_ju = sys.argv[2]
-input_file = f'data/results_j{year}_{ve_or_ju}.xml'
+input_file = f"data/results_j{year}_{ve_or_ju}.xml"
 logging.info("Reading " + input_file)
 tree = ET.parse(input_file)
 root = tree.getroot()
 
 # open a file for writing
 
-out_file_name = f'data/results_with_dist_j{year}_{ve_or_ju}.tsv'
-csv_file = open(out_file_name, 'w')
+out_file_name = f"data/results_with_dist_j{year}_{ve_or_ju}.tsv"
+csv_file = open(out_file_name, "w")
 
 csvwriter = csv.writer(csv_file, delimiter="\t", quoting=csv.QUOTE_ALL)
 
-header = ["team-id", "placement", "team-time", "team-name", "team-nro", "leg-nro", "emit", "leg-time",
-          "competitor-name", "weighted_log_mean_pace", "weighted_log_pace_std", "disqualified", "leg_distance"]
+header = [
+    "team-id",
+    "placement",
+    "team-time",
+    "team-name",
+    "team-nro",
+    "leg-nro",
+    "emit",
+    "leg-time",
+    "competitor-name",
+    "weighted_log_mean_pace",
+    "weighted_log_pace_std",
+    "disqualified",
+    "leg_distance",
+]
 
 csvwriter.writerow(header)
 
 
 def parse_time(control_time_text):
     try:
-        return time.strptime(control_time_text, '%S')
+        return time.strptime(control_time_text, "%S")
     except ValueError:
         try:
-            return time.strptime(control_time_text, '%M:%S')
+            return time.strptime(control_time_text, "%M:%S")
         except ValueError:
             try:
-                return time.strptime(control_time_text, '%H:%M:%S')
+                return time.strptime(control_time_text, "%H:%M:%S")
             except ValueError:
                 print("Cannot parse " + control_time_text)
                 raise
@@ -66,8 +82,8 @@ def weighted_avg_and_std(values, weights):
     return (average, math.sqrt(variance))
 
 
-for team in root.iter('team'):
-    for leg in team.iter('leg'):
+for team in root.iter("team"):
+    for leg in team.iter("leg"):
         row = []
         row.append(team.find("teamid").text)  # ty: ignore[unresolved-attribute]
         row.append(team.findtext("placement", "NA"))
@@ -89,15 +105,20 @@ for team in root.iter('team'):
         control_paces = []
         control_distances = []
         disqualified = False
-        for control in leg.iter('control'):
+        for control in leg.iter("control"):
             cd_text = control.find("cd").text  # ty: ignore[unresolved-attribute]
             if cd_text == "-" or cd_text is None:
                 disqualified = True  # Top teams have these but are not disqualified
 
             else:
                 struct_time = parse_time(cd_text)
-                cd_secs = int(datetime.timedelta(hours=struct_time.tm_hour, minutes=struct_time.tm_min,
-                                                 seconds=struct_time.tm_sec).total_seconds())
+                cd_secs = int(
+                    datetime.timedelta(
+                        hours=struct_time.tm_hour,
+                        minutes=struct_time.tm_min,
+                        seconds=struct_time.tm_sec,
+                    ).total_seconds()
+                )
                 distance_element = control.find("cl")
                 if distance_element is not None:
                     distance_meters = int(distance_element.text)  # ty: ignore[invalid-argument-type]
@@ -108,7 +129,9 @@ for team in root.iter('team'):
 
         if len(control_paces) > 0:
             log_paces = np.log(control_paces)
-            (weighted_log_mean_pace, weighted_log_pace_std) = weighted_avg_and_std(log_paces, control_distances)
+            (weighted_log_mean_pace, weighted_log_pace_std) = weighted_avg_and_std(
+                log_paces, control_distances
+            )
             # logging.info(f"{weighted_log_mean_pace} {weighted_log_pace_std}")
         else:
             (weighted_log_mean_pace, weighted_log_pace_std) = ("NA", "NA")

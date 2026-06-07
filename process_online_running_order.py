@@ -11,8 +11,10 @@ import shared
 
 # time uv run python process_online_running_order.py 2023
 
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s')
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s",
+)
 
 
 def fetch_running_order(year, ve_or_ju):
@@ -29,7 +31,9 @@ def fetch_running_order(year, ve_or_ju):
     # out_file_name = f"data/running_order_final_{ve_or_ju}_fy_{year}.tsv"
 
     # read json file
-    with open(f'data/online-running-order/online_running_order_{year}_{ve_or_ju}.json') as json_file:
+    with open(
+        f"data/online-running-order/online_running_order_{year}_{ve_or_ju}.json"
+    ) as json_file:
         data = json.load(json_file)
 
     teams = data[ve_or_ju.upper()]
@@ -59,7 +63,7 @@ def fetch_running_order(year, ve_or_ju):
                 "leg_dist": ld,
                 "name": name,
                 "original_name": runner_name,
-                "team_number": team_number
+                "team_number": team_number,
             }
             runners.append(runner)
     logging.info(f"{len(runners)=}")
@@ -74,8 +78,12 @@ def fetch_running_order(year, ve_or_ju):
     logging.info("Wrote " + out_file_name)
 
     # Write team_countries file also
-    team_countries = raw_df[["team_id", "team_base_name", "team_country"]].sort_values("team_id").drop_duplicates()
-    tc_file = f'data/online_team_countries_j{year}_{ve_or_ju}.tsv'
+    team_countries = (
+        raw_df[["team_id", "team_base_name", "team_country"]]
+        .sort_values("team_id")
+        .drop_duplicates()
+    )
+    tc_file = f"data/online_team_countries_j{year}_{ve_or_ju}.tsv"
     team_countries.to_csv(tc_file, sep="\t", index=False)
     logging.info("Wrote " + tc_file)
 
@@ -84,7 +92,9 @@ def fetch_running_order(year, ve_or_ju):
 
 def _summarize(running_order_file):
     df = pd.read_csv(running_order_file, delimiter="\t")
-    summary = df.agg({"team_id": ["count", "nunique"], "team_country": ["count", "nunique"]})
+    summary = df.agg(
+        {"team_id": ["count", "nunique"], "team_country": ["count", "nunique"]}
+    )
     shared.log_df(summary)
 
 
