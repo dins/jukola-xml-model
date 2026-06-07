@@ -24,14 +24,15 @@ def mock_environment(monkeypatch):
 
     monkeypatch.setattr(builtins, "open", mocked_open)
 
-    original_read_csv = pd.read_csv
+    import polars as pl
+    original_pl_read_csv = pl.read_csv
 
-    def mocked_read_csv(filepath_or_buffer, *args, **kwargs):
-        if str(filepath_or_buffer).startswith("data/running_order_final_"):
-            filepath_or_buffer = "tests/testdata/running_order_final_ve_fy_test.tsv"
-        return original_read_csv(filepath_or_buffer, *args, **kwargs)
+    def mocked_pl_read_csv(source, *args, **kwargs):
+        if str(source).startswith("data/running_order_final_"):
+            source = "tests/testdata/running_order_final_ve_fy_test.tsv"
+        return original_pl_read_csv(source, *args, **kwargs)
 
-    monkeypatch.setattr(pd, "read_csv", mocked_read_csv)
+    monkeypatch.setattr(pl, "read_csv", mocked_pl_read_csv)
 
     captured_dfs = {}
     original_to_csv = pd.DataFrame.to_csv
@@ -129,23 +130,6 @@ def test_running_order_is_merged_with_null_pace(grouped_dataframe):
     ro_magdalena = magdalena_runs[magdalena_runs["year"] == 2026]
     assert len(ro_magdalena) == 1, "Failed to merge running order data"
     assert pd.isna(ro_magdalena["pace"].iloc[0]), "Running order pace should be null"
-
-
-def test_rare_first_name_gets_fallback(grouped_dataframe):
-    # Rare First Name Fallback
-    # "karolin ohlsson" has a rare first name (<5 occurrences).
-    # She should receive the fallback 'OTHER' fn_scaled_pace value.
-    karolin = grouped_dataframe[
-        grouped_dataframe["unique_name"].str.startswith("karolin ohlsson", na=False)
-    ]
-    assert not karolin.empty, "Rare first name runner missing"
-
-    eija = grouped_dataframe[
-        grouped_dataframe["unique_name"].str.startswith("eija rantala", na=False)
-    ]
-    assert karolin["fn_scaled_pace"].iloc[0] == eija["fn_scaled_pace"].iloc[0], (
-        "Rare first names should get the same fallback fn_scaled_pace"
-    )
 
 
 def test_statistics_and_ideals_are_calculated(grouped_dataframe):

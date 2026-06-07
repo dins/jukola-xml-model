@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-import csv
 import logging
 from collections import defaultdict
-from typing import Any, Iterable
-
 import numpy as np
 import pandas as pd
+from typing import Any, Iterable
+
+import polars as pl
 
 import normalize_names
 import runner_linking
@@ -19,148 +19,262 @@ import shared
 # time RACE_TYPE=ju FORECAST_YEAR=2026 uv run python group_names.py
 
 
+
+
 def _group_runs_to_runners() -> None:
     """Read result/running-order rows, link them, and write the current long output file."""
     race_type = shared.race_type()
-    result_runs = _read_result_runs(race_type)
-    running_order_runs = _read_running_order_runs(race_type)
 
-    linked_runners = runner_linking.link_runs(
-        runs=result_runs + running_order_runs,
+    result_df = _read_result_runs_df(race_type)
+    running_order_df = _read_running_order_runs_df(race_type)
+
+    runs_df = pl.concat([result_df, running_order_df], how="vertical")
+    logging.info(
+        "Built canonical runs_df: %d rows (%d result, %d running order)",
+        runs_df.height,
+        result_df.height,
+        running_order_df.height,
     )
+
+    linked_runners = runner_linking.link_runs(runs=_runs_from_df(runs_df))
 
     grouped_runs_by_unique_name = _to_grouped_runs_by_unique_name(linked_runners)
     _write_individual_runs_file(grouped_runs_by_unique_name)
 
 
-def _read_result_runs(race_type: str) -> list[runner_linking.Run]:
-    """Read historical result rows and convert them into canonical Run objects."""
-    runs: list[runner_linking.Run] = []
+def _read_result_runs_df(race_type: str) -> pl.DataFrame:
+    """Read historical result rows into one cleaned canonical runs DataFrame."""
+    year_frames: list[pl.DataFrame] = []
 
-    for year in shared.history_years():
-        result_year = int(year)
-        country_by_team_id = shared.read_team_countries(result_year, race_type)
+    for year_str in shared.history_years():
+        result_year = int(year_str)
         in_file_name = f"data/results_with_dist_j{result_year}_{race_type}.tsv"
 
-        with open(in_file_name) as csvfile:
-            csvreader = csv.reader(csvfile, delimiter="\t")
-            next(csvreader, None)
+        raw_df = pl.read_csv(
+            in_file_name,
+            separator="\t",
+            schema_overrides={
+                "team-id": pl.Int64,
+                "team-name": pl.String,
+                "competitor-name": pl.String,
+                "leg-nro": pl.Int64,
+                "emit": pl.String,
+                "leg-time": pl.String,
+            },
+            infer_schema_length=0,
+        )
 
-            for row in csvreader:
-                team_id = int(row[0])
-                team_base_name = row[3].upper()
-                raw_name = row[8].lower()
-                normalized_name = normalize_names.normalize_name(raw_name)
-                leg = int(row[5])
-                emit_id = _optional_value(row[6])
-                leg_time_str = row[7]
+        year_df = raw_df.select(
+            team_id=pl.col("team-id").cast(pl.Int64),
+            team_name=pl.col("team-name").cast(pl.String).str.to_uppercase(),
+            raw_name=pl.col("competitor-name").cast(pl.String).str.to_lowercase(),
+            leg=pl.col("leg-nro").cast(pl.Int64),
+            emit=pl.col("emit").cast(pl.String),
+            leg_time=pl.col("leg-time").cast(pl.String),
+        ).with_columns(
+            year=pl.lit(result_year, dtype=pl.Int64),
+            race_type=pl.lit(race_type),
+        )
 
-                if leg_time_str == "NA":
-                    leg_pace = None
-                else:
-                    leg_distance = shared.leg_distance(race_type, result_year, leg)
-                    leg_pace = round((int(leg_time_str) / 60) / leg_distance, 3)
+        year_df = _attach_team_countries(year_df, result_year, race_type)
+        year_frames.append(year_df)
 
-                if len(normalized_name) <= 5:
-                    if leg_pace is not None:
-                        print(
-                            f"Ignoring too short name '{normalized_name}' with leg_pace {leg_pace} "
-                            f"from {result_year}/{race_type} {team_id}/{leg}"
-                        )
-                    continue
+    df = pl.concat(year_frames, how="vertical")
+    df = _attach_leg_distance(df, race_type)
 
-                runs.append(
-                    runner_linking.Run(
-                        run_id=_make_run_id(result_year, race_type, team_id, leg),
-                        year=result_year,
-                        race_type=race_type,
-                        team_id=team_id,
-                        team_name=team_base_name,
-                        team_country=country_by_team_id.get(team_id, "NA"),
-                        leg=leg,
-                        normalized_name=normalized_name,
-                        emit_id=emit_id,
-                        pace=leg_pace,
-                        source=runner_linking.RunSource.RESULT,
-                    )
-                )
-
-    return runs
-
-
-def _read_running_order_runs(race_type: str) -> list[runner_linking.Run]:
-    """Read forecast-year running order rows and convert them into Run objects."""
-    running_order = pd.read_csv(
-        f"data/running_order_final_{shared.race_id_str()}.tsv", delimiter="\t"
-    )
-    running_order["ro_orig_name"] = running_order["name"]
-
-    running_order["name"] = (
-        running_order["name"]
-        .str.lower()
-        .str.strip()
-        .str.replace(r" +", " ", regex=True)
-    )
-    running_order["name"] = (
-        running_order["name"].astype(str).apply(normalize_names.normalize_name)
+    df = df.with_columns(
+        normalized_name=pl.col("raw_name").map_elements(
+            normalize_names.normalize_name, return_dtype=pl.String
+        ),
+        emit_id=_normalize_optional_expr(pl.col("emit")),
+        pace=pl.when(pl.col("leg_time") == "NA")
+        .then(None)
+        .otherwise(
+            # NOTE: polars rounds by float-scaling, so ~0.1% of paces differ by
+            # 0.001 min/km from the legacy Python round(x, 3). The drift is well
+            # below measurement resolution and is accepted to keep this fully
+            # vectorized (no per-row Python callback just for rounding).
+            (pl.col("leg_time").cast(pl.Int64, strict=False) / 60 / pl.col("leg_distance")).round(3)
+        )
+        .cast(pl.Float64),
     )
 
-    running_order.replace("", pd.NA, inplace=True)
-    running_order.replace("nan", pd.NA, inplace=True)
+    # Diagnostic: surface implausibly short names that still carry a pace.
+    short_with_pace = df.filter(
+        (pl.col("normalized_name").str.len_chars() <= 5) & pl.col("pace").is_not_null()
+    )
+    if short_with_pace.height:
+        logging.warning(
+            "Ignoring %d too short names that still have a pace:\n%s",
+            short_with_pace.height,
+            short_with_pace.select("normalized_name", "pace", "year", "team_id", "leg"),
+        )
 
-    logging.info(f"Name missing in {sum(running_order.name.isna())} rows")
+    df = df.filter(pl.col("normalized_name").str.len_chars() > 5)
 
-    running_order = running_order.dropna(subset="name")
-    shared.log_df(running_order)
-    logging.info(f"running_order: {running_order.head(1).T}")
-    logging.info(f"running_order: {running_order.info()}")
+    df = df.with_columns(
+        run_id=_run_id_expr(race_type),
+        source=pl.lit(runner_linking.RunSource.RESULT.value),
+        original_name=pl.lit(None, dtype=pl.String),
+    )
 
-    running_order["team"] = running_order["team_base_name"].str.upper()
-    running_order["year"] = shared.forecast_year()
-    running_order["pace"] = "NA"
-    running_order["emit"] = "NA"
+    return _select_standard_run_columns(df)
 
-    running_order = running_order[
-        [
-            "name",
-            "ro_orig_name",
-            "team_id",
-            "team",
-            "team_country",
-            "year",
-            "pace",
-            "emit",
-            "leg",
-        ]
-    ]
 
+def _read_running_order_runs_df(race_type: str) -> pl.DataFrame:
+    """Read forecast-year running order rows into one cleaned canonical runs DataFrame."""
+    in_file_name = f"data/running_order_final_{shared.race_id_str()}.tsv"
+    forecast_year = shared.forecast_year()
+
+    df = pl.read_csv(in_file_name, separator="\t", infer_schema_length=0)
+
+    # Keep the untouched original name for later linking diagnostics, then apply
+    # the same lower/strip/collapse + normalize_name cleanup the pandas path used.
+    df = df.with_columns(original_name=pl.col("name").cast(pl.String))
+    df = df.with_columns(
+        normalized_name=pl.col("name")
+        .cast(pl.String)
+        .str.to_lowercase()
+        .str.strip_chars()
+        .str.replace_all(r" +", " ")
+    )
+    df = df.with_columns(
+        normalized_name=pl.col("normalized_name").map_elements(
+            lambda x: normalize_names.normalize_name(str(x)) if x is not None else None,
+            return_dtype=pl.String,
+        )
+    )
+    df = df.with_columns(pl.col("normalized_name").replace(["", "nan"], [None, None]))
+
+    missing_names = df.filter(pl.col("normalized_name").is_null()).height
+    logging.info(f"Name missing in {missing_names} rows")
+    df = df.drop_nulls(subset=["normalized_name"])
+
+    if "team_country" not in df.columns:
+        df = df.with_columns(team_country=pl.lit("NA"))
+
+    df = df.with_columns(
+        team_id=pl.col("team_id").cast(pl.Int64),
+        leg=pl.col("leg").cast(pl.Int64),
+        year=pl.lit(forecast_year, dtype=pl.Int64),
+        race_type=pl.lit(race_type),
+        team_name=pl.col("team_base_name").cast(pl.String).str.to_uppercase(),
+        team_country=pl.col("team_country").cast(pl.String).fill_null("NA"),
+        emit_id=pl.lit(None, dtype=pl.String),
+        pace=pl.lit(None, dtype=pl.Float64),
+        source=pl.lit(runner_linking.RunSource.RUNNING_ORDER.value),
+        original_name=_normalize_optional_expr(pl.col("original_name")),
+    )
+    df = df.with_columns(run_id=_run_id_expr(race_type))
+
+    return _select_standard_run_columns(df)
+
+
+def _runs_from_df(runs_df: pl.DataFrame) -> list[runner_linking.Run]:
+    """Materialize Run objects from a canonical runs DataFrame (one row per run)."""
     runs: list[runner_linking.Run] = []
 
-    for running_order_rec in running_order.to_dict(orient="records"):
-        logging.info(running_order_rec)
-
-        forecast_year = int(running_order_rec["year"])
-        team_id = int(running_order_rec["team_id"])
-        leg = int(running_order_rec["leg"])
-
+    for row in runs_df.iter_rows(named=True):
         runs.append(
             runner_linking.Run(
-                run_id=_make_run_id(forecast_year, race_type, team_id, leg),
-                year=forecast_year,
-                race_type=race_type,
-                team_id=team_id,
-                team_name=str(running_order_rec["team"]),
-                team_country=str(running_order_rec.get("team_country", "NA")),
-                leg=leg,
-                normalized_name=str(running_order_rec["name"]),
-                emit_id=None,
-                pace=None,
-                source=runner_linking.RunSource.RUNNING_ORDER,
-                original_name=_optional_value(running_order_rec.get("ro_orig_name")),
+                run_id=row["run_id"],
+                year=int(row["year"]),
+                race_type=row["race_type"],
+                team_id=int(row["team_id"]),
+                team_name=row["team_name"],
+                team_country=row["team_country"],
+                leg=int(row["leg"]),
+                normalized_name=row["normalized_name"],
+                emit_id=row["emit_id"],
+                pace=row["pace"],
+                source=runner_linking.RunSource(row["source"]),
+                original_name=row["original_name"],
             )
         )
 
     return runs
+
+
+def _attach_team_countries(
+    df: pl.DataFrame, year: int, race_type: str
+) -> pl.DataFrame:
+    """Left-join team -> country, defaulting missing teams to 'NA'."""
+    country_by_team_id = shared.read_team_countries(year, race_type)
+    country_df = pl.DataFrame(
+        {
+            "team_id": list(country_by_team_id.keys()),
+            "team_country": list(country_by_team_id.values()),
+        },
+        schema={"team_id": pl.Int64, "team_country": pl.String},
+    )
+    return df.join(country_df, on="team_id", how="left").with_columns(
+        pl.col("team_country").fill_null("NA")
+    )
+
+
+def _attach_leg_distance(df: pl.DataFrame, race_type: str) -> pl.DataFrame:
+    """Left-join leg distance, resolved once per distinct (year, leg) pair."""
+    leg_distance_df = (
+        df.select("year", "leg")
+        .unique()
+        .with_columns(
+            leg_distance=pl.struct("year", "leg").map_elements(
+                lambda s: float(shared.leg_distance(race_type, s["year"], s["leg"])),
+                return_dtype=pl.Float64,
+            )
+        )
+    )
+    return df.join(leg_distance_df, on=["year", "leg"], how="left")
+
+
+def _run_id_expr(race_type: str) -> pl.Expr:
+    """Vectorized equivalent of ``{year}-{race_type}-{team_id}-{leg}``."""
+    return pl.concat_str(
+        [
+            pl.col("year").cast(pl.String),
+            pl.lit(race_type),
+            pl.col("team_id").cast(pl.String),
+            pl.col("leg").cast(pl.String),
+        ],
+        separator="-",
+    ).alias("run_id")
+
+
+def _normalize_optional_expr(col: pl.Expr) -> pl.Expr:
+    """Vectorized equivalent of ``_optional_value``: NA-like values become null."""
+    text = col.cast(pl.String).str.strip_chars()
+    is_na_like = (
+        text.is_null()
+        | (text.str.len_chars() == 0)
+        | (text.str.to_uppercase() == "NA")
+        | (text.str.to_lowercase() == "nan")
+    )
+    return pl.when(is_na_like).then(None).otherwise(text)
+
+
+def _select_standard_run_columns(df: pl.DataFrame) -> pl.DataFrame:
+    """Project onto the canonical column set with stable order and dtypes."""
+
+    schema_common_to_history_and_running_order = pl.Schema(
+        {
+            "run_id": pl.String,
+            "year": pl.Int64,
+            "race_type": pl.String,
+            "team_id": pl.Int64,
+            "team_name": pl.String,
+            "team_country": pl.String,
+            "leg": pl.Int64,
+            "normalized_name": pl.String,
+            "emit_id": pl.String,
+            "pace": pl.Float64,
+            "source": pl.String,
+            "original_name": pl.String,
+        }
+    )
+
+    return df.select(
+        [pl.col(name).cast(dtype) for name, dtype in schema_common_to_history_and_running_order.items()]
+    )
 
 
 def _to_grouped_runs_by_unique_name(
@@ -251,8 +365,6 @@ def _write_individual_runs_file(
 
     df.info()
 
-    df = _first_name_stats(df)
-
     output_file_path = f"data/long_runs_and_running_order_{shared.race_id_str()}.tsv"
     df.to_csv(output_file_path, sep="\t", index=False)
     logging.info(f"Wrote: {output_file_path}")
@@ -262,118 +374,6 @@ def _write_individual_runs_file(
         f"Duplicate legs {len(duplicates)} in running order:\n{duplicates.to_string(index=False)}"
     )
     assert len(duplicates) == 0, "Duplicate legs"
-
-
-def _first_name_stats(df: pd.DataFrame) -> pd.DataFrame:
-    """Add first-name-based fallback pace features used by the existing forecast path."""
-    df["first_name"] = df["unique_name"].str.split().str[0]
-
-    leg_medians_df = (
-        df.dropna(subset=["pace"])
-        .groupby(["year", "leg"])
-        .agg(
-            leg_median_pace=("pace", "median"),
-        )
-        .reset_index()
-    )
-
-    df = pd.merge(df, leg_medians_df, how="left", on=["year", "leg"])
-    df["scaled_pace"] = df["pace"] / df["leg_median_pace"]
-
-    fn_counts_df = (
-        df[df["year"] >= 2014]
-        .groupby("first_name")
-        .agg(
-            fn_nunique_runners=("unique_name", "nunique"),
-        )
-        .sort_values("fn_nunique_runners")
-        .reset_index()
-    )
-
-    logging.info(fn_counts_df)
-
-    df = pd.merge(df, fn_counts_df, how="left", on=["first_name"])
-    df["fn_nunique_runners"] = df["fn_nunique_runners"].fillna(-1)
-
-    unqualified_first_name_mask = df["fn_nunique_runners"] < 5
-    df.loc[unqualified_first_name_mask, "first_name"] = "OTHER"
-    logging.info(f"{np.mean(unqualified_first_name_mask)=}")
-
-    fn_stats_df = (
-        df[df["year"] >= 2014]
-        .groupby("first_name")
-        .agg(
-            fn_median_scaled_pace=("scaled_pace", "median"),
-            fn_stats_runners=("unique_name", "nunique"),
-        )
-        .sort_values("fn_median_scaled_pace")
-        .reset_index()
-    )
-
-    logging.info(fn_stats_df)
-
-    df = pd.merge(df, fn_stats_df, how="left", on=["first_name"])
-    logging.info(df)
-
-    default_scaled_pace = (
-        fn_stats_df[fn_stats_df["first_name"] == "OTHER"]
-        .head(1)["fn_median_scaled_pace"]
-        .item()
-    )
-    logging.info(f"{default_scaled_pace=}")
-
-    df["fn_scaled_pace"] = df["fn_median_scaled_pace"].fillna(default_scaled_pace)
-    logging.info(
-        df[
-            [
-                "unique_name",
-                "first_name",
-                "pace",
-                "fn_scaled_pace",
-                "fn_median_scaled_pace",
-            ]
-        ]
-    )
-
-    df.info()
-
-    df = df.drop(
-        columns=[
-            "first_name",
-            "fn_median_scaled_pace",
-            "leg_median_pace",
-            "scaled_pace",
-            "fn_nunique_runners",
-        ]
-    )
-
-    df.info()
-
-    return df
-
-
-def _make_run_id(year: int, race_type: str, team_id: int, leg: int) -> str:
-    """Build the stable run id used as the linking graph node id."""
-    return f"{year}-{race_type}-{team_id}-{leg}"
-
-
-def _optional_value(value: Any) -> str | None:
-    """Normalize project NA-like values to None."""
-    if value is None:
-        return None
-
-    try:
-        if pd.isna(value):
-            return None
-    except TypeError:
-        pass
-
-    text = str(value).strip()
-
-    if text == "" or text.upper() == "NA" or text.lower() == "nan":
-        return None
-
-    return text
 
 
 if __name__ == "__main__":
