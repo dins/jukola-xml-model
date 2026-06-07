@@ -261,9 +261,26 @@ def test_typo_rule_merges_kriktila_via_emit(grouped_dataframe: pd.DataFrame):
         grouped_dataframe["name"].str.startswith("leena-maija krikti", na=False)
     ]
     unique_leenas = leena_runs["unique_name"].nunique()
-    
+
     assert unique_leenas == 1, (
         f"Expected leena-maija kriktilä and leena-maija kriktillä to be merged into 1 person, found {unique_leenas}"
     )
 
-    assert list(sorted(leena_runs["name"].unique())) == ["leena-maija kriktillä", "leena-maija kriktilä"]
+
+@pytest.mark.testdata("changed_last_name")
+def test_changed_last_name_connected_by_first_name_and_emit(
+    grouped_dataframe: pd.DataFrame,
+):
+    # Tests a case where a runner has changed their last name (e.g. marriage):
+    # "piia heiniö" -> "piia ruuskanen". They share the same first name and same Emit ID.
+    piia_runs = grouped_dataframe[
+        grouped_dataframe["name"].isin(["piia heiniö", "piia ruuskanen"])
+    ]
+    unique_piias = piia_runs["unique_name"].nunique()
+
+    assert unique_piias == 1, (
+        f"Expected piia heiniö and piia ruuskanen to be merged into 1 person, found {unique_piias}"
+    )
+
+    expected_names = ["piia heiniö", "piia ruuskanen"]
+    assert list(sorted(piia_runs["name"].unique())) == expected_names

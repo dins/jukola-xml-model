@@ -346,6 +346,60 @@ class TypoConnectedEmitRule(LinkingRule):
                     )
 
 
+class ChangedLastNameConnectedByFirstNameAndEmitRule(LinkingRule):
+    """Links runners with exact same first name(s) and Emit ID, assuming last name changed."""
+
+    rule_name = "changed_last_name_connected_by_first_name_and_emit"
+
+    def update_run_links(self, state: LinkingState) -> None:
+        runs_by_emit: dict[str, list[Run]] = defaultdict(list)
+
+        for run in state.all_runs:
+            if run.emit_id is not None:
+                runs_by_emit[run.emit_id].append(run)
+
+        for emit_id, group_runs in runs_by_emit.items():
+            runs_by_name: dict[str, list[Run]] = defaultdict(list)
+            for run in group_runs:
+                runs_by_name[run.normalized_name].append(run)
+
+            names = list(runs_by_name.keys())
+            if len(names) < 2 or len(names) > 3:
+                continue
+
+            for name_a, name_b in combinations(names, 2):
+                first_names_a = " ".join(name_a.split()[:-1])
+                first_names_b = " ".join(name_b.split()[:-1])
+
+                if first_names_a and first_names_a == first_names_b:
+                    # Require that the active years for the two names do not overlap.
+                    # Since it's a name change (like marriage), the runner shouldn't
+                    # use both last names simultaneously across the same period.
+                    years_a = {run.year for run in runs_by_name[name_a]}
+                    years_b = {run.year for run in runs_by_name[name_b]}
+                    common_years = years_a.intersection(years_b)
+
+                    year_ranges_dont_overlap = min(years_a) > max(years_b) or min(years_b) > max(years_a)
+                    teams_a = {run.team_id for run in runs_by_name[name_a]}
+                    teams_b = {run.team_id for run in runs_by_name[name_b]}
+
+                    # This rule combines also some typoed last names,
+                    # typos happen without year range guarantee
+                    only_in_one_team = len(teams_a | teams_b) == 1
+                    
+                    if not common_years and (year_ranges_dont_overlap or only_in_one_team):
+                        runs_to_link = runs_by_name[name_a] + runs_by_name[name_b]
+                        logging.info(f"Linking by emit {emit_id} with {len(names)} names: {name_a} -> {name_b}, one team: {only_in_one_team}")
+                        state.add_same_runner_group(
+                            runs_to_link,
+                            unique_name=None,
+                            rule_name=self.rule_name,
+                            reason="shared Emit ID, exact same first name, and non-overlapping years",
+                        )
+                    else:
+                        logging.info(f"NOT Linking by emit {emit_id} with {len(names)} names: {name_a} -> {name_b}, years overlap: {years_a} / {years_b}")
+
+
 class ManualExceptionRule(LinkingRule):
     """Links configured run_id groups before normal automatic rules run."""
 
@@ -483,6 +537,7 @@ def link_runs_with_state(
         AllowOneOverlapYearRule(),
         SameNameEmitConnectedTeamRule(),
         TypoConnectedEmitRule(),
+        ChangedLastNameConnectedByFirstNameAndEmitRule(),
     ]
 
     logging.info(
