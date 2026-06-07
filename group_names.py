@@ -5,7 +5,7 @@ from __future__ import annotations
 import csv
 import logging
 from collections import defaultdict
-from typing import Any
+from typing import Any, Iterable
 
 import numpy as np
 import pandas as pd
@@ -164,7 +164,7 @@ def _read_running_order_runs(race_type: str) -> list[runner_linking.Run]:
 
 
 def _to_grouped_runs_by_unique_name(
-    linked_runners: tuple[runner_linking.LinkedRunner, ...],
+    linked_runners: Iterable[runner_linking.LinkedRunner],
 ) -> dict[str, list[dict[str, Any]]]:
     """Convert LinkedRunner objects back to the dict shape used by the old writer."""
     grouped_runs_by_unique_name: dict[str, list[dict[str, Any]]] = defaultdict(list)
