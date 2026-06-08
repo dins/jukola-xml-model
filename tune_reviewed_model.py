@@ -58,7 +58,7 @@ def suggest_params(trial: optuna.Trial, race_type: str) -> Dict[str, Any]:
             "Base__min_samples_leaf", 300, 300, step=50
         )
     else:
-        n_estimators = trial.suggest_int("n_estimators", 300, 300, step=100)
+        n_estimators = trial.suggest_int("n_estimators", 300, 400, step=100)
         min_samples_leaf = trial.suggest_int(
             "Base__min_samples_leaf", 200, 200, step=50
         )
