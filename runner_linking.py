@@ -315,16 +315,9 @@ class TypoConnectedEmitRule(LinkingRule):
             if run.emit_id is not None:
                 runs_by_emit[run.emit_id].append(run)
 
-        self._link_similar_names_in_groups(
-            state, runs_by_emit.values(), "shared Emit ID and similar name"
-        )
-
-    def _link_similar_names_in_groups(
-        self, state: LinkingState, groups: Iterable[list[Run]], reason: str
-    ) -> None:
-        for group_runs in groups:
+        for emit_id, emit_runs in runs_by_emit.items():
             runs_by_name: dict[str, list[Run]] = defaultdict(list)
-            for run in group_runs:
+            for run in emit_runs:
                 runs_by_name[run.normalized_name].append(run)
 
             names = list(runs_by_name.keys())
@@ -335,17 +328,27 @@ class TypoConnectedEmitRule(LinkingRule):
             for name_a, name_b in combinations(names, 2):
                 similarity_score = JaroWinkler.similarity(name_a, name_b)
                 if similarity_score >= self.threshold:
-                    runs_to_link = runs_by_name[name_a] + runs_by_name[name_b]
-                    if similarity_score < 0.97:
+                    a_runs = runs_by_name[name_a]
+                    b_runs = runs_by_name[name_b]
+                    runs_to_link = a_runs + b_runs
+                    years_a = {run.year for run in a_runs}
+                    years_b = {run.year for run in b_runs}
+                    common_years = years_a.intersection(years_b)
+
+                    if common_years:
                         logging.info(
-                            f"Linking from [{len(names)}] names {similarity_score:.3f} {name_a} ~ {name_b} "
+                            f"NOT Linking TYPOED by {emit_id} because common years {common_years}, names {similarity_score:.3f} {name_a} ~ {name_b} "
                         )
-                    state.add_same_runner_group(
-                        runs_to_link,
-                        unique_name=None,
-                        rule_name=self.rule_name,
-                        reason=reason,
-                    )
+                    else:
+                        logging.info(
+                            f"Linking TYPOED by {emit_id} from [{len(names)}] names {similarity_score:.3f} {name_a} ~ {name_b} "
+                        )
+                        state.add_same_runner_group(
+                            runs_to_link,
+                            unique_name=None,
+                            rule_name=self.rule_name,
+                            reason="shared Emit ID and similar name",
+                        )
 
 
 class ChangedLastNameConnectedByFirstNameAndEmitRule(LinkingRule):
@@ -380,7 +383,6 @@ class ChangedLastNameConnectedByFirstNameAndEmitRule(LinkingRule):
                     years_a = {run.year for run in runs_by_name[name_a]}
                     years_b = {run.year for run in runs_by_name[name_b]}
                     common_years = years_a.intersection(years_b)
-
                     year_ranges_dont_overlap = min(years_a) > max(years_b) or min(
                         years_b
                     ) > max(years_a)
@@ -396,7 +398,7 @@ class ChangedLastNameConnectedByFirstNameAndEmitRule(LinkingRule):
                     ):
                         runs_to_link = runs_by_name[name_a] + runs_by_name[name_b]
                         logging.info(
-                            f"Linking by emit {emit_id} with {len(names)} names: {name_a} -> {name_b}, one team: {only_in_one_team}"
+                            f"Linking LASTNAME by emit {emit_id} with {len(names)} names: {name_a} -> {name_b}, one team: {only_in_one_team}"
                         )
                         state.add_same_runner_group(
                             runs_to_link,

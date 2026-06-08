@@ -96,19 +96,6 @@ def test_typo_rule_links_already_linked_runs():
             10.0,
             RunSource.RESULT,
         ),
-        Run(
-            "r3",
-            2017,
-            "ju",
-            1,
-            "Vehkalahden Veikot",
-            "FIN",
-            1,
-            "leena-maija kriktilä",
-            "1237164",
-            10.0,
-            RunSource.RESULT,
-        ),
         # Typo name
         Run(
             "r4",
@@ -144,4 +131,4 @@ def test_typo_rule_links_already_linked_runs():
     # We expect all 4 runs to be under a single linked runner.
     state.refresh_linked_runners(include_single_run_runners=True)
     assert len(state.linked_runners) == 1
-    assert len(state.linked_runners[0].runs) == 4
+    assert len(state.linked_runners[0].runs) == 3
