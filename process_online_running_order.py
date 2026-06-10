@@ -9,7 +9,7 @@ import pandas as pd
 import normalize_names
 import shared
 
-# time uv run python process_online_running_order.py 2023
+# time RACE_TYPE=ve FORECAST_YEAR=2026 uv run python process_online_running_order.py
 
 logging.basicConfig(
     level=logging.INFO,
@@ -17,7 +17,7 @@ logging.basicConfig(
 )
 
 
-def fetch_running_order(year, ve_or_ju):
+def fetch_running_order(year, ve_or_ju) -> str:
     def leg_dist(leg):
         dist = shared.distances[ve_or_ju][year]
         return dist[leg - 1]
@@ -99,15 +99,8 @@ def _summarize(running_order_file):
 
 
 if __name__ == "__main__":
-    year = int(sys.argv[1])
+    year = shared.forecast_year()
+    race_type = shared.race_type()
 
-    # ke_file = fetch_running_order(year, "ke")
-    # _summarize(ke_file)
-
-    ve_file = fetch_running_order(year, "ve")
-    if year != 2099:
-        ju_file = fetch_running_order(year, "ju")
-
-    _summarize(ve_file)
-    if year != 2099:
-        _summarize(ju_file)
+    out_file_name = fetch_running_order(year, race_type)
+    _summarize(out_file_name)
