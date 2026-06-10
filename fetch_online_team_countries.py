@@ -5,7 +5,7 @@ import requests
 
 import shared
 
-# RACE_TYPE=ve FORECAST_YEAR=2022 time uv run python fetch_online_team_countries.py && wc data/team_countries_j2022_ve.tsv
+# time RACE_TYPE=ve FORECAST_YEAR=2022 uv run python fetch_online_team_countries.py && wc data/team_countries_j2022_ve.tsv
 
 logging.basicConfig(
     level=logging.INFO,
@@ -26,6 +26,7 @@ def _fetch_and_parse_rows(url):
         team_id = competitor[3]
         club_index = competitor[1]
         team_country = competitor[2]
+        assert len(team_country) == 3, f"Unexpected country name length for '{team_country}'"
         team_base_name = club_names_by_index[club_index]
         logging.info(
             "Team line: "

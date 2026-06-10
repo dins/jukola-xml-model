@@ -295,6 +295,8 @@ def read_team_countries(year, race_type):
         for row in csvreader:
             team_id = int(row[0])
             team_country = row[2].upper()
+            #print(f"{year} {race_type} {row=}")
+            assert len(team_country) >= 1, f"Unexpected country name length for '{team_country}'"
             country_by_team_id[team_id] = team_country
 
         return country_by_team_id

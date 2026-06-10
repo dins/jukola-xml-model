@@ -53,7 +53,7 @@ def suggest_params(trial: optuna.Trial, race_type: str) -> Dict[str, Any]:
     # Notebook adds 50 by default (not for tuning).
     # Early stopping should handle the rest.
     if race_type == "ju":
-        n_estimators = trial.suggest_int("n_estimators", 500, 500, step=100)
+        n_estimators = trial.suggest_int("n_estimators", 400, 400, step=100)
         min_samples_leaf = trial.suggest_int(
             "Base__min_samples_leaf", 300, 300, step=50
         )
@@ -65,7 +65,7 @@ def suggest_params(trial: optuna.Trial, race_type: str) -> Dict[str, Any]:
 
     return {
         "Base__max_depth": trial.suggest_int(
-            "Base__max_depth", low=12, high=12, step=2
+            "Base__max_depth", low=8, high=8    , step=2
         ),
         "Base__min_samples_leaf": min_samples_leaf,
         "Base__max_features": trial.suggest_float(
