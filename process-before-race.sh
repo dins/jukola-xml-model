@@ -23,7 +23,8 @@ tail -n 10 ${RO_LOG_PATH}
 
 
 wc data/running_order_final_ju_fy_${FORECAST_YEAR}.tsv
-#wc data/running_order_final_ke_fy_${FORECAST_YEAR}.tsv
+
+# wc data/running_order_final_ke_fy_${FORECAST_YEAR}.tsv
 
 #time RACE_TYPE=ve uv run python group_names.py
 #echo $(date -u +"%F %T") "group_names ve ${FORECAST_YEAR} DONE"
@@ -45,7 +46,7 @@ function process_one_race {
   echo $(date -u +"%F %T") "DONE ${LOG_PATH} in $duration secs"
 }
 
-#RACE_TYPE=ke process_one_race &
+# RACE_TYPE=ke process_one_race &
 RACE_TYPE=ju process_one_race &
 RACE_TYPE=ve process_one_race &
 
