@@ -76,6 +76,7 @@ distances = {
     "ke": {
         2024: [8.0, 7.9, 6.8, 9.0],
         2025: [0.7, 0.7, 0.7, 0.7,],
+        2026: [2.8, 2.4, 2.4, 2.9,],
     },
     "ve": {
         1992: [6.8, 6.7, 5.7, 8.6],
@@ -162,6 +163,7 @@ def leg_distance(ve_or_ju, year, leg):
 start_timestamp = {
     "ke": {
         2025: pd.Timestamp(year=2025, month=6, day=11, hour=18, minute=00, tz="Europe/Helsinki"),
+        2026: pd.Timestamp(year=2026, month=6, day=10, hour=17, minute=30, tz="Europe/Helsinki"),
     },
     "ve": {
         2017: pd.Timestamp(year=2017, month=6, day=17, hour=14, tz="Europe/Helsinki"),
@@ -191,6 +193,7 @@ start_timestamp = {
 changeover_closing = {
     "ke": {
         2025: pd.Timestamp(year=2025, month=6, day=11, hour=19, minute=00, tz="Europe/Helsinki"),
+        2026: pd.Timestamp(year=2026, month=6, day=10, hour=18, minute=00, tz="Europe/Helsinki"),
     },
     "ve": {
         2017: pd.Timestamp(year=2017, month=6, day=17, hour=18, minute=30, tz="Europe/Helsinki"),
