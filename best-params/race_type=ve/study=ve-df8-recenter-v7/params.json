@@ -1,0 +1,9 @@
+{
+  "n_estimators": 300,
+  "Base__min_samples_leaf": 200,
+  "Base__max_depth": 8,
+  "Base__max_features": 0.8,
+  "learning_rate": 0.03694568138934677,
+  "col_sample": 0.18527977112954372,
+  "minibatch_frac": 1.0
+}
