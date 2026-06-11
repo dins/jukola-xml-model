@@ -2611,3 +2611,7 @@ execution_timestamp	kpi	value
 20260610_200101	Yksilöennusteen keskivirhe	14.901
 20260610_200101	Yksilön aikaväliennuste väärin	0.047
 20260610_200101	Yksilön aikavälin keskikoko	72.628
+20260611_045437	Viestin aikaväliennuste väärin	0.098
+20260611_045437	Yksilöennusteen keskivirhe	14.817
+20260611_045437	Yksilön aikaväliennuste väärin	0.043
+20260611_045437	Yksilön aikavälin keskikoko	73.897
