@@ -428,6 +428,10 @@ class ManualExceptionRule(LinkingRule):
             "2021-ju-938-4",
             "2026-ju-350-3",
         ],
+        [  # Antti-Ville
+            "2018-ju-1270-1",
+            "2026-ju-1491-3",
+        ],
     ]
 
     def update_run_links(self, state: LinkingState) -> None:

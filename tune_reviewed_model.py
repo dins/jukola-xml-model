@@ -55,7 +55,7 @@ def suggest_params(trial: optuna.Trial, race_type: str) -> Dict[str, Any]:
     if race_type == "ju":
         n_estimators = trial.suggest_int("n_estimators", 400, 400, step=100)
         min_samples_leaf = trial.suggest_int(
-            "Base__min_samples_leaf", 300, 300, step=50
+            "Base__min_samples_leaf", 150, 300, step=50
         )
     else:
         n_estimators = trial.suggest_int("n_estimators", 300, 400, step=100)
@@ -65,16 +65,16 @@ def suggest_params(trial: optuna.Trial, race_type: str) -> Dict[str, Any]:
 
     return {
         "Base__max_depth": trial.suggest_int(
-            "Base__max_depth", low=8, high=8    , step=2
+            "Base__max_depth", low=4, high=10    , step=2
         ),
         "Base__min_samples_leaf": min_samples_leaf,
         "Base__max_features": trial.suggest_float(
-            "Base__max_features", 0.8, 1.0, step=0.1
+            "Base__max_features", 0.9, 0.9, step=0.1
         ),
         # NGBoost parameters
-        "learning_rate": trial.suggest_float("learning_rate", 0.01, 0.05),
-        "col_sample": trial.suggest_float("col_sample", 0.1, 1.0),
-        "minibatch_frac": trial.suggest_float("minibatch_frac", 0.8, 1.0, step=0.1),
+        "learning_rate": trial.suggest_float("learning_rate", 0.02, 0.03),
+        "col_sample": trial.suggest_float("col_sample", 0.8, 0.9),
+        "minibatch_frac": trial.suggest_float("minibatch_frac", 1.0, 1.0, step=0.1),
         "n_estimators": n_estimators,
     }
 
