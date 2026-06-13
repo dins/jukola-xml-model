@@ -430,7 +430,11 @@ class ManualExceptionRule(LinkingRule):
         ],
         [  # Antti-Ville
             "2018-ju-1270-1",
-            "2026-ju-1491-3",
+            "2026-ju-1491-1",
+        ],
+        [  # Arvid
+            "2024-ju-1473-2",
+            "2026-ju-292-2",
         ],
     ]
 
