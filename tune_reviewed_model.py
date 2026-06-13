@@ -45,35 +45,32 @@ class TuningConfig:
 def suggest_params(trial: optuna.Trial, race_type: str) -> Dict[str, Any]:
     """Define the search space for ngboost-norm-tuned-reviewed.ipynb."""
 
-    # [I 2026-05-22 01:34:30,368] Trial 427 finished with value: 1.1791135697335187 and parameters:
-    # {'Base__min_samples_leaf': 70, 'n_estimators': 250, 'Base__max_depth': 10,
-    # 'Base__max_features': 0.8814660047756667, 'learning_rate': 0.007132733920820354,
-    # 'col_sample': 0.97289050032128, 'minibatch_frac': 0.5080133685253934}. Best is trial 427 with value: 1.1791135697335187.
-
-    # Notebook adds 50 by default (not for tuning).
-    # Early stopping should handle the rest.
     if race_type == "ju":
         n_estimators = trial.suggest_int("n_estimators", 400, 400, step=100)
         min_samples_leaf = trial.suggest_int(
-            "Base__min_samples_leaf", 150, 300, step=50
-        )
-    else:
-        n_estimators = trial.suggest_int("n_estimators", 300, 400, step=100)
-        min_samples_leaf = trial.suggest_int(
             "Base__min_samples_leaf", 200, 200, step=50
         )
+        col_sample = trial.suggest_float("col_sample", 0.81, 0.81)
+
+
+    else:
+        n_estimators = trial.suggest_int("n_estimators", 400, 400, step=100)
+        min_samples_leaf = trial.suggest_int(
+            "Base__min_samples_leaf", 150, 200, step=50
+        )
+        col_sample = trial.suggest_float("col_sample", 0.5, 0.9)
 
     return {
         "Base__max_depth": trial.suggest_int(
-            "Base__max_depth", low=4, high=10    , step=2
+            "Base__max_depth", low=4, high=14    , step=2
         ),
         "Base__min_samples_leaf": min_samples_leaf,
         "Base__max_features": trial.suggest_float(
-            "Base__max_features", 0.9, 0.9, step=0.1
+            "Base__max_features", 0.7, 1.0, step=0.1
         ),
         # NGBoost parameters
         "learning_rate": trial.suggest_float("learning_rate", 0.02, 0.03),
-        "col_sample": trial.suggest_float("col_sample", 0.8, 0.9),
+        "col_sample": col_sample,
         "minibatch_frac": trial.suggest_float("minibatch_frac", 1.0, 1.0, step=0.1),
         "n_estimators": n_estimators,
     }
