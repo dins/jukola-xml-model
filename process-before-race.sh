@@ -6,20 +6,30 @@ set -euf -o pipefail
 RUN_TS="br-$(date -u '+%Y%m%d_%H%M%S')"
 SECONDS=0
 
+# Registration dats BEFORE race
 
-RO_LOG_PATH="logs/running-order-${FORECAST_YEAR}-${RUN_TS}.log"
-echo $(date -u +"%F %T") "Starting BEFORE_RACE ${RUN_TS}, logs: ${RO_LOG_PATH}"
+# RO_LOG_PATH="logs/running-order-${FORECAST_YEAR}-${RUN_TS}.log"
+# echo $(date -u +"%F %T") "Starting BEFORE_RACE ${RUN_TS}, logs: ${RO_LOG_PATH}"
 
-uv run python fetch_running_order.py 2026  &> ${RO_LOG_PATH}
-tail -n 10 ${RO_LOG_PATH}
+# uv run python fetch_running_order.py 2026  &> ${RO_LOG_PATH}
+# tail -n 10 ${RO_LOG_PATH}
 
-#ORO_LOG_PATH="logs/running-order-online-${FORECAST_YEAR}-${RUN_TS}.log"
-#echo $(date -u +"%F %T") "Starting ${ORO_LOG_PATH}"
-#uv run python process_online_running_order.py 2026  &> ${ORO_LOG_PATH}
-#tail -n 10 ${ORO_LOG_PATH}
+
+# --- START Online data during Saturday and Sunday race
+
+ORO_LOG_PATH="logs/running-order-online-${FORECAST_YEAR}-${RUN_TS}.log"
+echo $(date -u +"%F %T") "Starting ${ORO_LOG_PATH}"
+time RACE_TYPE=ve FORECAST_YEAR=2026 uv run python process_online_running_order.py  &> ${ORO_LOG_PATH}
+echo $(date -u +"%F %T") "DONE VE process_online_running_order.py"
+time RACE_TYPE=ju FORECAST_YEAR=2026 uv run python process_online_running_order.py  &> ${ORO_LOG_PATH}
+echo $(date -u +"%F %T") "DONE JU process_online_running_order.py"
+tail -n 10 ${ORO_LOG_PATH}
 #cp data/online_running_order_ke_fy_2026.tsv data/running_order_final_ke_fy_2026.tsv
-#cp data/online_running_order_ve_fy_2024.tsv data/running_order_final_ve_fy_2024.tsv
-#cp data/online_running_order_ju_fy_2024.tsv data/running_order_final_ju_fy_2024.tsv
+cp data/online_running_order_ve_fy_2026.tsv data/running_order_final_ve_fy_2026.tsv
+cp data/online_running_order_ju_fy_2026.tsv data/running_order_final_ju_fy_2026.tsv
+
+# --- END Online data during Saturday and Sunday race
+
 
 
 wc data/running_order_final_ju_fy_${FORECAST_YEAR}.tsv
@@ -35,7 +45,8 @@ wc data/running_order_final_ju_fy_${FORECAST_YEAR}.tsv
 time uv run python count_names.py
 echo $(date -u +"%F %T") "count_names.py DONE"
 
-tail -n 10 ${RO_LOG_PATH}
+# tail -n 10 ${RO_LOG_PATH}
+tail -n 10 ${ORO_LOG_PATH}
 
 function process_one_race {
   LOG_PATH="logs/parallel-${RACE_TYPE}-${FORECAST_YEAR}-${RUN_TS}.log"
