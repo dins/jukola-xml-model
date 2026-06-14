@@ -1,0 +1,55 @@
+{
+  "meta": {
+    "kind": "consensus",
+    "study_name": "ve-df8-recenter-v7",
+    "race_type": "ve",
+    "trials_referenced": [
+      74,
+      98,
+      115,
+      154,
+      94
+    ],
+    "trials_referenced_count": 5,
+    "trial_values": [
+      -0.8007629263025285,
+      -0.7997892547381715,
+      -0.7951613440609494,
+      -0.7948841327718086,
+      -0.7943932456076676
+    ],
+    "trial_value_best": -0.8007629263025285,
+    "trial_value_spread": 0.006369680694860991,
+    "aggregation_method_per_param": {
+      "Base__max_depth": "mode",
+      "Base__max_features": "median",
+      "Base__min_samples_leaf": "mode",
+      "col_sample": "median",
+      "learning_rate": "median",
+      "minibatch_frac": "mode",
+      "n_estimators": "mode"
+    },
+    "disagreement_with_best": {
+      "col_sample": {
+        "best": 0.18527977112954372,
+        "consensus": 0.17538207635065836
+      },
+      "learning_rate": {
+        "best": 0.03694568138934677,
+        "consensus": 0.036266359931991524
+      }
+    },
+    "direction": "minimize",
+    "trial_min_cutoff": null,
+    "extraction_time_utc": "2026-06-14T12:44:54.373026+00:00"
+  },
+  "params": {
+    "Base__max_depth": 8,
+    "Base__max_features": 0.8,
+    "Base__min_samples_leaf": 200,
+    "col_sample": 0.17538207635065836,
+    "learning_rate": 0.036266359931991524,
+    "minibatch_frac": 1.0,
+    "n_estimators": 300
+  }
+}
