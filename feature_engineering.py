@@ -213,9 +213,28 @@ def build_features(runs_df: pl.DataFrame, forecast_year: int) -> tuple[pl.DataFr
         (pl.col("leg_dist") / pl.col("leg_dist").mean().over("year") + 1).alias("normalized_leg_dist"),
         (pl.col("run_num") / pl.col("run_num").median().over("year")).alias("run_num_norm"),
         (pl.col("run_num") <= 1).alias("first_time"),
+        (pl.col("run_num").cum_count().over(["unique_name", "year"])).alias("run_num_of_the_year"),
+        (pl.col("run_num").count().over(["unique_name", "year"])).alias("runs_in_year"),
+
+        # prestep for num_years_with_multiple_results
+        (pl.col("pace").is_not_null().sum().over(["unique_name", "year"]) >= 2).cast(pl.Int64).alias("_year_is_multi"),
+
         (pl.col("year") - pl.col("year").shift(1).rolling_mean(window_size=5, min_samples=1).over("unique_name")).alias("roll_5y_years_since_results"),
         (pl.col("pace") / pl.col("pace").median().over(["year", "leg"])).alias("pace_leg_ratio"),
     ]).fill_nan(None)
+
+    bc_df = bc_df.with_columns([
+        # SUBTRACT the current year's own flag so a multi year never counts itself.
+        (
+                (pl.when(pl.col("run_num_of_the_year") == 1)
+                 .then(pl.col("_year_is_multi"))
+                 .otherwise(0))
+                .cum_sum()
+                .over("unique_name")
+                - pl.col("_year_is_multi")
+        ).alias("num_years_with_multiple_results"),
+    ]).drop("_year_is_multi")
+
 
     bc_df = map_to_buckets(
         df=bc_df,
