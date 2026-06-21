@@ -9,11 +9,12 @@ import xml.etree.ElementTree as ET
 
 import numpy as np
 
-# time uv run python result_xml_to_csv.py 2025 ju
+# time uv run python result_xml_to_csv.py 2026 ju
 
 # time for year in $(seq 2012 2018); do echo "YEAR $year"; time uv run python result_xml_to_csv.py $year ve && head data/results_with_dist_j${year}_ve.tsv; done
 
-# curl https://online.jukola.com/tulokset-new/xml/results_j2025_ju.xml > data/results_j2025_ju.xml
+
+# curl https://online.jukola.fi/tulokset-new/xml/results_j2026_ju.xml > data/results_j2026_ju.xml
 
 # Archived results well after race
 # curl https://results.jukola.com/tulokset/results_j2025_ju.xml > data/results_j2025_ju.xml
