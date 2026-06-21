@@ -212,12 +212,18 @@ class AllowOneOverlapYearRule(LinkingRule):
     rule_name = "allow_one_overlap_year"
 
     def update_run_links(self, state: LinkingState) -> None:
+        self._connect_one_time_doublers(state)
+
+    def _connect_one_time_doublers(self, state: LinkingState):
         for normalized_name, name_runs in state.unlinked_runs_by_name.items():
             overlap_years = self._overlap_years(name_runs)
 
             if len(overlap_years) > 1:
                 continue
 
+            logging.info(
+                f"Linking name: {normalized_name} with {len(name_runs)} runs, "
+            )
             state.add_same_runner_group(
                 name_runs,
                 unique_name=normalized_name,
@@ -306,6 +312,9 @@ class TypoConnectedEmitRule(LinkingRule):
         self.threshold = jaro_winkler_threshold
 
     def update_run_links(self, state: LinkingState) -> None:
+        self._connect_typoed_names(state)
+
+    def _connect_typoed_names(self, state: LinkingState):
         runs_by_emit: dict[str, list[Run]] = defaultdict(list)
 
         # To connect typo groups that have already been grouped internally,
@@ -357,6 +366,9 @@ class ChangedLastNameConnectedByFirstNameAndEmitRule(LinkingRule):
     rule_name = "changed_last_name_connected_by_first_name_and_emit"
 
     def update_run_links(self, state: LinkingState) -> None:
+        self._connect_last_name_changers(state)
+
+    def _connect_last_name_changers(self, state: LinkingState):
         runs_by_emit: dict[str, list[Run]] = defaultdict(list)
 
         for run in state.all_runs:
@@ -394,7 +406,7 @@ class ChangedLastNameConnectedByFirstNameAndEmitRule(LinkingRule):
                     only_in_one_team = len(teams_a | teams_b) == 1
 
                     if not common_years and (
-                        year_ranges_dont_overlap or only_in_one_team
+                            year_ranges_dont_overlap or only_in_one_team
                     ):
                         runs_to_link = runs_by_name[name_a] + runs_by_name[name_b]
                         logging.info(
@@ -439,6 +451,9 @@ class ManualExceptionRule(LinkingRule):
     ]
 
     def update_run_links(self, state: LinkingState) -> None:
+        self._connect_manually_linked(state)
+
+    def _connect_manually_linked(self, state: LinkingState):
         runs_by_id = state.runs_by_id
 
         for run_id_group in self.manually_connected_run_id_groups:
