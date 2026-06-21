@@ -115,6 +115,12 @@ def _read_result_runs_df(race_type: str) -> pl.DataFrame:
 
     df = df.filter(pl.col("normalized_name").str.len_chars() > 5)
 
+    # Drop runs that never happened (missing both pace and emit card)
+    no_show = df.filter(pl.col("pace").is_null() & pl.col("emit_id").is_null())
+    if no_show.height:
+        logging.info("Dropping %d historical runs missing both pace and emit", no_show.height)
+    df = df.filter(pl.col("pace").is_not_null() | pl.col("emit_id").is_not_null())
+
     df = df.with_columns(
         run_id=_run_id_expr(race_type),
         source=pl.lit(runner_linking.RunSource.RESULT.value),
