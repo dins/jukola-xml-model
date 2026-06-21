@@ -1,2 +1,2 @@
-team-id\tplacement\tteam-time\tteam-name\tteam-nro\tleg-nro\temit\tleg-time\tcompetitor-name\tweighted_log_mean_pace\tweighted_log_pace_std\tdisqualified\tleg_distance
-1821\t733\t455\tVehkalahden Veikot\t3\t4\t1237164\t6254\tLeena-Maija Kriktilä\t2.448090239073723\t0.24864470180725615\tFalse\t8.7
+team-id	placement	team-time	team-name	team-nro	leg-nro	emit	leg-time	competitor-name	weighted_log_mean_pace	weighted_log_pace_std	disqualified	leg_distance
+1821	733	455	Vehkalahden Veikot	3	4	1237164	6254	Leena-Maija Kriktilä	2.448090239073723	0.24864470180725615	False	8.7

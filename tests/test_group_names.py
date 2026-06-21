@@ -76,6 +76,8 @@ def grouped_dataframe(monkeypatch, request):
     def mocked_pl_read_csv(source, *args, **kwargs):
         if str(source).startswith("data/running_order_final_"):
             source = f"{testdata_dir}/running_order_final_ve_fy_test.tsv"
+        elif str(source).startswith("data/results_with_dist_j"):
+            source = str(source).replace("data/", f"{testdata_dir}/")
         return original_pl_read_csv(source, *args, **kwargs)
 
     monkeypatch.setattr(pl, "read_csv", mocked_pl_read_csv)
