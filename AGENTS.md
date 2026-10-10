@@ -21,3 +21,4 @@ uv run ruff check *.py *.ipynb tests && uv run ty check *.py tests/ && time PYTH
 - Do NOT run `git checkout`, `git restore`, or any other destructive git command to "undo" your own changes. Ask the user how to proceed instead.
 - Do NOT run `uv run ruff format` across the whole project unless explicitly asked.
 - Do NOT modify shared fixture files in `tests/testdata/default-set/` for a new test. Create a sibling subfolder under `tests/testdata/` and use `@pytest.mark.testdata("<subdir>")` instead.
+- Do NOT use `cd` in shell commands — use `pwd` to verify the current working directory when uncertain; relative paths resolve from the current dir, and absolute paths work without `cd`.
