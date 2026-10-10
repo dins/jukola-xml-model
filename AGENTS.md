@@ -1,5 +1,9 @@
 # Agent notes
 
+## Permissions
+
+Allowed shell commands are listed in `.vibe/permissions.json`. Only commands explicitly listed there may be executed.
+
 ## Static checks and tests
 
 Always run this single command for static checks and tests before considering a task done:
