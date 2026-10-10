@@ -1,8 +1,8 @@
 import json
 import logging
 import sys
-import count_names
 
+import count_names
 
 # time uv run python normalize_names.py
 

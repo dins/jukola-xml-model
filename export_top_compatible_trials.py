@@ -3,7 +3,7 @@ import argparse
 import json
 import logging
 from pathlib import Path
-from typing import Any, Dict, cast
+from typing import Any, cast
 
 import optuna
 from optuna.storages import JournalStorage
@@ -31,8 +31,8 @@ class MockTrial:
 
 
 def coerce_params(
-    params: Dict[str, Any], expected_ranges: Dict[str, Any]
-) -> Dict[str, Any]:
+    params: dict[str, Any], expected_ranges: dict[str, Any]
+) -> dict[str, Any]:
     coerced = {}
     for name, range_info in expected_ranges.items():
         type_ = range_info[0]

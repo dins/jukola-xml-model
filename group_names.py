@@ -4,10 +4,11 @@ from __future__ import annotations
 
 import logging
 from collections import defaultdict
+from collections.abc import Iterable
+from typing import Any
+
 import numpy as np
 import pandas as pd
-from typing import Any, Iterable
-
 import polars as pl
 
 import normalize_names

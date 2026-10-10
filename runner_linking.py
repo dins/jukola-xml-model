@@ -3,13 +3,14 @@ from __future__ import annotations
 import functools
 import hashlib
 import logging
-from collections import defaultdict
-from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
+from collections import defaultdict
+from collections.abc import Iterable, Mapping, Sequence
+from dataclasses import dataclass, field
 from enum import Enum
-from typing import Iterable, Mapping, Sequence
-from rapidfuzz.distance import JaroWinkler
 from itertools import combinations
+
+from rapidfuzz.distance import JaroWinkler
 
 
 class RunSource(Enum):
@@ -70,7 +71,7 @@ class LinkingRule(ABC):
     rule_name: str
 
     @abstractmethod
-    def update_run_links(self, state: "LinkingState") -> None:
+    def update_run_links(self, state: LinkingState) -> None:
         """Inspect current state and add linking evidence through state methods."""
         ...
 
@@ -86,7 +87,7 @@ class LinkingState:
     unlinked_runs: list[Run] = field(default_factory=list)
 
     @classmethod
-    def from_runs(cls, runs: Iterable[Run]) -> "LinkingState":
+    def from_runs(cls, runs: Iterable[Run]) -> LinkingState:
         """Create initial state where no rules have linked any runs yet."""
         all_runs = sorted(runs, key=lambda run: run.run_id)
         _raise_if_duplicate_run_ids(all_runs)

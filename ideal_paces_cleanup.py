@@ -1,11 +1,10 @@
 import logging
+import re
 
 import numpy as np
 import pandas as pd
-import shared
-import re
-from typing import Optional
 
+import shared
 
 # time uv run python ideal_paces_cleanup.py
 
@@ -15,7 +14,7 @@ logging.basicConfig(
 )
 
 
-def parse_distance(distance_str: str) -> Optional[float]:
+def parse_distance(distance_str: str) -> float | None:
     """
     Extracts and averages distance values from a string, handling comma as decimal separator.
 

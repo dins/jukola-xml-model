@@ -1,11 +1,11 @@
 from runner_linking import (
-    LinkingState,
-    Run,
-    LinkRelation,
-    TypoConnectedEmitRule,
-    RunSource,
     AllowOneOverlapYearRule,
+    LinkingState,
+    LinkRelation,
+    Run,
+    RunSource,
     SameNameEmitConnectedTeamRule,
+    TypoConnectedEmitRule,
 )
 
 

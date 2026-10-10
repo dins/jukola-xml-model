@@ -4,7 +4,6 @@ import pandas as pd
 
 import shared
 
-
 # time RACE_TYPE=ve FORECAST_YEAR=2022 uv run python prepare_run_features.py
 
 # os.environ['FORECAST_YEAR'] = "2019"

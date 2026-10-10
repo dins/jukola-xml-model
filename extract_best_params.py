@@ -4,7 +4,7 @@ import json
 import logging
 import statistics
 from collections import Counter
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import optuna
@@ -111,7 +111,7 @@ def main():
     top_trials = completed[:n]
     consensus_params, methods = build_consensus(top_trials)
 
-    extraction_time = datetime.now(timezone.utc).isoformat()
+    extraction_time = datetime.now(UTC).isoformat()
     top_numbers = [t.number for t in top_trials]
     top_values = [t.value for t in top_trials]
     score_spread = (max(top_values) - min(top_values)) if len(top_values) > 1 else 0.0

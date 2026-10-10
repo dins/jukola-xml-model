@@ -2,7 +2,7 @@ import csv
 import json
 import logging
 import os
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import numpy as np
 import pandas as pd
@@ -280,12 +280,11 @@ def log_df(value, title=''):
 
 def write_simple_text_report(reports, file_name):
     with open(f'reports/{file_name}', 'w') as outfile:
-        for line in reports:
-            outfile.write(f"{line}\n")
+        outfile.writelines(f"{line}\n" for line in reports)
 
 
 def write_json_report(json_report, file_name):
-    ts_str = datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')
+    ts_str = datetime.now(UTC).strftime('%Y%m%d_%H%M%S')
     with open(f"json_reports/{ts_str}_{file_name}", 'w') as outfile:
         json.dump(json_report, outfile)
 

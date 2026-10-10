@@ -6,12 +6,12 @@ import os
 import re
 import subprocess
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from multiprocessing import Process, Semaphore
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import numpy as np
 import optuna
@@ -33,7 +33,7 @@ class TuningConfig:
     run_root: Path
     xml_model_root: Path
     journal_path: Path
-    deadline_timestamp: Optional[float]
+    deadline_timestamp: float | None
     backtest_semaphore: Any
 
 
@@ -42,7 +42,7 @@ class TuningConfig:
 # ---------------------------------------------------------------------------
 
 
-def suggest_params(trial: optuna.Trial, race_type: str) -> Dict[str, Any]:
+def suggest_params(trial: optuna.Trial, race_type: str) -> dict[str, Any]:
     """Define the search space for ngboost-norm-tuned-reviewed.ipynb."""
 
     if race_type == "ju":
@@ -92,7 +92,7 @@ def run_notebook_trial(trial: optuna.Trial, config: TuningConfig) -> float:
     with open(params_path, "w") as f:
         json.dump(params, f, indent=2)
 
-    yearly_scores: List[float] = []
+    yearly_scores: list[float] = []
 
     def run_year(year: int) -> float:
         logging.info(
@@ -145,16 +145,15 @@ def run_notebook_trial(trial: optuna.Trial, config: TuningConfig) -> float:
         ]
 
         try:
-            with config.backtest_semaphore:
-                with open(log_path, "w") as f:
-                    subprocess.run(
-                        cmd,
-                        cwd=config.xml_model_root,
-                        env=env,
-                        stdout=f,
-                        stderr=subprocess.STDOUT,
-                        check=True,
-                    )
+            with config.backtest_semaphore, open(log_path, "w") as f:
+                subprocess.run(
+                    cmd,
+                    cwd=config.xml_model_root,
+                    env=env,
+                    stdout=f,
+                    stderr=subprocess.STDOUT,
+                    check=True,
+                )
         except subprocess.CalledProcessError as e:
             # Check if process died due to termination signals:
             #  130 / -2 : SIGINT (Ctrl-C)

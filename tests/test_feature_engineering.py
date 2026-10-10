@@ -1,5 +1,7 @@
 import polars as pl
+
 from feature_engineering import build_past_first_name_features
+
 
 def test_build_past_first_name_features_assigns_buckets_and_accumulates_correctly():
     # Synthetic data with 3 years: 2018, 2019, 2020

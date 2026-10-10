@@ -4,10 +4,11 @@ import logging
 import math
 import sys
 import time
-import shared
 import xml.etree.ElementTree as ET
 
 import numpy as np
+
+import shared
 
 # time uv run python result_xml_to_csv.py 2026 ju
 

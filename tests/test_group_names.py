@@ -1,11 +1,12 @@
-import pytest
 import builtins
 import os
 import re
-import pandas as pd
-import shared
-import group_names
 
+import pandas as pd
+import pytest
+
+import group_names
+import shared
 
 TESTDATA_ROOT = "tests/testdata"
 DEFAULT_TESTDATA_SUBDIR = "default-set"
@@ -352,4 +353,4 @@ def test_changed_last_name_connected_by_first_name_and_emit(
     )
 
     expected_names = ["piia heiniö", "piia ruuskanen"]
-    assert list(sorted(piia_runs["name"].unique())) == expected_names
+    assert sorted(piia_runs["name"].unique()) == expected_names

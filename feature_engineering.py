@@ -1,9 +1,10 @@
 import numpy as np
 import polars as pl
+
 from boxcox_transform import BoxCoxParams, fit_boxcox_and_normalize
 
 
-def _safe_number(value: float | int | None, fallback: float | int) -> float | int:
+def _safe_number(value: float | None, fallback: float) -> float | int:
     if value is None:
         return fallback
     if isinstance(value, (float, np.floating)) and np.isnan(value):
