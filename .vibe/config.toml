@@ -1,0 +1,5 @@
+[tools.bash]
+permission = "ask"
+allow = [
+    "time ./run-all-local-checks.sh",
+]
