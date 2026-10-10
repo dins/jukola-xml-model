@@ -98,7 +98,7 @@ class LinkingState:
         return {run.run_id: run for run in self.all_runs}
 
     @staticmethod
-    def _runs_by_normalized_name(runs: Iterable[Run]) -> dict[str, list[Run]]:
+    def _map_runs_to_normalized_name(runs: Iterable[Run]) -> dict[str, list[Run]]:
         runs_by_name: dict[str, list[Run]] = defaultdict(list)
 
         for run in runs:
@@ -112,7 +112,7 @@ class LinkingState:
     @functools.cached_property
     def unlinked_runs_by_name(self) -> dict[str, list[Run]]:
         """Return unlinked runs grouped by normalized full name."""
-        return self._runs_by_normalized_name(self.unlinked_runs)
+        return self._map_runs_to_normalized_name(self.unlinked_runs)
 
     def add_same_runner_group(
         self,
@@ -324,24 +324,26 @@ class TypoConnectedEmitRule(LinkingRule):
             if run.emit_id is not None:
                 runs_by_emit[run.emit_id].append(run)
 
-        for emit_id, emit_runs in runs_by_emit.items():
-            runs_by_name: dict[str, list[Run]] = defaultdict(list)
-            for run in emit_runs:
-                runs_by_name[run.normalized_name].append(run)
+        all_runs_by_name = state._map_runs_to_normalized_name(state.all_runs)
 
-            names = list(runs_by_name.keys())
-            if len(names) < 2 or len(names) > 10:
+        for emit_id, emit_runs in runs_by_emit.items():
+            emit_runs_by_name: dict[str, list[Run]] = defaultdict(list)
+            for run in emit_runs:
+                emit_runs_by_name[run.normalized_name].append(run)
+
+            emit_names = list(emit_runs_by_name.keys())
+            if len(emit_names) < 2 or len(emit_names) > 10:
                 # Skip if emit has more than 10 names. Likely rental or team emit.
                 continue
 
-            for name_a, name_b in combinations(names, 2):
+            for name_a, name_b in combinations(emit_names, 2):
                 similarity_score = JaroWinkler.similarity(name_a, name_b)
                 if similarity_score >= self.threshold:
-                    a_runs = runs_by_name[name_a]
-                    b_runs = runs_by_name[name_b]
+                    a_runs = emit_runs_by_name[name_a]
+                    b_runs = emit_runs_by_name[name_b]
                     runs_to_link = a_runs + b_runs
-                    years_a = {run.year for run in a_runs}
-                    years_b = {run.year for run in b_runs}
+                    years_a = {run.year for run in all_runs_by_name[name_a]}
+                    years_b = {run.year for run in all_runs_by_name[name_b]}
                     common_years = years_a.intersection(years_b)
 
                     if common_years:
@@ -350,7 +352,7 @@ class TypoConnectedEmitRule(LinkingRule):
                         )
                     else:
                         logging.info(
-                            f"Linking TYPOED by {emit_id} from [{len(names)}] names {similarity_score:.3f} {name_a} ~ {name_b} "
+                            f"Linking TYPOED by {emit_id} from [{len(emit_names)}] names {similarity_score:.3f} {name_a} ~ {name_b} "
                         )
                         state.add_same_runner_group(
                             runs_to_link,
@@ -375,16 +377,18 @@ class ChangedLastNameConnectedByFirstNameAndEmitRule(LinkingRule):
             if run.emit_id is not None:
                 runs_by_emit[run.emit_id].append(run)
 
-        for emit_id, group_runs in runs_by_emit.items():
-            runs_by_name: dict[str, list[Run]] = defaultdict(list)
-            for run in group_runs:
-                runs_by_name[run.normalized_name].append(run)
+        all_runs_by_name = state._map_runs_to_normalized_name(state.all_runs)
 
-            names = list(runs_by_name.keys())
-            if len(names) < 2 or len(names) > 3:
+        for emit_id, emit_runs in runs_by_emit.items():
+            emit_runs_by_name: dict[str, list[Run]] = defaultdict(list)
+            for run in emit_runs:
+                emit_runs_by_name[run.normalized_name].append(run)
+
+            emit_names = list(emit_runs_by_name.keys())
+            if len(emit_names) < 2 or len(emit_names) > 3:
                 continue
 
-            for name_a, name_b in combinations(names, 2):
+            for name_a, name_b in combinations(emit_names, 2):
                 first_names_a = " ".join(name_a.split()[:-1])
                 first_names_b = " ".join(name_b.split()[:-1])
 
@@ -392,14 +396,14 @@ class ChangedLastNameConnectedByFirstNameAndEmitRule(LinkingRule):
                     # Require that the active years for the two names do not overlap.
                     # Since it's a name change (like marriage), the runner shouldn't
                     # use both last names simultaneously across the same period.
-                    years_a = {run.year for run in runs_by_name[name_a]}
-                    years_b = {run.year for run in runs_by_name[name_b]}
+                    years_a = {run.year for run in all_runs_by_name[name_a]}
+                    years_b = {run.year for run in all_runs_by_name[name_b]}
                     common_years = years_a.intersection(years_b)
                     year_ranges_dont_overlap = min(years_a) > max(years_b) or min(
                         years_b
                     ) > max(years_a)
-                    teams_a = {run.team_id for run in runs_by_name[name_a]}
-                    teams_b = {run.team_id for run in runs_by_name[name_b]}
+                    teams_a = {run.team_id for run in all_runs_by_name[name_a]}
+                    teams_b = {run.team_id for run in all_runs_by_name[name_b]}
 
                     # This rule combines also some typoed last names,
                     # typos happen without year range guarantee
@@ -408,9 +412,9 @@ class ChangedLastNameConnectedByFirstNameAndEmitRule(LinkingRule):
                     if not common_years and (
                             year_ranges_dont_overlap or only_in_one_team
                     ):
-                        runs_to_link = runs_by_name[name_a] + runs_by_name[name_b]
+                        runs_to_link = emit_runs_by_name[name_a] + emit_runs_by_name[name_b]
                         logging.info(
-                            f"Linking LASTNAME by emit {emit_id} with {len(names)} names: {name_a} -> {name_b}, one team: {only_in_one_team}"
+                            f"Linking LASTNAME by emit {emit_id} with {len(emit_names)} names: {name_a} -> {name_b}, one team: {only_in_one_team}"
                         )
                         state.add_same_runner_group(
                             runs_to_link,
@@ -420,7 +424,7 @@ class ChangedLastNameConnectedByFirstNameAndEmitRule(LinkingRule):
                         )
                     else:
                         logging.info(
-                            f"NOT Linking by emit {emit_id} with {len(names)} names: {name_a} -> {name_b}, years overlap: {years_a} / {years_b}"
+                            f"NOT Linking by emit {emit_id} with {len(emit_names)} names: {name_a} -> {name_b}, years overlap: {years_a} / {years_b}"
                         )
 
 

@@ -254,6 +254,66 @@ def test_short_name_filtering(grouped_dataframe):
     assert len(n_n_runs) == 0, "Expected 'n n' to be dropped due to short length"
 
 
+@pytest.mark.testdata("multi-year-overlap")
+def test_multi_year_overlap_splits_runners(grouped_dataframe):
+    # Eero Kärkkäinen runs for Espoon Suunta (1993, 1995, 2003) and 
+    # Rautalammin Urheilijat (1992, 1996, ..., 2019).
+    # Since their careers overlap over a 10-year span (1993-2003), they should be split into 2 people.
+    assert len(grouped_dataframe)  == 37
+    karkkainen = grouped_dataframe[grouped_dataframe['name'] == 'eero kärkkäinen']
+    # print(karkkainen)
+    karkainen_runs = karkkainen[['team', 'year', 'leg']].to_dict(orient="records")
+    karkainen_expected_runs = [
+        {'team': 'RAUTALAMMIN URHEILIJAT', 'year': 1992, 'leg': 4},
+        {'team': 'ESPOON SUUNTA', 'year': 1993, 'leg': 1},
+        {'team': 'ESPOON SUUNTA', 'year': 1995, 'leg': 1},
+        {'team': 'RAUTALAMMIN URHEILIJAT', 'year': 1996, 'leg': 1},
+        {'team': 'RAUTALAMMIN URHEILIJAT', 'year': 1997, 'leg': 1},
+        {'team': 'RAUTALAMMEN URHEILIJAT', 'year': 2000, 'leg': 3},
+        {'team': 'RAUTALAMMIN URHEILIJAT', 'year': 2001, 'leg': 3},
+        {'team': 'RAUTALAMMIN URHEILIJAT', 'year': 2002, 'leg': 4},
+        {'team': 'RAUTALAMMIN URHEILIJAT', 'year': 2003, 'leg': 4},
+        {'team': 'RAUTALAMMIN URHEILIJAT', 'year': 2004, 'leg': 4},
+        {'team': 'RAUTALAMMIN URHEILIJAT', 'year': 2005, 'leg': 4},
+        {'team': 'RAUTALAMMIN URHEILIJAT', 'year': 2006, 'leg': 4},
+        {'team': 'RAUTALAMMIN URHEILIJAT', 'year': 2008, 'leg': 4},
+        {'team': 'RAUTALAMMIN URHEILIJAT', 'year': 2009, 'leg': 3},
+        {'team': 'RAUTALAMMIN URHEILIJAT', 'year': 2010, 'leg': 3},
+        {'team': 'RAUTALAMMIN URHEILIJAT', 'year': 2011, 'leg': 3},
+        {'team': 'RAUTALAMMIN URHEILIJAT', 'year': 2012, 'leg': 4},
+        {'team': 'RAUTALAMMIN URHEILIJAT', 'year': 2013, 'leg': 1},
+        {'team': 'RAUTALAMMIN URHEILIJAT', 'year': 2014, 'leg': 1},
+        {'team': 'RAUTALAMMIN URHEILIJAT', 'year': 2016, 'leg': 1},
+        {'team': 'RAUTALAMMIN URHEILIJAT', 'year': 2017, 'leg': 2},
+        {'team': 'RAUTALAMMIN URHEILIJAT', 'year': 2019, 'leg': 2},
+    ]
+    assert karkainen_runs == karkainen_expected_runs
+
+    # Eero Ilomäki runs for Rautalammin Urheilijat and Suonenjoen Vasama.
+    # Their careers also overlap over a multi-year period (1996-2013 and 1999-2007).
+    ilomaki = grouped_dataframe[grouped_dataframe['name'] == 'eero ilomäki']
+    ilomaki_runs = ilomaki[['team', 'year', 'leg']].to_dict(orient="records")
+    print(ilomaki_runs)
+    ilomaki_expected_runs = [
+        {'team': 'RAUTALAMMIN URHEILIJAT', 'year': 1996, 'leg': 2},
+        {'team': 'RAUTALAMMIN URHEILIJAT', 'year': 1997, 'leg': 1},
+        {'team': 'SUONENJOEN VASAMA', 'year': 1999, 'leg': 4},
+        {'team': 'SUONENJOEN VASAMA', 'year': 2000, 'leg': 4},
+        {'team': 'SUONENJOEN VASAMA', 'year': 2001, 'leg': 4},
+        {'team': 'SUONENJOEN VASAMA', 'year': 2002, 'leg': 3},
+        {'team': 'RAUTALAMMIN URHEILIJAT', 'year': 2003, 'leg': 1},
+        {'team': 'SUONENJOEN VASAMA', 'year': 2005, 'leg': 3},
+        {'team': 'LOHIMAAN RASTI', 'year': 2006, 'leg': 1},
+        {'team': 'SUONENJOEN VASAMA', 'year': 2007, 'leg': 4},
+        {'team': 'RAUTALAMMIN URHEILIJAT', 'year': 2008, 'leg': 3},
+        {'team': 'RAUTALAMMIN URHEILIJAT', 'year': 2010, 'leg': 4},
+        {'team': 'RAUTALAMMIN URHEILIJAT', 'year': 2011, 'leg': 2},
+        {'team': 'RAUTALAMMIN URHEILIJAT', 'year': 2012, 'leg': 3},
+        {'team': 'RAUTALAMMIN URHEILIJAT', 'year': 2013, 'leg': 3},
+    ]
+    assert ilomaki_runs == ilomaki_expected_runs
+
+
 def test_basic_data_integrity(grouped_dataframe):
     # Verify basic data integrity
     assert "pace" in grouped_dataframe.columns
