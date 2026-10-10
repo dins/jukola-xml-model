@@ -11,8 +11,9 @@ SECONDS=0
 # RO_LOG_PATH="logs/running-order-${FORECAST_YEAR}-${RUN_TS}.log"
 # echo $(date -u +"%F %T") "Starting BEFORE_RACE ${RUN_TS}, logs: ${RO_LOG_PATH}"
 
-# uv run python fetch_running_order.py 2026  &> ${RO_LOG_PATH}
+uv run python fetch_running_order.py 2026  &> ${RO_LOG_PATH}
 # tail -n 10 ${RO_LOG_PATH}
+
 
 
 # --- START Online data during Saturday and Sunday race
@@ -25,6 +26,9 @@ time RACE_TYPE=ju FORECAST_YEAR=2026 uv run python process_online_running_order.
 echo $(date -u +"%F %T") "DONE JU process_online_running_order.py"
 tail -n 10 ${ORO_LOG_PATH}
 #cp data/online_running_order_ke_fy_2026.tsv data/running_order_final_ke_fy_2026.tsv
+
+cp data/online_team_countries_j2026_ve.tsv data/team_countries_j2026_ve.tsv
+cp data/online_team_countries_j2026_ju.tsv data/team_countries_j2026_ju.tsv
 cp data/online_running_order_ve_fy_2026.tsv data/running_order_final_ve_fy_2026.tsv
 cp data/online_running_order_ju_fy_2026.tsv data/running_order_final_ju_fy_2026.tsv
 
