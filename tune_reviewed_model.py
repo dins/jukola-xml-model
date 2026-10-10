@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import argparse
 import json
 import logging
@@ -17,6 +16,11 @@ import numpy as np
 import optuna
 from optuna.storages import JournalStorage
 from optuna.storages.journal import JournalFileBackend
+
+import logging_config
+
+logger = logging.getLogger(__name__)
+
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -95,7 +99,7 @@ def run_notebook_trial(trial: optuna.Trial, config: TuningConfig) -> float:
     yearly_scores: list[float] = []
 
     def run_year(year: int) -> float:
-        logging.info(
+        logger.info(
             "Trial %d: Processing %s year %d", trial.number, config.race_type, year
         )
 
@@ -161,7 +165,7 @@ def run_notebook_trial(trial: optuna.Trial, config: TuningConfig) -> float:
             #  137 / -9 : SIGKILL (Force kill)
             if e.returncode in (130, -2, -15, 137, -9):
                 # Process was killed/interrupted
-                logging.warning(
+                logger.warning(
                     f"Trial {trial.number} year {year} notebook execution interrupted (code {e.returncode})."
                 )
                 # We MUST raise KeyboardInterrupt instead of TrialPruned here so the main loop aborts
@@ -169,14 +173,14 @@ def run_notebook_trial(trial: optuna.Trial, config: TuningConfig) -> float:
                 raise KeyboardInterrupt(
                     f"Notebook execution interrupted for year {year}"
                 )
-            logging.error(
+            logger.error(
                 "Trial %d failed for year %d. See %s", trial.number, year, log_path
             )
             raise optuna.TrialPruned(f"Notebook execution failed for year {year}")
 
         # Extract metric
         if not metrics_json_path.exists():
-            logging.error(
+            logger.error(
                 "Trial %d: Metrics file missing at %s", trial.number, metrics_json_path
             )
             raise optuna.TrialPruned(f"Metrics missing for year {year}")
@@ -187,7 +191,7 @@ def run_notebook_trial(trial: optuna.Trial, config: TuningConfig) -> float:
         # We optimize for forecast year custom score: NLL (Negative Log-Likelihood) + interval penalty
         fy_metrics = metrics.get("forecast_year_metrics")
         if fy_metrics is None:
-            logging.error(
+            logger.error(
                 "Trial %d: Forecast year metrics missing for year %d. "
                 "This usually means actual results for that year are missing from 'data/'.",
                 trial.number,
@@ -197,7 +201,7 @@ def run_notebook_trial(trial: optuna.Trial, config: TuningConfig) -> float:
 
         fy_custom_tuning_score = fy_metrics.get("tuning_score")
         if fy_custom_tuning_score is None:
-            logging.error(
+            logger.error(
                 "Trial %d: tuning_score missing in forecast_year_metrics for year %d",
                 trial.number,
                 year,
@@ -219,7 +223,7 @@ def run_notebook_trial(trial: optuna.Trial, config: TuningConfig) -> float:
                 running_years.remove(year)
     except KeyboardInterrupt:
         for year in running_years:
-            logging.info(
+            logger.info(
                 "Trial %d backtest %d received signal SIGINT. Terminating.",
                 trial.number,
                 year,
@@ -308,9 +312,6 @@ def main():
     )
     args = parser.parse_args()
 
-    logging.basicConfig(
-        level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-    )
 
     study_name = args.study_name or f"v6-tuning-{args.race_type}"
     journal_path = Path(
@@ -343,15 +344,15 @@ def main():
 
                 try:
                     study.enqueue_trial(optuna_params, skip_if_exists=True)
-                    logging.info(
+                    logger.info(
                         f"Enqueued initial parameters from {param_path} into study {study_name}"
                     )
                 except Exception as e:
-                    logging.error(
+                    logger.error(
                         f"Failed to enqueue parameters from {param_path}: {e}"
                     )
             else:
-                logging.warning(
+                logger.warning(
                     f"Enqueue params file not found: {param_path}. Ignoring."
                 )
 
@@ -368,7 +369,7 @@ def main():
         n_workers=args.n_workers,
         seed_base=args.seed,
         run_root=Path(args.run_root),
-        xml_model_root=Path(".").resolve(),
+        xml_model_root=Path.cwd(),
         journal_path=journal_path,
         deadline_timestamp=deadline_timestamp,
         backtest_semaphore=backtest_semaphore,
@@ -380,9 +381,9 @@ def main():
         deadline_str = datetime.fromtimestamp(config.deadline_timestamp).strftime(
             "%Y-%m-%d %H:%M:%S"
         )
-        logging.info("Tuning will run until deadline: %s", deadline_str)
+        logger.info("Tuning will run until deadline: %s", deadline_str)
 
-    logging.info("Starting tuning: %s", config)
+    logger.info("Starting tuning: %s", config)
 
     processes = []
     for i in range(config.n_workers):
@@ -395,7 +396,7 @@ def main():
             p.join()
     except KeyboardInterrupt:
         print()  # Print a newline so the log doesn't end up on the same line as ^C
-        logging.info(
+        logger.info(
             "Interrupted by user. Waiting for workers to shut down gracefully and mark trials as failed (up to 15s)..."
         )
         # Give workers time to catch the SIGINT, fail their Optuna trials in the DB, and exit cleanly
@@ -408,7 +409,7 @@ def main():
         killed_any = False
         for p in processes:
             if p.is_alive():
-                logging.warning(
+                logger.warning(
                     f"Worker {p.pid} did not terminate gracefully in time. Force killing."
                 )
                 p.terminate()  # SIGTERM is safer than SIGKILL
@@ -421,11 +422,12 @@ def main():
             for p in processes:
                 p.join()
 
-        logging.info("Tuning interrupted and workers terminated.")
+        logger.info("Tuning interrupted and workers terminated.")
         return
 
-    logging.info("Tuning complete.")
+    logger.info("Tuning complete.")
 
 
 if __name__ == "__main__":
+    logging_config.configure_logging()
     main()

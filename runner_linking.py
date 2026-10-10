@@ -463,7 +463,7 @@ class ManualExceptionRule(LinkingRule):
 
         for run_id_group in self.manually_connected_run_id_groups:
             valid_run_ids = sorted(
-                list(set(runs_by_id.keys()).intersection(run_id_group))
+                set(runs_by_id.keys()).intersection(run_id_group)
             )
             if valid_run_ids != sorted(run_id_group):
                 logging.warning(

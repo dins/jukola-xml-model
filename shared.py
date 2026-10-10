@@ -1,14 +1,15 @@
 import csv
 import json
-import logging
 import os
 from datetime import UTC, datetime
 
 import numpy as np
 import pandas as pd
 
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s')
+import logging_config
+
+logger = logging_config.configure_logging(__name__)
+
 
 num_pace_years = 20
 
@@ -21,13 +22,13 @@ def random_seed():
 
 def race_type(default="ve"):
     type = os.getenv('RACE_TYPE', default)
-    logging.info(f"RACE_TYPE: {type}")
+    logger.info(f"RACE_TYPE: {type}")
     return type
 
 
 def forecast_year(default=2026) -> int:
     year = os.getenv('FORECAST_YEAR', default)
-    logging.info(f"FORECAST_YEAR: {year}")
+    logger.info(f"FORECAST_YEAR: {year}")
     return int(year)
 
 
@@ -58,7 +59,7 @@ def history_years():
     # filter out future data
     history = list(filter(lambda year: year < fy, all_years))
     history = [str(y_int) for y_int in history]
-    logging.info(f"history_years: {history}")
+    logger.info(f"history_years: {history}")
     return history
 
 
@@ -273,9 +274,9 @@ num_legs = {
 
 def log_df(value, title=''):
     if isinstance(value, str):
-        logging.info(value)
+        logger.info(value)
     else:
-        logging.info(f"FY{forecast_year()} {title}\n{value}")
+        logger.info(f"FY{forecast_year()} {title}\n{value}")
 
 
 def write_simple_text_report(reports, file_name):
