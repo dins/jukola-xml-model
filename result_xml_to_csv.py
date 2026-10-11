@@ -1,6 +1,5 @@
 import csv
 import datetime
-import logging
 import math
 import sys
 import time
@@ -8,7 +7,10 @@ import xml.etree.ElementTree as ET
 
 import numpy as np
 
+import logging_config
 import shared
+
+logger = logging_config.configure_logging(__name__)
 
 # time uv run python result_xml_to_csv.py 2026 ju
 
@@ -20,43 +22,12 @@ import shared
 # Archived results well after race
 # curl https://results.jukola.com/tulokset/results_j2025_ju.xml > data/results_j2025_ju.xml
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s",
-)
-
 year = int(sys.argv[1])
 ve_or_ju = sys.argv[2]
 input_file = f"data/results_j{year}_{ve_or_ju}.xml"
-logging.info("Reading " + input_file)
+logger.info("Reading " + input_file)
 tree = ET.parse(input_file)
 root = tree.getroot()
-
-# open a file for writing
-
-out_file_name = f"data/results_with_dist_j{year}_{ve_or_ju}.tsv"
-csv_file = open(out_file_name, "w")
-
-csvwriter = csv.writer(csv_file, delimiter="\t", quoting=csv.QUOTE_ALL)
-
-header = [
-    "team-id",
-    "placement",
-    "team-time",
-    "team-name",
-    "team-nro",
-    "leg-nro",
-    "emit",
-    "leg-time",
-    "competitor-name",
-    "weighted_log_mean_pace",
-    "weighted_log_pace_std",
-    "disqualified",
-    "leg_distance",
-]
-
-csvwriter.writerow(header)
-
 
 def parse_time(control_time_text):
     try:
@@ -84,68 +55,91 @@ def weighted_avg_and_std(values, weights):
     return (average, math.sqrt(variance))
 
 
-for team in root.iter("team"):
-    for leg in team.iter("leg"):
-        row = []
-        row.append(team.find("teamid").text)  # ty: ignore[unresolved-attribute]
-        row.append(team.findtext("placement", "NA"))
-        row.append(team.findtext("tsecs", "NA"))
-        row.append(team.find("teamname").text)  # ty: ignore[unresolved-attribute]
-        row.append(team.find("teamnro").text)  # ty: ignore[unresolved-attribute]
+# open a file for writing
 
-        leg_nro = leg.find("legnro").text  # ty: ignore[unresolved-attribute]
-        row.append(leg_nro)
-        row.append(leg.findtext("emit", "NA"))
+out_file_name = f"data/results_with_dist_j{year}_{ve_or_ju}.tsv"
+with open(out_file_name, "w") as csv_file:
+    csvwriter = csv.writer(csv_file, delimiter="\t", quoting=csv.QUOTE_ALL)
 
-        # if no tsecs (=runner or team disqualified?)
-        default_leg_time = "NA"
-        row.append(leg.findtext("tsecs", default_leg_time))
+    header = [
+        "team-id",
+        "placement",
+        "team-time",
+        "team-name",
+        "team-nro",
+        "leg-nro",
+        "emit",
+        "leg-time",
+        "competitor-name",
+        "weighted_log_mean_pace",
+        "weighted_log_pace_std",
+        "disqualified",
+        "leg_distance",
+    ]
 
-        competitor_name = leg.find("nm").text  # ty: ignore[unresolved-attribute]
-        row.append(competitor_name)
+    csvwriter.writerow(header)
 
-        control_paces = []
-        control_distances = []
-        disqualified = False
-        for control in leg.iter("control"):
-            cd_text = control.find("cd").text  # ty: ignore[unresolved-attribute]
-            if cd_text == "-" or cd_text is None:
-                disqualified = True  # Top teams have these but are not disqualified
+    for team in root.iter("team"):
+        for leg in team.iter("leg"):
+            row = []
+            row.append(team.find("teamid").text)  # ty: ignore[unresolved-attribute]
+            row.append(team.findtext("placement", "NA"))
+            row.append(team.findtext("tsecs", "NA"))
+            row.append(team.find("teamname").text)  # ty: ignore[unresolved-attribute]
+            row.append(team.find("teamnro").text)  # ty: ignore[unresolved-attribute]
 
-            else:
-                struct_time = parse_time(cd_text)
-                cd_secs = int(
-                    datetime.timedelta(
-                        hours=struct_time.tm_hour,
-                        minutes=struct_time.tm_min,
-                        seconds=struct_time.tm_sec,
-                    ).total_seconds()
+            leg_nro = leg.find("legnro").text  # ty: ignore[unresolved-attribute]
+            row.append(leg_nro)
+            row.append(leg.findtext("emit", "NA"))
+
+            # if no tsecs (=runner or team disqualified?)
+            default_leg_time = "NA"
+            row.append(leg.findtext("tsecs", default_leg_time))
+
+            competitor_name = leg.find("nm").text  # ty: ignore[unresolved-attribute]
+            row.append(competitor_name)
+
+            control_paces = []
+            control_distances = []
+            disqualified = False
+            for control in leg.iter("control"):
+                cd_text = control.find("cd").text  # ty: ignore[unresolved-attribute]
+                if cd_text == "-" or cd_text is None:
+                    disqualified = True  # Top teams have these but are not disqualified
+
+                else:
+                    struct_time = parse_time(cd_text)
+                    cd_secs = int(
+                        datetime.timedelta(
+                            hours=struct_time.tm_hour,
+                            minutes=struct_time.tm_min,
+                            seconds=struct_time.tm_sec,
+                        ).total_seconds()
+                    )
+                    distance_element = control.find("cl")
+                    if distance_element is not None:
+                        distance_meters = int(distance_element.text)  # ty: ignore[invalid-argument-type]
+                        control_pace = (cd_secs / 60.0) / (distance_meters / 1000.0)
+
+                        control_paces.append(control_pace)
+                        control_distances.append(distance_meters)
+
+            if len(control_paces) > 0:
+                log_paces = np.log(control_paces)
+                (weighted_log_mean_pace, weighted_log_pace_std) = weighted_avg_and_std(
+                    log_paces, control_distances
                 )
-                distance_element = control.find("cl")
-                if distance_element is not None:
-                    distance_meters = int(distance_element.text)  # ty: ignore[invalid-argument-type]
-                    control_pace = (cd_secs / 60.0) / (distance_meters / 1000.0)
+                # logging.info(f"{weighted_log_mean_pace} {weighted_log_pace_std}")
+            else:
+                (weighted_log_mean_pace, weighted_log_pace_std) = ("NA", "NA")
+                # logging.info(control_paces)
+                # logging.info(control_distances)
+                # logging.info(f"{competitor_name}: {weighted_log_mean_pace} {weighted_log_pace_std}")
+            row.append(weighted_log_mean_pace)
+            row.append(weighted_log_pace_std)
+            row.append(disqualified)
+            leg_distance = shared.leg_distance(ve_or_ju, year, int(leg_nro))  # ty: ignore[invalid-argument-type]
+            row.append(leg_distance)
+            csvwriter.writerow(row)
 
-                    control_paces.append(control_pace)
-                    control_distances.append(distance_meters)
-
-        if len(control_paces) > 0:
-            log_paces = np.log(control_paces)
-            (weighted_log_mean_pace, weighted_log_pace_std) = weighted_avg_and_std(
-                log_paces, control_distances
-            )
-            # logging.info(f"{weighted_log_mean_pace} {weighted_log_pace_std}")
-        else:
-            (weighted_log_mean_pace, weighted_log_pace_std) = ("NA", "NA")
-            # logging.info(control_paces)
-            # logging.info(control_distances)
-            # logging.info(f"{competitor_name}: {weighted_log_mean_pace} {weighted_log_pace_std}")
-        row.append(weighted_log_mean_pace)
-        row.append(weighted_log_pace_std)
-        row.append(disqualified)
-        leg_distance = shared.leg_distance(ve_or_ju, year, int(leg_nro))  # ty: ignore[invalid-argument-type]
-        row.append(leg_distance)
-        csvwriter.writerow(row)
-
-csv_file.close()
-logging.info("Wrote " + out_file_name)
+logger.info("Wrote " + out_file_name)

@@ -347,10 +347,8 @@ def main():
                     logger.info(
                         f"Enqueued initial parameters from {param_path} into study {study_name}"
                     )
-                except Exception as e:
-                    logger.error(
-                        f"Failed to enqueue parameters from {param_path}: {e}"
-                    )
+                except Exception:
+                    logger.exception("Failed to enqueue parameters from {param_path}")
             else:
                 logger.warning(
                     f"Enqueue params file not found: {param_path}. Ignoring."

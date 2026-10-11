@@ -2,7 +2,10 @@ import logging
 
 import pandas as pd
 
+import logging_config
 import shared
+
+logger = logging.getLogger(__name__)
 
 # time RACE_TYPE=ve FORECAST_YEAR=2022 uv run python prepare_run_features.py
 
@@ -19,7 +22,7 @@ def combine_estimates_with_running_order():
 
     path = f"data/running_order_with_estimates_{shared.race_id_str()}.tsv"
     estimates.to_csv(path, sep="\t", index=False)
-    logging.info(f"Wrote: {path}")
+    logger.info(f"Wrote: {path}")
 
     shared.log_df(
         estimates[["num_runs", "log_std", "log_mean"]]
@@ -53,7 +56,7 @@ def _load_pymc_history_values_for_running_order_names():
     history_estimates = history_estimates.drop(columns=["num_runs", "median_pace"])
 
     missing_estimate_0 = history_estimates[history_estimates["log_mean"].isna()]
-    logging.info(
+    logger.info(
         f"Found {len(missing_estimate_0)} runners without history estimate:\n{missing_estimate_0.to_string(index=False)}"
     )
     assert len(missing_estimate_0) == 0, "All should have estiamte pace"
@@ -91,14 +94,14 @@ def _load_pymc_history_values_for_running_order_names():
             "pace_samples",
         ]
     ]
-    logging.info(
+    logger.info(
         f"running_order_with_estimates {len(running_order_with_estimates)} rows, columns: {running_order_with_estimates.columns}"
     )
 
     missing_estimate = running_order_with_estimates[
         running_order_with_estimates["log_mean"].isna()
     ]
-    logging.info(
+    logger.info(
         f"Found {len(missing_estimate)} runners without estimate:\n{missing_estimate.to_string(index=False)}"
     )
 
@@ -155,11 +158,11 @@ def _load_ngboost_estimates_for_running_order_names():
             "pace_samples",
         ]
     ]
-    # logging.info(
+    # logger.info(
     #    f'Found {len(ngboost_estimates)} NGBoost estimates:\n{ngboost_estimates.head(5).to_string(index=False)}')
 
     missing_estimate_0 = ngboost_estimates[ngboost_estimates["log_mean"].isna()]
-    logging.info(
+    logger.info(
         f"Found {len(missing_estimate_0)} runners without NGBoost estimate:\n{missing_estimate_0.to_string(index=False)}"
     )
     assert len(missing_estimate_0) == 0, "All should have estimate pace"
@@ -197,14 +200,14 @@ def _load_ngboost_estimates_for_running_order_names():
             "pace_samples",
         ]
     ]
-    logging.info(
+    logger.info(
         f"running_order_with_estimates {len(running_order_with_estimates)} rows, columns: {running_order_with_estimates.columns}"
     )
 
     missing_estimate = running_order_with_estimates[
         running_order_with_estimates["log_mean"].isna()
     ]
-    logging.info(
+    logger.info(
         f"Found {len(missing_estimate)} runners without estimate:\n{missing_estimate.to_string(index=False)}"
     )
 
@@ -229,7 +232,7 @@ def _load_ngboost_estimates_for_running_order_names():
     duplicates = running_order_with_estimates[
         running_order_with_estimates.duplicated(subset=["team_id", "leg"], keep=False)
     ]
-    logging.info(
+    logger.info(
         f"Duplicate legs {len(duplicates)} in running order:\n{duplicates.to_string(index=False)}"
     )
     assert len(duplicates) == 0, "Duplicate legs"
@@ -238,9 +241,6 @@ def _load_ngboost_estimates_for_running_order_names():
 
 
 if __name__ == "__main__":
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s",
-    )
-    logging.info("Creating static individual estimates for running order")
+    logging_config.configure_logging()
+    logger.info("Creating static individual estimates for running order")
     combine_estimates_with_running_order()

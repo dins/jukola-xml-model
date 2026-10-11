@@ -7,15 +7,13 @@ import pandas as pd
 import requests
 from lxml import html
 
+import logging_config
 import normalize_names
 import shared
 
-# time uv run python fetch_running_order.py 2023 && wc data/running_order_final_ju_fy_2023.tsv
+logger = logging.getLogger(__name__)
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s",
-)
+# time uv run python fetch_running_order.py 2023 && wc data/running_order_final_ju_fy_2023.tsv
 
 
 # Fetches running order from registration site. It will become outdated on the race day.
@@ -33,13 +31,13 @@ def fetch_running_order(year, ve_or_ju):
         return team_name
 
     def fetch_order(url):
-        logging.info("Fetching " + url)
+        logger.info("Fetching " + url)
         page = requests.get(url, timeout=15)
         # tree = html.fromstring(page.content.decode('ISO-8859-1').encode("utf-8").strip())
         tree = html.fromstring(page.content.strip())
         # Use a more robust selector since the layout changed (removed #site_main)
         rows = tree.xpath("//table/tr")
-        logging.info(f"Got {len(rows)} rows")
+        logger.info(f"Got {len(rows)} rows")
 
         output_rows = []
 
@@ -58,7 +56,7 @@ def fetch_running_order(year, ve_or_ju):
                 team_base_name = parse_team_base_name(team_name)
                 current_team_name = team_name
                 current_team_base_name = team_base_name
-                logging.info(
+                logger.info(
                     "Team line: "
                     + current_team_country
                     + " "
@@ -92,7 +90,7 @@ def fetch_running_order(year, ve_or_ju):
                             ]
                         )
                     else:
-                        logging.warning(
+                        logger.warning(
                             f"Will not add: {current_team_id=} '{current_team_name=}' {leg=} '{name=}'"
                         )
 
@@ -100,28 +98,26 @@ def fetch_running_order(year, ve_or_ju):
 
     # out_file_name = f'data/running_order_j{year}_{ve_or_ju}.tsv'
     out_file_name = f"data/running_order_final_{ve_or_ju}_fy_{year}.tsv"
-    csv_file = open(out_file_name, "w")
+    with open(out_file_name, "w") as csv_file:
+        csvwriter = csv.writer(csv_file, delimiter="\t", quoting=csv.QUOTE_ALL)
+        header = [
+            "team_id",
+            "team",
+            "team_base_name",
+            "team_country",
+            "leg",
+            "leg_dist",
+            "name",
+        ]
 
-    csvwriter = csv.writer(csv_file, delimiter="\t", quoting=csv.QUOTE_ALL)
-    header = [
-        "team_id",
-        "team",
-        "team_base_name",
-        "team_country",
-        "leg",
-        "leg_dist",
-        "name",
-    ]
+        csvwriter.writerow(header)
 
-    csvwriter.writerow(header)
+        url = f"https://registration.jukola.com/?kieli=en&kisa=j{year}&view=1&sarja={ve_or_ju}&jarj=kilpnro&jj=1"
+        rows = fetch_order(url)
+        for row in rows:
+            csvwriter.writerow(row)
 
-    url = f"https://registration.jukola.com/?kieli=en&kisa=j{year}&view=1&sarja={ve_or_ju}&jarj=kilpnro&jj=1"
-    rows = fetch_order(url)
-    for row in rows:
-        csvwriter.writerow(row)
-
-    csv_file.close()
-    logging.info("Wrote " + out_file_name)
+    logger.info("Wrote " + out_file_name)
 
     # Write team_countries file also
     ro = pd.read_csv(out_file_name, delimiter="\t")
@@ -132,7 +128,7 @@ def fetch_running_order(year, ve_or_ju):
     )
     tc_file = f"data/team_countries_j{year}_{ve_or_ju}.tsv"
     team_countries.to_csv(tc_file, sep="\t", index=False)
-    logging.info("Wrote " + tc_file)
+    logger.info("Wrote " + tc_file)
 
     return out_file_name
 
@@ -146,6 +142,7 @@ def _summarize(running_order_file):
 
 
 if __name__ == "__main__":
+    logging_config.configure_logging()
     year = int(sys.argv[1])
 
     # ke_file = fetch_running_order(year, "ke")

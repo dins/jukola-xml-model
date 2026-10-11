@@ -1,16 +1,13 @@
 import csv
-import logging
 
 import pandas as pd
 
+import logging_config
 import shared
 
-#  time RACE_TYPE=ve FORECAST_YEAR=2026 uv run python final_running_order.py && head data/running_order_final_ve_fy_2025.tsv
+logger = logging_config.configure_logging(__name__)
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s",
-)
+#  time RACE_TYPE=ve FORECAST_YEAR=2026 uv run python final_running_order.py && head data/running_order_final_ve_fy_2025.tsv
 
 
 def create_running_order_from_results():
@@ -55,7 +52,7 @@ def create_running_order_from_results():
     )
     tc_file = f"data/team_countries_j{year}_{race_type}.tsv"
     team_countries.to_csv(tc_file, sep="\t", index=False)
-    logging.info("Wrote " + tc_file)
+    logger.info("Wrote " + tc_file)
 
 
 create_running_order_from_results()

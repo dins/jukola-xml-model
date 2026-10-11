@@ -11,9 +11,12 @@ import numpy as np
 import pandas as pd
 import polars as pl
 
+import logging_config
 import normalize_names
 import runner_linking
 import shared
+
+logger = logging.getLogger(__name__)
 
 # time RACE_TYPE=ju FORECAST_YEAR=2024 uv run python group_names.py
 # To get all years use next year:
@@ -28,7 +31,7 @@ def _group_runs_to_runners() -> None:
     running_order_df = _read_running_order_runs_df(race_type)
 
     runs_df = pl.concat([result_df, running_order_df], how="vertical")
-    logging.info(
+    logger.info(
         "Built canonical runs_df: %d rows (%d result, %d running order)",
         runs_df.height,
         result_df.height,
@@ -49,7 +52,7 @@ def _read_result_runs_df(race_type: str) -> pl.DataFrame:
         result_year = int(year_str)
         in_file_name = f"data/results_with_dist_j{result_year}_{race_type}.tsv"
 
-        logging.info(f"Reading {in_file_name}")
+        logger.info(f"Reading {in_file_name}")
         raw_df = pl.read_csv(
             in_file_name,
             separator="\t",
@@ -108,7 +111,7 @@ def _read_result_runs_df(race_type: str) -> pl.DataFrame:
         (pl.col("normalized_name").str.len_chars() <= 5) & pl.col("pace").is_not_null()
     )
     if short_with_pace.height:
-        logging.warning(
+        logger.warning(
             "Ignoring %d too short names that still have a pace:\n%s",
             short_with_pace.height,
             short_with_pace.select("normalized_name", "pace", "year", "team_id", "leg"),
@@ -119,7 +122,7 @@ def _read_result_runs_df(race_type: str) -> pl.DataFrame:
     # Drop runs that never happened (missing both pace and emit card)
     no_show = df.filter(pl.col("pace").is_null() & pl.col("emit_id").is_null())
     if no_show.height:
-        logging.info("Dropping %d historical runs missing both pace and emit", no_show.height)
+        logger.info("Dropping %d historical runs missing both pace and emit", no_show.height)
     df = df.filter(pl.col("pace").is_not_null() | pl.col("emit_id").is_not_null())
 
     df = df.with_columns(
@@ -157,7 +160,7 @@ def _read_running_order_runs_df(race_type: str) -> pl.DataFrame:
     df = df.with_columns(pl.col("normalized_name").replace(["", "nan"], [None, None]))
 
     missing_names = df.filter(pl.col("normalized_name").is_null()).height
-    logging.info(f"Name missing in {missing_names} rows")
+    logger.info(f"Name missing in {missing_names} rows")
     df = df.drop_nulls(subset=["normalized_name"])
 
     if "team_country" not in df.columns:
@@ -355,8 +358,8 @@ def _write_individual_runs_file(
     ideals = ideals.rename(columns={"leg_distance": "leg_dist"})
     ideals["marking_per_km"] = ideals["marking"] / ideals["leg_dist"]
 
-    logging.info(f"Ideals:\n{ideals.head(5).round(3)}")
-    logging.info(f"Loaded ideals for {len(ideals)} legs")
+    logger.info(f"Ideals:\n{ideals.head(5).round(3)}")
+    logger.info(f"Loaded ideals for {len(ideals)} legs")
 
     ideals = ideals[
         [
@@ -378,18 +381,15 @@ def _write_individual_runs_file(
 
     output_file_path = f"data/long_runs_and_running_order_{shared.race_id_str()}.tsv"
     df.to_csv(output_file_path, sep="\t", index=False)
-    logging.info(f"Wrote: {output_file_path}")
+    logger.info(f"Wrote: {output_file_path}")
 
     duplicates = df[df.duplicated(subset=["year", "team_id", "leg"], keep=False)]
-    logging.info(
+    logger.info(
         f"Duplicate legs {len(duplicates)} in running order:\n{duplicates.to_string(index=False)}"
     )
     assert len(duplicates) == 0, "Duplicate legs"
 
 
 if __name__ == "__main__":
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s",
-    )
+    logging_config.configure_logging()
     _group_runs_to_runners()

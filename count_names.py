@@ -4,14 +4,12 @@ import re
 
 import pandas as pd
 
+import logging_config
 import shared
 
-# time uv run python count_names.py
+logger = logging.getLogger(__name__)
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s",
-)
+# time uv run python count_names.py
 
 
 def _correct_hyphen_spacing_in_names(name):
@@ -47,7 +45,7 @@ def _append_names(year, ve_or_ju, all_names):
 
 def analyze_names():
     all_years = shared.all_years
-    logging.info(f"All years {all_years}")
+    logger.info(f"All years {all_years}")
 
     all_names = []
     for year in all_years:
@@ -61,7 +59,7 @@ def analyze_names():
     names = runs["name"].str.split(" ", n=1, expand=True)
     runs["firstname"] = names[0]
     runs["lastname"] = names[1]
-    logging.info(runs)
+    logger.info(runs)
 
     fn_counts = (
         runs.groupby("firstname")
@@ -80,7 +78,7 @@ def analyze_names():
         .join(ln_counts.set_index("lastname"), how="outer")
         .fillna(0)
     )
-    logging.info(counts)
+    logger.info(counts)
 
     counts["is_firstname"] = counts["fn_count"] > counts["ln_count"]
 
@@ -89,4 +87,5 @@ def analyze_names():
 
 
 if __name__ == "__main__":
+    logging_config.configure_logging()
     analyze_names()

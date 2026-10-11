@@ -7,6 +7,8 @@ from scipy import stats
 
 import shared
 
+logger = logging.getLogger(__name__)
+
 
 @dataclass
 class BoxCoxParams:
@@ -68,7 +70,7 @@ def fit_boxcox_and_normalize(
     )
 
     no_nans_history_capped_paces = history_capped_paces[~np.isnan(history_capped_paces)]
-    logging.info(
+    logger.info(
         f"history capped paces: {min(no_nans_history_capped_paces)} - {max(no_nans_history_capped_paces)}"
     )
 
@@ -86,6 +88,6 @@ def fit_boxcox_and_normalize(
         lmbda=race_specific_bc_lambda, bc_mean=bc_mean, bc_std=bc_std
     )
 
-    logging.info(f"{shared.race_id_str()} {race_specific_bc_lambda=}, {boxcox_params=}")
+    logger.info(f"{shared.race_id_str()} {race_specific_bc_lambda=}, {boxcox_params=}")
 
     return normalized_bc_paces, boxcox_params

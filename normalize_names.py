@@ -3,6 +3,9 @@ import logging
 import sys
 
 import count_names
+import logging_config
+
+logger = logging.getLogger(__name__)
 
 # time uv run python normalize_names.py
 
@@ -27,25 +30,22 @@ def normalize_name(orig_name):
     splits = name.split()
     if len(splits) <= 1:
         if len(name) > 0:
-            logging.info(f"Ignoring possibly invalid name '{orig_name}'")
+            logger.info(f"Ignoring possibly invalid name '{orig_name}'")
         return name
 
     if len(splits) == 2:
         if not is_firstname(splits[0]) and not is_firstname(splits[1]):
-            logging.info(f"NOT swithcing name '{orig_name}'")
+            logger.info(f"NOT swithcing name '{orig_name}'")
         if not is_firstname(splits[0]) and is_firstname(splits[1]):
             swithced_name = f"{splits[1]} {splits[0]}"
-            logging.info(f"swithced name '{orig_name}' TO '{swithced_name}'")
+            logger.info(f"swithced name '{orig_name}' TO '{swithced_name}'")
             return swithced_name
 
     return name
 
 
 if __name__ == "__main__":
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s",
-    )
+    logging_config.configure_logging()
     orig_name = sys.argv[1]
     normalized = normalize_name(orig_name)
-    logging.info(f'orig_name: "{orig_name}"  -->  normalized: "{normalized}"')
+    logger.info(f'orig_name: "{orig_name}"  -->  normalized: "{normalized}"')

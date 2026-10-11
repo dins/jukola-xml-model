@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import argparse
 import json
 import logging
@@ -10,7 +9,10 @@ from optuna.storages import JournalStorage
 from optuna.storages.journal import JournalFileBackend
 from optuna.trial import TrialState
 
+import logging_config
 from tune_reviewed_model import suggest_params
+
+logger = logging.getLogger(__name__)
 
 
 class MockTrial:
@@ -96,36 +98,32 @@ def main():
 
     args = parser.parse_args()
 
-    logging.basicConfig(
-        level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-    )
-
     study_name = args.study_name
     journal_path = Path(
         args.journal_path or f".optuna/reviewed-journal-{args.race_type}.log"
     )
 
     if not journal_path.exists():
-        logging.error(f"Journal file not found: {journal_path}")
+        logger.error(f"Journal file not found: {journal_path}")
         return
 
-    logging.info(f"Loading study '{study_name}' from {journal_path}")
+    logger.info(f"Loading study '{study_name}' from {journal_path}")
 
     storage = JournalStorage(JournalFileBackend(str(journal_path)))
     try:
         study = optuna.load_study(study_name=study_name, storage=storage)
     except KeyError:
-        logging.error(f"Study '{study_name}' not found in the journal.")
+        logger.error(f"Study '{study_name}' not found in the journal.")
         return
-    except Exception as e:
-        logging.error(f"Failed to load study: {e}")
+    except Exception:
+        logger.exception("Failed to load study.")
         return
 
     # Determine expected ranges by running our MockTrial through the search space function
     mock_trial = MockTrial()
     suggest_params(cast(optuna.Trial, mock_trial), args.race_type)
     expected_ranges = mock_trial.ranges
-    logging.info(f"Expected parameter ranges for {args.race_type}: {expected_ranges}")
+    logger.info(f"Expected parameter ranges for {args.race_type}: {expected_ranges}")
 
     completed_trials = [
         t
@@ -137,7 +135,7 @@ def main():
         completed_trials = [t for t in completed_trials if t.number >= args.trial_min]
 
     if not completed_trials:
-        logging.warning("No completed trials found in study.")
+        logger.warning("No completed trials found in study.")
         return
 
     # Sort trials by value
@@ -146,7 +144,7 @@ def main():
 
     top_trials = completed_trials[: args.top_n]
 
-    logging.info(
+    logger.info(
         f"Found {len(completed_trials)} completed trials. Exporting and coercing top {len(top_trials)}."
     )
 
@@ -164,14 +162,15 @@ def main():
         with open(file_path, "w") as f:
             json.dump(coerced_params, f, indent=2)
 
-        logging.info(
+        logger.info(
             f"Rank {i + 1}: Trial {t.number} (Value: {t.value:.4f}) -> {file_path}"
         )
         # Log if any parameter was coerced
         for k, v in t.params.items():
             if k in coerced_params and coerced_params[k] != v:
-                logging.info(f"  Coerced {k}: {v} -> {coerced_params[k]}")
+                logger.info(f"  Coerced {k}: {v} -> {coerced_params[k]}")
 
 
 if __name__ == "__main__":
+    logging_config.configure_logging()
     main()

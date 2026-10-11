@@ -5,14 +5,12 @@ import os
 import numpy as np
 import pandas as pd
 
+import logging_config
 import shared
 
-# time uv run python json_reports.py && wc data/all_json_reports.tsv
+logger = logging.getLogger(__name__)
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s",
-)
+# time uv run python json_reports.py && wc data/all_json_reports.tsv
 
 
 def list_files_in_folder(folder_name):
@@ -28,7 +26,7 @@ def read_all_json_files_from_folder_to_df():
     # read .json files in parallel to pandas dataframes
     dfs = []
     for file_name in list_files_in_folder(folder_name):
-        # logging.info(f"Reading {file_name}")
+        # logger.info(f"Reading {file_name}")
         with open(f"{folder_name}/{file_name}", "r") as f:
             reports_dict = json.load(f)
             execution_timestamp = reports_dict.pop("execution_timestamp")["value"]
@@ -60,7 +58,7 @@ def read_all_json_files_from_folder_to_df():
 
     all_reports_path = "reports/all_json_reports.tsv"
     all_df.to_csv(all_reports_path, sep="\t", index=False)
-    logging.info(f"Saved {len(all_df)} rows to {all_reports_path}")
+    logger.info(f"Saved {len(all_df)} rows to {all_reports_path}")
 
     # Should we distinguish ve and ju here?
     key_values_df = all_df[
@@ -94,13 +92,14 @@ def read_all_json_files_from_folder_to_df():
     wide_averages_df = averages_df.pivot(
         index="execution_timestamp", columns="kpi", values="value"
     )
-    logging.info(f"\n{wide_averages_df.tail(20).round(3)}")
+    logger.info(f"\n{wide_averages_df.tail(20).round(3)}")
 
     summary_path = "reports/reports_summary.tsv"
     averages_df.round(3).to_csv(summary_path, sep="\t", index=False)
-    logging.info(f"Saved {len(averages_df)} rows to {summary_path}")
+    logger.info(f"Saved {len(averages_df)} rows to {summary_path}")
 
 
 if __name__ == "__main__":
+    logging_config.configure_logging()
     read_all_json_files_from_folder_to_df()
     os.getenv("RUN_TS", "unknown")

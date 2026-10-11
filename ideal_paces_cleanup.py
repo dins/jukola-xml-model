@@ -1,17 +1,14 @@
-import logging
 import re
 
 import numpy as np
 import pandas as pd
 
+import logging_config
 import shared
 
-# time uv run python ideal_paces_cleanup.py
+logger = logging_config.configure_logging(__name__)
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s",
-)
+# time uv run python ideal_paces_cleanup.py
 
 
 def parse_distance(distance_str: str) -> float | None:
@@ -46,7 +43,7 @@ def _cleanup_ideal_times(race_type, marked_route):
     # raw['Osuuspituus_str'] = raw['Osuuspituus'].str.extract(r'(\d+,\d+)')
     # cleaned["leg_distance"] = raw['Osuuspituus_str'].str.replace(",", ".").astype(float)
     cleaned["leg_distance"] = raw["Osuuspituus"].apply(parse_distance)
-    logging.info(f"Osuuspituudet:\n{cleaned[['year', 'leg_distance']]}")
+    logger.info(f"Osuuspituudet:\n{cleaned[['year', 'leg_distance']]}")
 
     # def _resolve_leg_distance(row):
     #    return shared.leg_distance(race_type, row["year"], row["leg"])
@@ -72,7 +69,7 @@ def _cleanup_ideal_times(race_type, marked_route):
 marked_route = pd.read_csv("Jukola-terrain/viitoitus.csv", delimiter=";")
 marked_route["marking"] = marked_route["viitoitus"]
 marked_route_cleaned = marked_route[["year", "race_type", "marking"]]
-logging.info(f"marked_route_cleaned: {marked_route_cleaned}")
+logger.info(f"marked_route_cleaned: {marked_route_cleaned}")
 
 _cleanup_ideal_times("ve", marked_route)
 _cleanup_ideal_times("ju", marked_route)

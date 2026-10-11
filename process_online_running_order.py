@@ -5,15 +5,13 @@ import re
 
 import pandas as pd
 
+import logging_config
 import normalize_names
 import shared
 
-# time RACE_TYPE=ve FORECAST_YEAR=2026 uv run python process_online_running_order.py
+logger = logging.getLogger(__name__)
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s",
-)
+# time RACE_TYPE=ve FORECAST_YEAR=2026 uv run python process_online_running_order.py
 
 
 def fetch_running_order(year, ve_or_ju) -> str:
@@ -36,9 +34,9 @@ def fetch_running_order(year, ve_or_ju) -> str:
         data = json.load(json_file)
 
     teams = data[ve_or_ju.upper()]
-    logging.info(f"{len(teams)=}")
-    logging.info(f"{teams[0]=}")
-    logging.info(f"{teams[1]=}")
+    logger.info(f"{len(teams)=}")
+    logger.info(f"{teams[0]=}")
+    logger.info(f"{teams[1]=}")
 
     runners = []
     for team in teams:
@@ -65,16 +63,16 @@ def fetch_running_order(year, ve_or_ju) -> str:
                 "team_number": team_number,
             }
             runners.append(runner)
-    logging.info(f"{len(runners)=}")
-    logging.info(f"{runners[0]=}")
+    logger.info(f"{len(runners)=}")
+    logger.info(f"{runners[0]=}")
     raw_df = pd.json_normalize(runners)
-    # logging.info(f"{raw_df.info()=}")
-    logging.info(f"{raw_df.head()=}")
+    # logger.info(f"{raw_df.info()=}")
+    logger.info(f"{raw_df.head()=}")
 
     out_file_name = f"data/online_running_order_{ve_or_ju}_fy_{year}.tsv"
     raw_df.to_csv(out_file_name, sep="\t", index=False, quoting=csv.QUOTE_ALL)
 
-    logging.info("Wrote " + out_file_name)
+    logger.info("Wrote " + out_file_name)
 
     # Write team_countries file also
     team_countries = (
@@ -84,7 +82,7 @@ def fetch_running_order(year, ve_or_ju) -> str:
     )
     tc_file = f"data/online_team_countries_j{year}_{ve_or_ju}.tsv"
     team_countries.to_csv(tc_file, sep="\t", index=False)
-    logging.info("Wrote " + tc_file)
+    logger.info("Wrote " + tc_file)
 
     return out_file_name
 
@@ -98,6 +96,7 @@ def _summarize(running_order_file):
 
 
 if __name__ == "__main__":
+    logging_config.configure_logging()
     year = shared.forecast_year()
     race_type = shared.race_type()
 

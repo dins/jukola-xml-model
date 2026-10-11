@@ -3,9 +3,11 @@ import logging
 
 import pandas as pd
 
+logger = logging.getLogger(__name__)
+
 
 def log_dataframe_info(df: pd.DataFrame) -> None:
-    logging.info(dataframe_info_to_str(df))
+    logger.info(dataframe_info_to_str(df))
 
 
 def dataframe_info_to_str(df: pd.DataFrame) -> str:

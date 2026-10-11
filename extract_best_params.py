@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import argparse
 import json
 import logging
@@ -11,6 +10,10 @@ import optuna
 from optuna.storages import JournalStorage
 from optuna.storages.journal import JournalFileBackend
 from optuna.trial import TrialState
+
+import logging_config
+
+logger = logging.getLogger(__name__)
 
 
 def _is_discrete(values):
@@ -74,25 +77,22 @@ def main():
         help="Consider only trials with number >= trial_min (post-feature-change cutoff)")
     args = parser.parse_args()
 
-    logging.basicConfig(level=logging.INFO,
-                        format="%(asctime)s - %(levelname)s - %(message)s")
-
     study_name = args.study_name or f"v6-tuning-{args.race_type}"
     journal_path = Path(args.journal_path
                         or f".optuna/reviewed-journal-{args.race_type}.log")
     if not journal_path.exists():
-        logging.error(f"Journal file not found: {journal_path}")
+        logger.error(f"Journal file not found: {journal_path}")
         return
 
-    logging.info(f"Loading study '{study_name}' from {journal_path}")
+    logger.info(f"Loading study '{study_name}' from {journal_path}")
     storage = JournalStorage(JournalFileBackend(str(journal_path)))
     try:
         study = optuna.load_study(study_name=study_name, storage=storage)
     except KeyError:
-        logging.error(f"Study '{study_name}' not found in the journal.")
+        logger.error(f"Study '{study_name}' not found in the journal.")
         return
-    except Exception as e:
-        logging.error(f"Failed to load study: {e}")
+    except Exception:
+        logger.exception("Failed to load study.")
         return
 
     completed = [t for t in study.trials
@@ -100,7 +100,7 @@ def main():
     if args.trial_min is not None:
         completed = [t for t in completed if t.number >= args.trial_min]
     if not completed:
-        logging.error("No completed trials found in the study.")
+        logger.error("No completed trials found in the study.")
         return
 
     is_min = study.direction == optuna.study.StudyDirection.MINIMIZE
@@ -113,7 +113,7 @@ def main():
 
     extraction_time = datetime.now(UTC).isoformat()
     top_numbers = [t.number for t in top_trials]
-    top_values = [t.value for t in top_trials]
+    top_values = [t.value for t in top_trials if t.value is not None]
     score_spread = (max(top_values) - min(top_values)) if len(top_values) > 1 else 0.0
 
     # Flag where consensus disagrees with the single best trial.
@@ -169,18 +169,19 @@ def main():
     with open(consensus_path, "w") as f:
         json.dump(consensus_doc, f, indent=2)
 
-    logging.info(f"Best trial {best_trial.number} (value {best_trial.value:.4f}) -> {best_path}")
-    logging.info(f"Consensus over {n} trials {top_numbers} -> {consensus_path}")
-    logging.info(f"Consensus score spread across top {n}: {score_spread:.4f} "
+    logger.info(f"Best trial {best_trial.number} (value {best_trial.value:.4f}) -> {best_path}")
+    logger.info(f"Consensus over {n} trials {top_numbers} -> {consensus_path}")
+    logger.info(f"Consensus score spread across top {n}: {score_spread:.4f} "
                  f"(noise floor ~0.015; a spread near/below this means a flat basin)")
     if disagreements:
         for k, d in disagreements.items():
-            logging.info(f"  consensus differs from best on {k}: best={d['best']} consensus={d['consensus']}")
+            logger.info(f"  consensus differs from best on {k}: best={d['best']} consensus={d['consensus']}")
     else:
-        logging.info("  consensus matches single best on every parameter")
+        logger.info("  consensus matches single best on every parameter")
 
     print(json.dumps(consensus_doc, indent=2))
 
 
 if __name__ == "__main__":
+    logging_config.configure_logging()
     main()

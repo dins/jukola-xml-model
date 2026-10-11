@@ -9,8 +9,11 @@ from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass, field
 from enum import Enum
 from itertools import combinations
+from typing import ClassVar
 
 from rapidfuzz.distance import JaroWinkler
+
+logger = logging.getLogger(__name__)
 
 
 class RunSource(Enum):
@@ -222,7 +225,7 @@ class AllowOneOverlapYearRule(LinkingRule):
             if len(overlap_years) > 1:
                 continue
 
-            logging.info(
+            logger.info(
                 f"Linking name: {normalized_name} with {len(name_runs)} runs, "
             )
             state.add_same_runner_group(
@@ -348,11 +351,11 @@ class TypoConnectedEmitRule(LinkingRule):
                     common_years = years_a.intersection(years_b)
 
                     if common_years:
-                        logging.info(
+                        logger.info(
                             f"NOT Linking TYPOED by {emit_id} because common years {common_years}, names {similarity_score:.3f} {name_a} ~ {name_b} "
                         )
                     else:
-                        logging.info(
+                        logger.info(
                             f"Linking TYPOED by {emit_id} from [{len(emit_names)}] names {similarity_score:.3f} {name_a} ~ {name_b} "
                         )
                         state.add_same_runner_group(
@@ -414,7 +417,7 @@ class ChangedLastNameConnectedByFirstNameAndEmitRule(LinkingRule):
                             year_ranges_dont_overlap or only_in_one_team
                     ):
                         runs_to_link = emit_runs_by_name[name_a] + emit_runs_by_name[name_b]
-                        logging.info(
+                        logger.info(
                             f"Linking LASTNAME by emit {emit_id} with {len(emit_names)} names: {name_a} -> {name_b}, one team: {only_in_one_team}"
                         )
                         state.add_same_runner_group(
@@ -424,7 +427,7 @@ class ChangedLastNameConnectedByFirstNameAndEmitRule(LinkingRule):
                             reason="shared Emit ID, exact same first name, and non-overlapping years",
                         )
                     else:
-                        logging.info(
+                        logger.info(
                             f"NOT Linking by emit {emit_id} with {len(emit_names)} names: {name_a} -> {name_b}, years overlap: {years_a} / {years_b}"
                         )
 
@@ -434,7 +437,7 @@ class ManualExceptionRule(LinkingRule):
 
     rule_name = "manual_exception"
 
-    manually_connected_run_id_groups: list[list[str]] = [
+    manually_connected_run_id_groups: ClassVar[list[list[str]]] = [
         [  # Milja Kallio
             "2024-ju-810-5",
             "2026-ju-350-5",
@@ -466,13 +469,13 @@ class ManualExceptionRule(LinkingRule):
                 set(runs_by_id.keys()).intersection(run_id_group)
             )
             if valid_run_ids != sorted(run_id_group):
-                logging.warning(
+                logger.warning(
                     f"Not all configured run_ids ({run_id_group} != {valid_run_ids}) are valid."
                 )
             if valid_run_ids:
                 runs = [runs_by_id[run_id] for run_id in valid_run_ids]
                 nammes = {run.normalized_name for run in runs}
-                logging.info(f"Manually linking names {nammes}")
+                logger.info(f"Manually linking names {nammes}")
                 state.add_same_runner_group(
                     runs,
                     unique_name=None,
@@ -601,18 +604,18 @@ def link_runs_with_state(
         ManualExceptionRule(),
     ]
 
-    logging.info(
+    logger.info(
         f"Starting to group {len(runs)} runs with {len(active_rules)} linking rules"
     )
     for rule in active_rules:
         # Before rule runs, count current runners
         old_linked = len(state.linked_runners)
-        logging.info(f"Starting rule {rule.rule_name}")
+        logger.info(f"Starting rule {rule.rule_name}")
         rule.update_run_links(state)
         state.refresh_linked_runners(include_single_run_runners=False)
         # After rule runs, count and report new runners
         new_linked = len(state.linked_runners) - old_linked
-        logging.info(f"Rule {rule.rule_name} linked {new_linked} new runners")
+        logger.info(f"Rule {rule.rule_name} linked {new_linked} new runners")
 
     state.refresh_linked_runners(include_single_run_runners=True)
     return state

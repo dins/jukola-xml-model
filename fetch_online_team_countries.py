@@ -1,34 +1,31 @@
 import csv
-import logging
 
 import requests
 
+import logging_config
 import shared
+
+logger = logging_config.configure_logging(__name__)
 
 # time RACE_TYPE=ve FORECAST_YEAR=2022 uv run python fetch_online_team_countries.py && wc data/team_countries_j2022_ve.tsv
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s [%(threadName)s] %(funcName)s [%(levelname)s] %(message)s",
-)
-
 
 def _fetch_and_parse_rows(url):
-    logging.info("Fetching " + url)
+    logger.info("Fetching " + url)
     response = requests.get(url, timeout=15).json()
-    logging.info(f"Found {response}")
+    logger.info(f"Found {response}")
 
     output_rows = []
 
     club_names_by_index = {club[0]: club[1] for club in response["Clubs"]}
-    logging.info(f"club_names_by_index {club_names_by_index}")
+    logger.info(f"club_names_by_index {club_names_by_index}")
     for competitor in response["Competitors"]:
         team_id = competitor[3]
         club_index = competitor[1]
         team_country = competitor[2]
         assert len(team_country) == 3, f"Unexpected country name length for '{team_country}'"
         team_base_name = club_names_by_index[club_index]
-        logging.info(
+        logger.info(
             "Team line: "
             + " "
             + str(team_id)
@@ -44,20 +41,18 @@ def _fetch_and_parse_rows(url):
 
 def fetch_team_countries(year, race_type):
     out_file_name = f"data/team_countries_j{year}_{race_type}.tsv"
-    csv_file = open(out_file_name, "w")
+    with open(out_file_name, "w") as csv_file:
+        csvwriter = csv.writer(csv_file, delimiter="\t", quoting=csv.QUOTE_ALL)
+        header = ["team_id", "team_base_name", "team_country"]
 
-    csvwriter = csv.writer(csv_file, delimiter="\t", quoting=csv.QUOTE_ALL)
-    header = ["team_id", "team_base_name", "team_country"]
+        csvwriter.writerow(header)
 
-    csvwriter.writerow(header)
+        url = f"https://online.jukola.com/tulokset-new/online/online_j{year}_{race_type}_competitors.json"
+        output_rows = _fetch_and_parse_rows(url)
+        for row in output_rows:
+            csvwriter.writerow(row)
 
-    url = f"https://online.jukola.com/tulokset-new/online/online_j{year}_{race_type}_competitors.json"
-    output_rows = _fetch_and_parse_rows(url)
-    for row in output_rows:
-        csvwriter.writerow(row)
-
-    csv_file.close()
-    logging.info("Wrote " + out_file_name)
+    logger.info("Wrote " + out_file_name)
 
 
 year = shared.forecast_year()
