@@ -1,16 +1,16 @@
+applied_migrations = [
+    "bash_read_only_defaults_v1",
+]
+
 [tools.bash]
 permission = "ask"
 allowlist = [
     "./run-all-local-checks.sh",
-    "uv run ty",
-    "uv run ruff",
-    "uv run pytest",
     "basename",
     "cat",
     "comm",
     "cut",
     "date",
-    "sleep",
     "diff",
     "dirname",
     "du",
@@ -37,6 +37,7 @@ allowlist = [
     "sha1sum",
     "sha256sum",
     "shasum",
+    "sleep",
     "sort",
     "stat",
     "sum",
@@ -46,8 +47,10 @@ allowlist = [
     "tree",
     "uname",
     "uniq",
+    "uv run pytest",
+    "uv run ruff",
+    "uv run ty",
     "wc",
     "which",
     "whoami",
-
 ]
