@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 # time uv run python count_names.py
 
 
-def _correct_hyphen_spacing_in_names(name):
+def _correct_hyphen_spacing_in_names(name: str) -> str:
     # Remove extra spaces around hyphens
     corrected_name = re.sub(r"\s*-\s*", "-", name)
     # Ensure only one space between words
@@ -20,19 +20,19 @@ def _correct_hyphen_spacing_in_names(name):
     return corrected_name
 
 
-def cleanup_name(orig_name):
+def cleanup_name(orig_name: str) -> str:
     name = orig_name.strip()
     name = _correct_hyphen_spacing_in_names(name)
     if "  " in name:
-        #logging.info(f"Trimming DOUBLE or multiple spaces '{orig_name}'")
+        # logging.info(f"Trimming DOUBLE or multiple spaces '{orig_name}'")
         name = " ".join(name.split())
     if "|" in name:
-        #logging.info(f"Trimming pipes '{orig_name}'")
+        # logging.info(f"Trimming pipes '{orig_name}'")
         name = name.replace("|", "")
     return name
 
 
-def _append_names(year, ve_or_ju, all_names):
+def _append_names(year: int, ve_or_ju: str, all_names: list[str]) -> None:
     in_file_name = f"data/results_with_dist_j{year}_{ve_or_ju}.tsv"
     with open(in_file_name) as csvfile:
         csvreader = csv.reader(csvfile, delimiter="\t")
@@ -43,12 +43,12 @@ def _append_names(year, ve_or_ju, all_names):
                 all_names.append(name)
 
 
-def analyze_names():
-    all_years = shared.all_years
-    logger.info(f"All years {all_years}")
+def analyze_names() -> None:
+    all_years_list = shared.all_years
+    logger.info(f"All years {all_years_list}")
 
-    all_names = []
-    for year in all_years:
+    all_names: list[str] = []
+    for year in all_years_list:
         _append_names(year, "ve", all_names)
         _append_names(year, "ju", all_names)
 

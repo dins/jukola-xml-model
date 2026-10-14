@@ -10,13 +10,13 @@ logger = logging_config.configure_logging(__name__)
 #  time RACE_TYPE=ve FORECAST_YEAR=2026 uv run python final_running_order.py && head data/running_order_final_ve_fy_2025.tsv
 
 
-def create_running_order_from_results():
+def create_running_order_from_results() -> None:
     year = shared.forecast_year()
     race_type = shared.race_type()
 
     country_by_team_id = shared.read_team_countries(year, race_type)
 
-    def leg_dist(leg):
+    def leg_dist(leg: int) -> float:
         dist = shared.distances[race_type][year]
         return dist[leg - 1]
 

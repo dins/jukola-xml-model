@@ -20,11 +20,11 @@ def read_first_names() -> set:
 first_names = read_first_names()
 
 
-def is_firstname(name):
+def is_firstname(name: str) -> bool:
     return name.lower() in first_names
 
 
-def normalize_name(orig_name):
+def normalize_name(orig_name: str) -> str:
     name = count_names.cleanup_name(orig_name)
 
     splits = name.split()
@@ -37,9 +37,9 @@ def normalize_name(orig_name):
         if not is_firstname(splits[0]) and not is_firstname(splits[1]):
             logger.info(f"NOT swithcing name '{orig_name}'")
         if not is_firstname(splits[0]) and is_firstname(splits[1]):
-            swithced_name = f"{splits[1]} {splits[0]}"
-            logger.info(f"swithced name '{orig_name}' TO '{swithced_name}'")
-            return swithced_name
+            switched_name = f"{splits[1]} {splits[0]}"
+            logger.info(f"switched name '{orig_name}' TO '{switched_name}'")
+            return switched_name
 
     return name
 

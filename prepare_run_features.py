@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 # os.environ['FORECAST_YEAR'] = "2019"
 
 
-def combine_estimates_with_running_order():
+def combine_estimates_with_running_order() -> None:
     # running_order_with_estimates = _load_pymc_history_values_for_running_order_names()
     running_order_with_estimates = _load_ngboost_estimates_for_running_order_names()
 
@@ -32,7 +32,7 @@ def combine_estimates_with_running_order():
     )
 
 
-def _load_pymc_history_values_for_running_order_names():
+def _load_pymc_history_values_for_running_order_names() -> pd.DataFrame:
     # unique_name	num_runs	name	team_id	team	team_country	year	pace	emit	leg	median_pace	log_stdev
     runs = pd.read_csv(
         f"data/long_runs_and_running_order_{shared.race_id_str()}.tsv", delimiter="\t"
@@ -125,7 +125,7 @@ def _load_pymc_history_values_for_running_order_names():
     return running_order_with_estimates
 
 
-def _load_ngboost_estimates_for_running_order_names():
+def _load_ngboost_estimates_for_running_order_names() -> pd.DataFrame:
     # unique_name	num_runs	name	team_id	team	team_country	year	pace	emit	leg	median_pace	log_stdev
     runs = pd.read_csv(
         f"data/long_runs_and_running_order_{shared.race_id_str()}.tsv", delimiter="\t"

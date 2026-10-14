@@ -5,18 +5,19 @@ import statistics
 from collections import Counter
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 import optuna
 from optuna.storages import JournalStorage
 from optuna.storages.journal import JournalFileBackend
-from optuna.trial import TrialState
+from optuna.trial import FrozenTrial, TrialState
 
 import logging_config
 
 logger = logging.getLogger(__name__)
 
 
-def _is_discrete(values):
+def _is_discrete(values: list[float | int]) -> bool:
     """Treat a parameter as discrete (use mode) if every observed value is
     integer-valued; continuous (use median) otherwise. Optuna stores stepped
     ints as ints and floats as floats, so this matches the search space."""
@@ -24,7 +25,7 @@ def _is_discrete(values):
                for v in values)
 
 
-def _consensus_value(name, values, trial_weights):
+def _consensus_value(name: str, values: list[float | int], trial_weights: list[int]) -> tuple[float | int, str]:
     """Mode for discrete params (ties broken toward better-scoring trials),
     median for continuous params. `trial_weights` ranks each contributing trial
     so a tie in the mode is decided by trial quality, not file order."""
@@ -41,11 +42,12 @@ def _consensus_value(name, values, trial_weights):
     return float(statistics.median(values)), "median"
 
 
-def build_consensus(top_trials):
+def build_consensus(top_trials: list[FrozenTrial]) -> tuple[dict[str, Any], dict[str, str]]:
     """top_trials: list of optuna trials, already sorted best-first.
     Returns (consensus_params, per_param_method)."""
     param_names = sorted({k for t in top_trials for k in t.params})
-    consensus, methods = {}, {}
+    consensus: dict[str, Any] = {}
+    methods: dict[str, str] = {}
     # weight = rank index (0 = best); used only for mode tie-breaks
     weights = list(range(len(top_trials)))
     for name in param_names:
@@ -60,7 +62,7 @@ def build_consensus(top_trials):
     return consensus, methods
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Extract best and consensus parameters from an Optuna study."
     )

@@ -29,7 +29,7 @@ logger.info("Reading " + input_file)
 tree = ET.parse(input_file)
 root = tree.getroot()
 
-def parse_time(control_time_text):
+def parse_time(control_time_text: str) -> time.struct_time:
     try:
         return time.strptime(control_time_text, "%S")
     except ValueError:
@@ -43,7 +43,7 @@ def parse_time(control_time_text):
                 raise
 
 
-def weighted_avg_and_std(values, weights):
+def weighted_avg_and_std(values: np.ndarray, weights: np.ndarray) -> tuple[float, float]:
     """
     Return the weighted average and standard deviation.
 
@@ -127,7 +127,7 @@ with open(out_file_name, "w") as csv_file:
             if len(control_paces) > 0:
                 log_paces = np.log(control_paces)
                 (weighted_log_mean_pace, weighted_log_pace_std) = weighted_avg_and_std(
-                    log_paces, control_distances
+                    log_paces, np.array(control_distances)
                 )
                 # logging.info(f"{weighted_log_mean_pace} {weighted_log_pace_std}")
             else:

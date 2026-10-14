@@ -2,6 +2,7 @@ import csv
 import json
 import os
 from datetime import UTC, datetime
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -16,28 +17,28 @@ num_pace_years = 20
 np.random.seed(2019)
 
 
-def random_seed():
+def random_seed() -> int:
     return 2019
 
 
-def race_type(default="ve"):
-    type = os.getenv('RACE_TYPE', default)
-    logger.info(f"RACE_TYPE: {type}")
-    return type
+def race_type(default: str = "ve") -> str:
+    race_type_val = os.getenv('RACE_TYPE', default)
+    logger.info(f"RACE_TYPE: {race_type_val}")
+    return race_type_val
 
 
-def forecast_year(default=2026) -> int:
-    year = os.getenv('FORECAST_YEAR', default)
-    logger.info(f"FORECAST_YEAR: {year}")
-    return int(year)
+def forecast_year(default: int = 2026) -> int:
+    year_val = os.getenv('FORECAST_YEAR', default)
+    logger.info(f"FORECAST_YEAR: {year_val}")
+    return int(year_val)
 
 
-def race_id_str():
+def race_id_str() -> str:
     return f"{race_type()}_fy_{forecast_year()}"
 
 
 # TODO replace with ALL_YEARS below???
-years = {
+years: dict[str, list[str]] = {
     "ke": ["2024"],
     "ve": ["2026", "2025", "2024", "2023", "2022", "2021", "2019", "2018", "2017", "2016", "2015", "2014", "2013", "2012", "2011",
            "2010", "2009", "2008", "2007", "2006", "2005", "2004", "2003", "2002", "2001", "2000", "1999", "1998",
@@ -49,15 +50,15 @@ years = {
 
 # 2020 missing
 # Add only after race?
-all_years = [1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009,
+all_years: list[int] = [1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009,
              2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2021, 2022, 2023, 2024, 2025]
 
 
-def history_years():
-    all_years = [int(y_str) for y_str in years[race_type()]]
+def history_years() -> list[str]:
+    all_years_list = [int(y_str) for y_str in years[race_type()]]
     fy = forecast_year()
     # filter out future data
-    history = list(filter(lambda year: year < fy, all_years))
+    history = list(filter(lambda year: year < fy, all_years_list))
     history = [str(y_int) for y_int in history]
     logger.info(f"history_years: {history}")
     return history
@@ -73,7 +74,7 @@ def history_years():
 # 2000 https://web.archive.org/web/20000511173546/http://www.kalevanrasti.fi/jukola2000/kilp/FI/85kutsu.htm
 # 2001 https://web.archive.org/web/20010511091625/http://www.kolumbus.fi/nikkari-jukola/kilpailuinfo/ratatiedot.html
 
-distances = {
+distances: dict[str, dict[int, list[float]]] = {
     "ke": {
         2024: [8.0, 7.9, 6.8, 9.0],
         2025: [0.7, 0.7, 0.7, 0.7,],
@@ -156,12 +157,12 @@ distances = {
 }
 
 
-def leg_distance(ve_or_ju, year, leg):
+def leg_distance(ve_or_ju: str, year: int, leg: int) -> float:
     dist = distances[ve_or_ju][year]
     return dist[leg - 1]
 
 
-start_timestamp = {
+start_timestamp: dict[str, dict[int, pd.Timestamp | None]] = {  # type: ignore
     "ke": {
         2025: pd.Timestamp(year=2025, month=6, day=11, hour=18, minute=00, tz="Europe/Helsinki"),
         2026: pd.Timestamp(year=2026, month=6, day=10, hour=17, minute=30, tz="Europe/Helsinki"),
@@ -191,7 +192,7 @@ start_timestamp = {
     }
 }
 
-changeover_closing = {
+changeover_closing: dict[str, dict[int, pd.Timestamp | None]] = {  # type: ignore
     "ke": {
         2025: pd.Timestamp(year=2025, month=6, day=11, hour=19, minute=00, tz="Europe/Helsinki"),
         2026: pd.Timestamp(year=2026, month=6, day=10, hour=18, minute=00, tz="Europe/Helsinki"),
@@ -222,7 +223,7 @@ changeover_closing = {
     }
 }
 
-dark_period = {
+dark_period: dict[int, dict[str, pd.Timestamp | None]] = {  # type: ignore
     2017: {
         "start": pd.Timestamp(year=2017, month=6, day=17, hour=22, minute=58, tz="Europe/Helsinki"),
         "end": pd.Timestamp(year=2017, month=6, day=18, hour=3, minute=1, tz="Europe/Helsinki")
@@ -265,36 +266,36 @@ dark_period = {
     },
 }
 
-num_legs = {
+num_legs: dict[str, int] = {
     "ke": 4,
     "ve": 4,
     "ju": 7
 }
 
 
-def log_df(value, title=''):
+def log_df(value: str | pd.DataFrame, title: str = '') -> None:
     if isinstance(value, str):
         logger.info(value)
     else:
         logger.info(f"FY{forecast_year()} {title}\n{value}")
 
 
-def write_simple_text_report(reports, file_name):
+def write_simple_text_report(reports: list[str], file_name: str) -> None:
     with open(f'reports/{file_name}', 'w') as outfile:
         outfile.writelines(f"{line}\n" for line in reports)
 
 
-def write_json_report(json_report, file_name):
+def write_json_report(json_report: Any, file_name: str) -> None:
     ts_str = datetime.now(UTC).strftime('%Y%m%d_%H%M%S')
     with open(f"json_reports/{ts_str}_{file_name}", 'w') as outfile:
         json.dump(json_report, outfile)
 
 
-def read_team_countries(year, race_type):
+def read_team_countries(year: int, race_type: str) -> dict[int, str]:
     with open(f'data/team_countries_j{year}_{race_type}.tsv') as csvfile:
         csvreader = csv.reader(csvfile, delimiter="\t")
         next(csvreader, None)  # skip the headers
-        country_by_team_id = {}
+        country_by_team_id: dict[int, str] = {}
         for row in csvreader:
             team_id = int(row[0])
             team_country = row[2].upper()

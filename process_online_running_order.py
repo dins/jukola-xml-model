@@ -1,7 +1,7 @@
 import csv
 import json
 import logging
-import re
+from typing import Any
 
 import pandas as pd
 
@@ -14,16 +14,10 @@ logger = logging.getLogger(__name__)
 # time RACE_TYPE=ve FORECAST_YEAR=2026 uv run python process_online_running_order.py
 
 
-def fetch_running_order(year, ve_or_ju) -> str:
-    def leg_dist(leg):
+def fetch_running_order(year: int, ve_or_ju: str) -> str:
+    def leg_dist(leg: int) -> float:
         dist = shared.distances[ve_or_ju][year]
         return dist[leg - 1]
-
-    def parse_team_base_name(team_name):
-        p = "^(.+) ([0-9]+)$"
-        matches = re.match(p, team_name)
-        team_base_name = matches.group(1)  # ty: ignore[unresolved-attribute]
-        return team_base_name
 
     # out_file_name = f"data/running_order_final_{ve_or_ju}_fy_{year}.tsv"
 
@@ -31,27 +25,27 @@ def fetch_running_order(year, ve_or_ju) -> str:
     with open(
         f"data/online-running-order/online_running_order_{year}_{ve_or_ju}.json"
     ) as json_file:
-        data = json.load(json_file)
+        data: dict[str, Any] = json.load(json_file)
 
-    teams = data[ve_or_ju.upper()]
+    teams: list[Any] = data[ve_or_ju.upper()]
     logger.info(f"{len(teams)=}")
     logger.info(f"{teams[0]=}")
     logger.info(f"{teams[1]=}")
 
-    runners = []
+    runners: list[dict[str, Any]] = []
     for team in teams:
-        team_id = team[0]
-        team_base_name = team[1]  # club name
-        team_number = team[2]
+        team_id: int = team[0]
+        team_base_name: str = team[1]  # club name
+        team_number: int = team[2]
         team_name = f"{team_base_name} {team_number}"
-        team_country = team[3]
-        runner_names = team[4]
+        team_country: str = team[3]
+        runner_names: list[str] = team[4]
         for index, runner_name in enumerate(runner_names):
-            name = normalize_names.normalize_name(runner_name)
-            leg = index + 1
-            ld = leg_dist(leg)
+            name: str = normalize_names.normalize_name(runner_name)
+            leg: int = index + 1
+            ld: float = leg_dist(leg)
             # ["team_id", "team", "team_base_name", "team_country", "leg", "leg_dist", "name"]
-            runner = {
+            runner: dict[str, Any] = {
                 "team_id": team_id,
                 "team": team_name,
                 "team_base_name": team_base_name,
@@ -87,7 +81,7 @@ def fetch_running_order(year, ve_or_ju) -> str:
     return out_file_name
 
 
-def _summarize(running_order_file):
+def _summarize(running_order_file: str) -> None:
     df = pd.read_csv(running_order_file, delimiter="\t")
     summary = df.agg(
         {"team_id": ["count", "nunique"], "team_country": ["count", "nunique"]}

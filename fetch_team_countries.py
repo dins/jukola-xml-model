@@ -11,8 +11,8 @@ logger = logging_config.configure_logging(__name__)
 # time uv run python fetch_team_countries.py 2022 && wc data/team_countries_j2022_ju.tsv
 
 
-def fetch_team_country(year, ve_or_ju):
-    def fetch_order(url):
+def fetch_team_country(year: int, ve_or_ju: str) -> None:
+    def fetch_order(url: str) -> list[list[str | None]]:
         logger.info("Fetching " + url)
         page = requests.get(url, timeout=15)
         # tree = html.fromstring(page.content.decode('ISO-8859-1').encode("utf-8").strip())
@@ -20,17 +20,17 @@ def fetch_team_country(year, ve_or_ju):
         rows = tree.xpath('//*[@id="site_main"]/table/table/tr')
         logger.info(f"Found {len(rows)} rows")
         assert len(rows) > 100
-        output_rows = []
+        output_rows: list[list[str | None]] = []
         for row in rows:
             if len(row.xpath("td[1]")) > 0:
-                team_id = next(iter(row.xpath(".//td[1]/text()") or []), None)
-                team_base_name = next(iter(row.xpath(".//td[2]/a/text()") or []), "NA")
-                team_country_name = next(
+                team_id: str | None = next(iter(row.xpath(".//td[1]/text()") or []), None)
+                team_base_name: str = next(iter(row.xpath(".//td[2]/a/text()") or []), "NA")
+                team_country_name: str = next(
                     iter(row.xpath(".//td[3]/img/@title") or []), "NA"
                 )
 
                 # 1. Get the full URL:
-                img_url = next(iter(row.xpath(".//td[3]/img/@src") or []), None)
+                img_url: str | None = next(iter(row.xpath(".//td[3]/img/@src") or []), None)
 
                 if img_url:
                     # 2. Take everything after the last slash, then strip “.png”

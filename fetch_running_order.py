@@ -18,19 +18,19 @@ logger = logging.getLogger(__name__)
 
 # Fetches running order from registration site. It will become outdated on the race day.
 # Later changes are available on the online site.
-def fetch_running_order(year, ve_or_ju):
-    def leg_dist(leg):
+def fetch_running_order(year: int, ve_or_ju: str) -> str:
+    def leg_dist(leg: int) -> float:
         dist = shared.distances[ve_or_ju][year]
         return dist[leg - 1]
 
-    def parse_team_base_name(team_name):
+    def parse_team_base_name(team_name: str) -> str:
         p = "^(.+) ([0-9]+)$"
         matches = re.match(p, team_name)
         if matches:
             return matches.group(1)
         return team_name
 
-    def fetch_order(url):
+    def fetch_order(url: str) -> list[list[str | int | float | None]]:
         logger.info("Fetching " + url)
         page = requests.get(url, timeout=15)
         # tree = html.fromstring(page.content.decode('ISO-8859-1').encode("utf-8").strip())
@@ -39,21 +39,21 @@ def fetch_running_order(year, ve_or_ju):
         rows = tree.xpath("//table/tr")
         logger.info(f"Got {len(rows)} rows")
 
-        output_rows = []
+        output_rows: list[list[str | int | float | None]] = []
 
-        current_team_id = ""
-        current_team_base_name = ""
-        current_team_name = ""
-        current_team_country = "NONE"
+        current_team_id: str = ""
+        current_team_base_name: str = ""
+        current_team_name: str = ""
+        current_team_country: str = "NONE"
         for row in rows:
-            team_id = next(iter(row.xpath(".//td[1]/text()") or []), None)
+            team_id: str | None = next(iter(row.xpath(".//td[1]/text()") or []), None)
             if team_id is not None and team_id.strip() != "":
-                team_name = next(iter(row.xpath(".//td[2]/text()") or []), "")
+                team_name: str = next(iter(row.xpath(".//td[2]/text()") or []), "")
                 current_team_country = next(
                     iter(row.xpath(".//img/@title") or []), "NA"
                 )
                 current_team_id = team_id
-                team_base_name = parse_team_base_name(team_name)
+                team_base_name: str = parse_team_base_name(team_name)
                 current_team_name = team_name
                 current_team_base_name = team_base_name
                 logger.info(
@@ -67,15 +67,15 @@ def fetch_running_order(year, ve_or_ju):
                     + team_base_name
                 )
             else:
-                leg = next(iter(row.xpath(".//td[2]/text()") or []), None)
-                name = next(iter(row.xpath(".//td[3]/text()") or []), None)
+                leg: str | int | None = next(iter(row.xpath(".//td[2]/text()") or []), None)
+                name: str | None = next(iter(row.xpath(".//td[3]/text()") or []), None)
                 if (
                     name is not None
                     and name.strip() != ""
                     and name != " "
                     and leg is not None
                 ):
-                    leg = int(leg.strip())
+                    leg_int = int(leg.strip()) if isinstance(leg, str) else leg
                     name = normalize_names.normalize_name(name)
                     if current_team_id:
                         output_rows.append(
@@ -84,8 +84,8 @@ def fetch_running_order(year, ve_or_ju):
                                 current_team_name,
                                 current_team_base_name,
                                 current_team_country,
-                                leg,
-                                leg_dist(leg),
+                                leg_int,
+                                leg_dist(leg_int),
                                 name,
                             ]
                         )
@@ -100,7 +100,7 @@ def fetch_running_order(year, ve_or_ju):
     out_file_name = f"data/running_order_final_{ve_or_ju}_fy_{year}.tsv"
     with open(out_file_name, "w") as csv_file:
         csvwriter = csv.writer(csv_file, delimiter="\t", quoting=csv.QUOTE_ALL)
-        header = [
+        header: list[str] = [
             "team_id",
             "team",
             "team_base_name",
@@ -133,7 +133,7 @@ def fetch_running_order(year, ve_or_ju):
     return out_file_name
 
 
-def _summarize(running_order_file):
+def _summarize(running_order_file: str) -> None:
     df = pd.read_csv(running_order_file, delimiter="\t")
     summary = df.agg(
         {"team_id": ["count", "nunique"], "team_country": ["count", "nunique"]}

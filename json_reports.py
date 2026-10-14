@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -13,34 +14,34 @@ logger = logging.getLogger(__name__)
 # time uv run python json_reports.py && wc data/all_json_reports.tsv
 
 
-def list_files_in_folder(folder_name):
-    files = []
+def list_files_in_folder(folder_name: str) -> list[str]:
+    files: list[str] = []
     for file in os.listdir(folder_name):
         if file.endswith(".json"):
             files.append(file)
     return files
 
 
-def read_all_json_files_from_folder_to_df():
+def read_all_json_files_from_folder_to_df() -> None:
     folder_name = "json_reports"
     # read .json files in parallel to pandas dataframes
-    dfs = []
+    dfs: list[pd.DataFrame] = []
     for file_name in list_files_in_folder(folder_name):
         # logger.info(f"Reading {file_name}")
         with open(f"{folder_name}/{file_name}", "r") as f:
-            reports_dict = json.load(f)
-            execution_timestamp = reports_dict.pop("execution_timestamp")["value"]
+            reports_dict: dict[str, Any] = json.load(f)
+            execution_timestamp: str = reports_dict.pop("execution_timestamp")["value"]
             if execution_timestamp == "unknown":
                 # logging.warning(f"Skipping {file_name} with unknown execution_timestamp")
                 continue
-            race_id = reports_dict.pop("race_id")["value"]
-            num_runners = reports_dict.pop("num_runners")["value"]
+            race_id: str = reports_dict.pop("race_id")["value"]
+            num_runners: int = reports_dict.pop("num_runners")["value"]
 
             # convert dict items to flat records
-            def _to_record(k, v):
+            def _to_record(k: str, v: dict[str, Any]) -> dict[str, Any]:
                 return {"name": k, "value": v["value"], "desc": v["desc"]}
 
-            records = [_to_record(k, v) for k, v in reports_dict.items()]
+            records: list[dict[str, Any]] = [_to_record(k, v) for k, v in reports_dict.items()]
             df = pd.DataFrame(records)
             df["execution_timestamp"] = execution_timestamp
             df["race_id"] = race_id

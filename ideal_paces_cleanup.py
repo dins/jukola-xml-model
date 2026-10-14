@@ -31,7 +31,7 @@ def parse_distance(distance_str: str) -> float | None:
     return average
 
 
-def _cleanup_ideal_times(race_type, marked_route):
+def _cleanup_ideal_times(race_type: str, marked_route: pd.DataFrame) -> None:
     raw = pd.read_csv(f"Jukola-terrain/{race_type}-ideal-times.csv", delimiter=";")
     raw["year"] = raw["Vuosi"]
     cleaned = raw[["year"]].copy()  # make a copy to avoid SettingWithCopy warnings
@@ -66,9 +66,9 @@ def _cleanup_ideal_times(race_type, marked_route):
     cleaned.to_csv(f"Jukola-terrain/ideal-paces-{race_type}.tsv", sep="\t", index=False)
 
 
-marked_route = pd.read_csv("Jukola-terrain/viitoitus.csv", delimiter=";")
+marked_route: pd.DataFrame = pd.read_csv("Jukola-terrain/viitoitus.csv", delimiter=";")
 marked_route["marking"] = marked_route["viitoitus"]
-marked_route_cleaned = marked_route[["year", "race_type", "marking"]]
+marked_route_cleaned: pd.DataFrame = marked_route[["year", "race_type", "marking"]]
 logger.info(f"marked_route_cleaned: {marked_route_cleaned}")
 
 _cleanup_ideal_times("ve", marked_route)
