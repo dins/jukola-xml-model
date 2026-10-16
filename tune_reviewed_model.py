@@ -185,7 +185,7 @@ def run_notebook_trial(trial: optuna.Trial, config: TuningConfig) -> float:
             )
             raise optuna.TrialPruned(f"Metrics missing for year {year}")
 
-        with open(metrics_json_path, "r") as f:
+        with open(metrics_json_path) as f:
             metrics = json.load(f)
 
         # We optimize for forecast year custom score: NLL (Negative Log-Likelihood) + interval penalty
@@ -331,7 +331,7 @@ def main():
         for param_file in args.enqueue_params_json:
             param_path = Path(param_file)
             if param_path.exists():
-                with open(param_path, "r") as f:
+                with open(param_path) as f:
                     initial_params = json.load(f)
 
                 # Map parameters matching notebook formatting to Optuna's format if necessary

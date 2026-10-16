@@ -36,3 +36,6 @@ dev = [
 markers = [
     "testdata: mark test with a test data fixture name",
 ]
+
+[tool.ruff.lint]
+extend-select = ["C4", "UP"] # no "SIM",

@@ -28,7 +28,7 @@ def read_all_json_files_from_folder_to_df() -> None:
     dfs: list[pd.DataFrame] = []
     for file_name in list_files_in_folder(folder_name):
         # logger.info(f"Reading {file_name}")
-        with open(f"{folder_name}/{file_name}", "r") as f:
+        with open(f"{folder_name}/{file_name}") as f:
             reports_dict: dict[str, Any] = json.load(f)
             execution_timestamp: str = reports_dict.pop("execution_timestamp")["value"]
             if execution_timestamp == "unknown":
