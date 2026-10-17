@@ -1,12 +1,22 @@
 #!/usr/bin/env bash
-set -eu -o pipefail
+set -euf -o pipefail
 
 # time ./clear-all-notebook-cells.sh
 
-# Find all .ipynb files, excluding any hidden directories like .ipynb_checkpoints/ or .venv/.
-# rg is far faster than find here: it skips hidden dirs by default and respects .gitignore.
-# `archive` is passed explicitly because it is gitignored but still holds notebooks we want to clear.
-rg --files -g '*.ipynb' . archive | while read -r file; do
-  echo $(date -u +"%F %T") "Clearing ${file}"
+# Clear all .ipynb notebooks (outputs + metadata) in parallel.
+# rg skips hidden dirs and respects .gitignore, so archive/ is not cleared.
+# Parallelism defaults to 4; override with PARALLELISM. Any failure aborts the script.
+
+PARALLELISM="${PARALLELISM:-4}"
+
+function clear_notebook_worker() {
+  local file="$1"
+  echo "$(date -u +"%F %T")" "Clearing ${file}"
   uv run jupyter nbconvert --ClearOutputPreprocessor.enabled=True --ClearMetadataPreprocessor.enabled=True --inplace "${file}"
-done
+}
+
+export -f clear_notebook_worker
+
+trap 'echo "ERROR: notebook clearing failed (see errors above)" >&2' ERR
+
+rg --files -g '*.ipynb' . | xargs -n 1 -P "${PARALLELISM}" bash -c 'clear_notebook_worker "$1"' _

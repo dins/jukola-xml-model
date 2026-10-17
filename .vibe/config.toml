@@ -6,7 +6,9 @@ applied_migrations = [
 permission = "ask"
 allowlist = [
     "./run-all-local-checks.sh",
+    "./clear-all-notebook-cells.sh",
     "basename",
+    "shellcheck",
     "cat",
     "comm",
     "cut",
@@ -15,6 +17,7 @@ allowlist = [
     "dirname",
     "du",
     "echo",
+    "printf",
     "file",
     "find",
     "fmt",
@@ -51,7 +54,13 @@ allowlist = [
     "uv run pytest",
     "uv run ruff",
     "uv run ty",
+    "uv tree --outdated",
     "wc",
     "which",
     "whoami",
+]
+
+denylist = [
+    "sed",
+    "awk",
 ]
