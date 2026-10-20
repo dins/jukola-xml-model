@@ -19,4 +19,5 @@ export -f clear_notebook_worker
 
 trap 'echo "ERROR: notebook clearing failed (see errors above)" >&2' ERR
 
+# shellcheck disable=SC2016  # $1 expands in the inner bash, not here
 rg --files -g '*.ipynb' . | xargs -n 1 -P "${PARALLELISM}" bash -c 'clear_notebook_worker "$1"' _

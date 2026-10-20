@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 set -euf -o pipefail
 
-export RUN_TS=$(date -u '+%Y%m%d_%H%M%S')
-export SCRIPT_START_TIME=$(date +%s)
+RUN_TS=$(date -u '+%Y%m%d_%H%M%S')
+export RUN_TS
+SCRIPT_START_TIME=$(date +%s)
+export SCRIPT_START_TIME
 
 time uv run python count_names.py
 echo "$(date -u +"%F %T") count_names.py DONE"
@@ -13,14 +15,16 @@ function process_race_worker() {
   local current_forecast_year=$2
 
   local log_path="logs/parallel-${current_race_type}-${current_forecast_year}-${RUN_TS}.log"
-  local now=$(date +%s)
+  local now
+  now=$(date +%s)
   local start_secs=$((now - SCRIPT_START_TIME))
 
   echo "$(date -u +"%F %T") Starting at ${start_secs} secs, ${log_path}"
 
   # Run the script and capture duration
   if RACE_TYPE="${current_race_type}" FORECAST_YEAR="${current_forecast_year}" RUN_TS="${RUN_TS}" ./process-one-race.sh > "${log_path}" 2>&1; then
-    local end_now=$(date +%s)
+    local end_now
+    end_now=$(date +%s)
     local duration=$((end_now - now))
     echo "$(date -u +"%F %T") DONE ${log_path} in ${duration} secs"
   else
@@ -41,6 +45,7 @@ pending_races=(
 # 4. Use xargs to pass arguments to our exported function
 # -n 2: Passes exactly 2 arguments (Type and Year) to the function at a time
 # -P 8: Maintains exactly 8 workers concurrently
+# shellcheck disable=SC2016  # $1/$2 expand in the inner bash, not here
 printf "%s\n" "${pending_races[@]}" | xargs -n 2 -P 8 bash -c 'process_race_worker "$1" "$2"' _
 
 echo "DONE ${RUN_TS}"
