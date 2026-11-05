@@ -14,7 +14,7 @@ dependencies = [
     "jupyter>=1.0.0,<2",
     "statsmodels>=0.14.1,<1",
     "scikit-optimize>=0.10.0,<1",
-    "xmltodict>=0.13.0,<1",
+    "xmltodict>=1.0.4",
     "pandas>=2.3.3,<3",
     "polars>=1.39.3,<2",
     "ngboost>=0.5.10",
@@ -23,10 +23,14 @@ dependencies = [
     "optuna>=4.8.0",
     "optuna-dashboard>=0.20.0",
     "rapidfuzz>=3.14.5",
+    "numpy>=2.5.4",
+    "matplotlib>=3.11.2",
+    "scipy>=1.18.1",
 ]
 
 [dependency-groups]
 dev = [
+    "deptry>=0.25.1",
     "pytest>=9.0.3",
     "ruff>=0.15.16",
     "ty>=0.0.44",
@@ -35,6 +39,15 @@ dev = [
 [tool.pytest.ini_options]
 markers = [
     "testdata: mark test with a test data fixture name",
+]
+
+[tool.deptry.per_rule_ignores]
+DEP002 = [
+    "jupyter",
+    "optuna-dashboard",
+    "statsmodels",
+    "scikit-optimize",
+    "pyarrow",
 ]
 
 [tool.ruff.lint]

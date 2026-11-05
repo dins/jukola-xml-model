@@ -54,6 +54,7 @@ allowlist = [
     "uv run pytest",
     "uv run ruff",
     "uv run ty",
+    "uv run deptry .",
     "uv tree --outdated",
     "wc",
     "which",
@@ -63,4 +64,6 @@ allowlist = [
 denylist = [
     "sed",
     "awk",
+    "xargs",
+    "cd",
 ]

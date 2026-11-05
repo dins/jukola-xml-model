@@ -9,3 +9,6 @@ uv run ty check ./*.py tests/
 
 echo "=== pytest ==="
 PYTHONPATH=. uv run pytest
+
+echo "=== deptry ==="
+uv run deptry .
