@@ -32,7 +32,7 @@ def fetch_team_country(year: int, ve_or_ju: str) -> None:
                 # 1. Get the full URL:
                 img_url: str | None = next(iter(row.xpath(".//td[3]/img/@src") or []), None)
 
-                if img_url:
+                if img_url is not None:
                     # 2. Take everything after the last slash, then strip “.png”
                     filename = img_url.rsplit("/", 1)[-1]  # e.g. "FIN.png"
                     team_country_code = filename.rsplit(".", 1)[0]  # -> "FIN"
