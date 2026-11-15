@@ -37,8 +37,8 @@ export -f process_race_worker
 
 # 3. Define the queue as a flat list of arguments (type, year, type, year)
 pending_races=(
-  "ju" "2025" "ju" "2024" "ju" "2023" "ju" "2022" "ju" "2021" "ju" "2019" "ju" "2018" "ju" "2017"
-  "ve" "2025" "ve" "2024" "ve" "2023" "ve" "2022" "ve" "2021" "ve" "2019" "ve" "2018" "ve" "2017"
+  "ju" "2026" "ju" "2025" "ju" "2024" "ju" "2023" "ju" "2022" "ju" "2021" "ju" "2019" "ju" "2018" "ju" "2017"
+  "ve" "2026" "ve" "2025" "ve" "2024" "ve" "2023" "ve" "2022" "ve" "2021" "ve" "2019" "ve" "2018" "ve" "2017"
 )
 
 

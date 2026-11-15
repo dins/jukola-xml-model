@@ -289,7 +289,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--race-type", default="ve", choices=["ju", "ve", "ke"])
     parser.add_argument(
-        "--years", nargs="+", type=int, default=[2022, 2023, 2024, 2025]
+        "--years", nargs="+", type=int, default=[2022, 2023, 2024, 2025, 2026]
     )
     parser.add_argument(
         "--study-name",

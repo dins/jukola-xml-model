@@ -2743,11 +2743,11 @@ execution_timestamp	kpi	value
 20261115_072619	Yksilöennusteen keskivirhe	15.031
 20261115_072619	Yksilön aikaväliennuste väärin	0.048
 20261115_072619	Yksilön aikavälin keskikoko	72.589
-test-pandas3	Viestin aikaväliennuste väärin	0.041
-test-pandas3	Yksilöennusteen keskivirhe	10.921
-test-pandas3	Yksilön aikaväliennuste väärin	0.022
-test-pandas3	Yksilön aikavälin keskikoko	59.134
-test-polars2	Viestin aikaväliennuste väärin	0.041
-test-polars2	Yksilöennusteen keskivirhe	10.921
-test-polars2	Yksilön aikaväliennuste väärin	0.022
-test-polars2	Yksilön aikavälin keskikoko	59.134
+20261115_083821	Viestin aikaväliennuste väärin	0.103
+20261115_083821	Yksilöennusteen keskivirhe	14.978
+20261115_083821	Yksilön aikaväliennuste väärin	0.046
+20261115_083821	Yksilön aikavälin keskikoko	73.865
+20261115_091449	Viestin aikaväliennuste väärin	0.103
+20261115_091449	Yksilöennusteen keskivirhe	14.978
+20261115_091449	Yksilön aikaväliennuste väärin	0.046
+20261115_091449	Yksilön aikavälin keskikoko	73.865
