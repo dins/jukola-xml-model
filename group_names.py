@@ -350,7 +350,7 @@ def _write_individual_runs_file(
     )
 
     df = df.merge(runner_stats_df, on="unique_name")
-    df.drop(columns=["log_pace"], inplace=True)
+    df = df.drop(columns=["log_pace"])
 
     ideals = pd.read_csv(
         f"Jukola-terrain/ideal-paces-{shared.race_type()}.tsv", delimiter="\t"

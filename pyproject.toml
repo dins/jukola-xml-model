@@ -14,8 +14,8 @@ dependencies = [
     "jupyter>=1.0.0,<2",
     "scikit-optimize>=0.10.0,<1",
     "xmltodict>=1.0.4",
-    "pandas>=2.3.3,<3",
-    "polars>=1.39.3,<2",
+    "pandas>=3.0.0,<4",
+    "polars>=2.0.0",
     # 0.6.0 has some backwards incomaptible fixes to TFixedDf
     "ngboost>=0.5.10,<0.6.0",
     "properscoring>=0.1",

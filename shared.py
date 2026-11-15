@@ -273,7 +273,7 @@ num_legs: dict[str, int] = {
 }
 
 
-def log_df(value: str | pd.DataFrame, title: str = '') -> None:
+def log_df(value: str | pd.DataFrame | pd.Series, title: str = '') -> None:
     if isinstance(value, str):
         logger.info(value)
     else:
