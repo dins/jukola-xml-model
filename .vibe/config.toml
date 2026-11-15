@@ -55,6 +55,7 @@ allowlist = [
     "uv run ruff",
     "uv run ty",
     "uv run deptry .",
+    "uv run python --version",
     "uv tree --outdated",
     "wc",
     "which",
