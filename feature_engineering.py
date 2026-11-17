@@ -418,8 +418,46 @@ def build_features(runs_df: pl.DataFrame, forecast_year: int) -> tuple[pl.DataFr
             "other_team_members_roll_5y_tcn_bcp_var",
         ])
     )
-    
-    
+
+    # Earlier legs in the same team: aggregate history of runners who ran before this leg.
+    # Leg 1 has no earlier legs -> null after the left join.
+    earlier_legs_src = bc_df.select([
+        "row_id", "year", "team_id", "leg",
+        "roll_5y_tcn_bcp_mean", "roll_5y_pace_leg_ratio_mean",
+    ]).rename({
+        "row_id": "src_row_id",
+        "leg": "src_leg",
+        "roll_5y_tcn_bcp_mean": "src_tcn_bcp",
+        "roll_5y_pace_leg_ratio_mean": "src_pace_leg_ratio",
+    })
+    earlier_legs_agg = (
+        bc_df.select(["row_id", "year", "team_id", "leg"])
+        .join(earlier_legs_src, on=["year", "team_id"], how="left")
+        .filter(pl.col("src_leg") < pl.col("leg"))
+        .group_by("row_id")
+        .agg([
+            pl.col("src_tcn_bcp").drop_nulls().mean().alias("earlier_legs_roll_5y_tcn_bcp_mean"),
+            pl.col("src_tcn_bcp").drop_nulls().count().alias("earlier_legs_with_history"),
+            pl.col("src_pace_leg_ratio").drop_nulls().mean().alias("earlier_legs_roll_5y_pace_leg_ratio_mean"),
+        ])
+    )
+    bc_df = bc_df.join(earlier_legs_agg, on="row_id", how="left")
+
+    # Later legs in the same team: aggregate history of runners who run after this leg.
+    later_legs_agg = (
+        bc_df.select(["row_id", "year", "team_id", "leg"])
+        .join(earlier_legs_src, on=["year", "team_id"], how="left")
+        .filter(pl.col("src_leg") > pl.col("leg"))
+        .group_by("row_id")
+        .agg([
+            pl.col("src_tcn_bcp").drop_nulls().mean().alias("later_legs_roll_5y_tcn_bcp_mean"),
+            pl.col("src_tcn_bcp").drop_nulls().count().alias("later_legs_with_history"),
+            pl.col("src_pace_leg_ratio").drop_nulls().mean().alias("later_legs_roll_5y_pace_leg_ratio_mean"),
+        ])
+    )
+    bc_df = bc_df.join(later_legs_agg, on="row_id", how="left")
+
+
     bc_df = bc_df.with_columns([
         #(pl.col("roll_5y_tcn_bcp_mean") / pl.col("history_tcn_bcp_median")).alias("roll_5y_history_median_ratio"),
         (pl.col("roll_5y_tcn_bcp_std") / pl.col("history_tcn_bcp_std")).alias("roll_5y_history_std_ratio"),
@@ -498,12 +536,19 @@ def build_features(runs_df: pl.DataFrame, forecast_year: int) -> tuple[pl.DataFr
         "fn_scaled_pace_tc_interaction",
         "fn_scaled_pace_c_bcp_median_vc_interaction",
     
-        'other_team_members_roll_5y_tcn_bcp_mean',
+        #'other_team_members_roll_5y_tcn_bcp_mean',
         'other_team_members_roll_5y_tcn_bcp_std',
         #'team_members_with_history',
         'other_team_members_with_history',
         #'team_members_total',
-        
+
+        'earlier_legs_roll_5y_tcn_bcp_mean',
+        #'earlier_legs_roll_5y_pace_leg_ratio_mean',
+        'earlier_legs_with_history',
+        'later_legs_roll_5y_tcn_bcp_mean',
+        #'later_legs_roll_5y_pace_leg_ratio_mean',
+        'later_legs_with_history',
+
     ]
 
     first_pass_drops = [
