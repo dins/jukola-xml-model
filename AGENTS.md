@@ -43,3 +43,4 @@ Always run this single command for static checks and tests before considering a 
 
 - The agent only runs smoke tests to verify changes, via the dedicated script: `uv run python smoke_test_ngboost.py`
 - Longer/real training runs, Optuna hyperparameter tuning (`tune_reviewed_model.py`) and analysis/notebook processing are run manually by the user, not by the agent. 
+- If changes require smoke testing you are allowed to run 2017 backtesting Like this: `time RACE_TYPE=ve FORECAST_YEAR=2017 ./process-one-race.sh`
