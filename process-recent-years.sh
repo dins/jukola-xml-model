@@ -6,9 +6,6 @@ export RUN_TS
 SCRIPT_START_TIME=$(date +%s)
 export SCRIPT_START_TIME
 
-time uv run python count_names.py
-echo "$(date -u +"%F %T") count_names.py DONE"
-
 # 1. Define the worker logic as a standard, readable function
 function process_race_worker() {
   local current_race_type=$1

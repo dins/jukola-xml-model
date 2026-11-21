@@ -6,6 +6,10 @@ set -ef -o pipefail
 
 # BEFORE_RACE="true"
 echo "$(date -u +"%F %T")" "RACE_TYPE: ${RACE_TYPE}, FORECAST_YEAR: ${FORECAST_YEAR}, RUN_TS: ${RUN_TS}"
+# Build per-forecast-year name stats (years < FORECAST_YEAR only) so that
+# name normalization does not leak future results into this year's backtest.
+time uv run python count_names.py
+echo "$(date -u +"%F %T")" "count_names ${RACE_TYPE} ${FORECAST_YEAR} DONE"
 time uv run python group_names.py
 echo "$(date -u +"%F %T")" "group_names ${RACE_TYPE} ${FORECAST_YEAR} DONE"
 

@@ -1,17 +1,31 @@
 import json
 import logging
+import os
 import sys
 
 import count_names
 import logging_config
+import shared
 
 logger = logging.getLogger(__name__)
 
 # time uv run python normalize_names.py
 
 
+def _stats_path() -> str:
+    """Per-forecast-year name stats, falling back to the legacy global file."""
+    per_year = f"data/name-counts/name-stats-{shared.forecast_year()}.json"
+    if os.path.exists(per_year):
+        return per_year
+    logger.warning(
+        "Per-year name stats %s not found, falling back to data/name_counts.json",
+        per_year,
+    )
+    return "data/name_counts.json"
+
+
 def read_first_names() -> set:
-    with open("data/name_counts.json") as json_file:
+    with open(_stats_path()) as json_file:
         name_counts = json.load(json_file)
         first_names = {count["name"] for count in name_counts if count["is_firstname"]}
         return first_names
