@@ -25,6 +25,7 @@ allowlist = [
     "git diff",
     "git log",
     "git status",
+    "git ls-files",
     "rg",
     "grep",
     "head",
