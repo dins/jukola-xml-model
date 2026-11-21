@@ -1,0 +1,55 @@
+{
+  "meta": {
+    "kind": "consensus",
+    "study_name": "ju-df6-recenter-v6",
+    "race_type": "ju",
+    "trials_referenced": [
+      70,
+      65,
+      73,
+      68,
+      74
+    ],
+    "trials_referenced_count": 5,
+    "trial_values": [
+      -1.1619116714725013,
+      -1.1599641300500285,
+      -1.1592254007157035,
+      -1.1589812008651588,
+      -1.1583765213423651
+    ],
+    "trial_value_best": -1.1619116714725013,
+    "trial_value_spread": 0.0035351501301361665,
+    "aggregation_method_per_param": {
+      "Base__max_depth": "mode",
+      "Base__max_features": "mode",
+      "Base__min_samples_leaf": "mode",
+      "col_sample": "median",
+      "learning_rate": "median",
+      "minibatch_frac": "mode",
+      "n_estimators": "mode"
+    },
+    "disagreement_with_best": {
+      "col_sample": {
+        "best": 0.5848520117132607,
+        "consensus": 0.6594503579595217
+      },
+      "learning_rate": {
+        "best": 0.03559741981256357,
+        "consensus": 0.034927239693193175
+      }
+    },
+    "direction": "minimize",
+    "trial_min_cutoff": null,
+    "extraction_time_utc": "2026-06-14T12:12:02.795928+00:00"
+  },
+  "params": {
+    "Base__max_depth": 8,
+    "Base__max_features": 1.0,
+    "Base__min_samples_leaf": 300,
+    "col_sample": 0.6594503579595217,
+    "learning_rate": 0.034927239693193175,
+    "minibatch_frac": 1.0,
+    "n_estimators": 400
+  }
+}
