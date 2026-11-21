@@ -22,10 +22,18 @@ Always run this single command for static checks and tests before considering a 
 - `ty check` runs type checking on the same set.
 - `PYTHONPATH=.` is required so `pytest` can import the project's top-level modules from `tests/`.
 
+
+## Shell commands
+- Run commands from the folder the session starts in (`git log`, `uv tree`). Use `pwd` to check where you are based and work from there. 
+- Don't add directory flags such as `git -C <path>`, `uv --directory` or `uv --project`; for a subfolder use `cd <subfolder> && <command>`.
+- Quote arguments that start with `=` or contain `==`, e.g. `echo "==="` as a separator. Unquoted, zsh expands them, so they always need approval.
+- For versions use `uv tree --depth 1`, `uv tree --package <name> --depth 0` or `uv tree --outdated --depth 1`.
+
 ## Don'ts
 
 - Do NOT run `git checkout`, `git restore`, or any other destructive git command to "undo" your own changes. Ask the user how to proceed instead.
 - Do NOT run `uv run ruff format` across the whole project unless explicitly asked.
+- Do NOT install new packagesd nor use `uv pip`
 - Do NOT modify shared fixture files in `tests/testdata/default-set/` for a new test. Create a sibling subfolder under `tests/testdata/` and use `@pytest.mark.testdata("<subdir>")` instead.
 - Do NOT use `cd` in shell commands — use `pwd` to verify the current working directory when uncertain; relative paths resolve from the current dir, and absolute paths work without `cd`.
 - Do NOT suggest potentially harmfull arbitrary code with `sed`,`awk`,`python -C *`,`uv run python -C *` or any other. Instead, use safe read-only tools if they do roughly the same thing.
