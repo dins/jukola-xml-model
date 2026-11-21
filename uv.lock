@@ -3,10 +3,10 @@ revision = 5
 requires-python = ">=3.13, <3.16"
 resolution-markers = [
     "python_full_version >= '3.15' and sys_platform == 'win32'",
-    "python_full_version == '3.14.*' and sys_platform == 'win32'",
     "python_full_version >= '3.15' and sys_platform == 'emscripten'",
-    "python_full_version == '3.14.*' and sys_platform == 'emscripten'",
     "python_full_version >= '3.15' and sys_platform != 'emscripten' and sys_platform != 'win32'",
+    "python_full_version == '3.14.*' and sys_platform == 'win32'",
+    "python_full_version == '3.14.*' and sys_platform == 'emscripten'",
     "python_full_version == '3.14.*' and sys_platform != 'emscripten' and sys_platform != 'win32'",
     "python_full_version < '3.14' and sys_platform == 'win32'",
     "python_full_version < '3.14' and sys_platform == 'emscripten'",
@@ -936,6 +936,7 @@ name = "jukola-xml-model"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "ipython" },
     { name = "jupyter" },
     { name = "lxml" },
     { name = "matplotlib" },
@@ -966,6 +967,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "ipython", specifier = ">=9.0.0,<10" },
     { name = "jupyter", specifier = ">=1.0.0,<2" },
     { name = "lxml", specifier = ">=6.0.0,<7" },
     { name = "matplotlib", specifier = ">=3.11.2" },
